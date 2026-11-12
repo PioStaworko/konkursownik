@@ -1,0 +1,39 @@
+# Konkursownik — rzeczy odłożone na później (po MVP)
+
+Zebrane z recenzji zadań i końcowego przeglądu. Żadna nie blokuje używania aplikacji przez znajomych.
+
+## Warto zrobić przed szerszym użyciem
+- Kwoty ≥ 100 000 000 lub ujemna liczba nagród → błąd 500 zamiast 400 (`AppDbContext` decimal(10,2), brak górnej granicy w walidacji).
+- Zablokowane konto (po wielu błędnych hasłach) widzi komunikat „zły e-mail lub hasło” — warto osobny kod `locked_out`.
+- Zdjęcia paragonów są cache'owane w przeglądarce przez dobę (`Cache-Control: private, max-age=86400`) — rozważyć `no-store`.
+- Brak zmiany/resetu hasła (świadomie poza zakresem etapu 1); przy dodaniu zmiany hasła włączyć walidację security stamp (`AddIdentityCookies`).
+- Miniatury to pełne zdjęcia do 10 MB — przy etapie 2 generować małe podglądy.
+
+## Instrukcja wdrożenia (`docs/deploy.md`)
+- Na Windows brak `zip` i `openssl` w Git Bash — dopisać alternatywy (PowerShell `Compress-Archive`, generowanie haseł).
+- Wyjaśnić, co dokładnie otwiera `--public-access 0.0.0.0` przy Azure PostgreSQL.
+- Puste `POSTGRES_PASSWORD` w `.env.example` — compose padnie przy starcie, jeśli ktoś go nie uzupełni (głośno, ale warto sprawdzać w `smoke.sh`).
+
+## Odporność i drobne błędy
+- Brak listy w body PUT konkursu (`tasks`/`purchases`/`proofs` = null) → 500 zamiast 400.
+- Ten sam Id dziecka dwa razy w PUT dodaje encję podwójnie.
+- Dwa równoczesne pierwsze zapisy wygranej → 500 (unikalny indeks).
+- Zgłoszenie bez daty zapisuje 0001-01-01.
+- Sklep nazwany dosłownie „Dowolny sklep” tworzy osobną grupę.
+- Kopiowanie konkursu pole-po-polu — nowe pola w `Contest` trzeba dopisać do duplikowania.
+- Osierocone pliki zdjęć przy równoczesnym uploadzie i usuwaniu; częściowy plik przy przerwanym zapisie.
+- Istniejący publiczny kontener Azure nie jest wykrywany.
+- `smoke.sh`: `.env` zostaje przy wyjściu z powodu zajętego portu; `APP_PORT` z `.env` nadpisuje `SMOKE_PORT`; brak sprawdzenia ciasteczka Secure i trwałości kluczy Data Protection.
+
+## Frontend / dostępność
+- Etykiety przycisków w `EditableList` nie mówią, której listy dotyczą; klucze po indeksie.
+- Formularz edycji ignoruje odświeżenie danych w tle.
+- `mutateAsync` w onClick bez `catch` na stronie szczegółów; odhaczanie blokuje całą sekcję.
+- Zakładki bez `aria-controls`.
+
+## Luki w testach
+- Testy DST/granicy 22:00 UTC latem; rozstrzyganie remisu sortowania przypomnień; wiele przypomnień na konkurs.
+- Walidacja konkursu (limity, nagroda, PUT 400), round-trip zakupów/dowodów, sortowanie archiwum.
+- Toggle 404 dla zakupów/dowodów; klucze błędów w testach 400.
+- Usunięcie cudzego zgłoszenia nie rusza cudzych plików; awaria storage przy DELETE → 204; body > 11 MB.
+- Komunikat 401 przy logowaniu, przekierowanie `RequireAuth`, zaproszenia/schowek na stronie „Więcej”.
