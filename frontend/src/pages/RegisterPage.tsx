@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
-import AuthForm, { inputClass } from '../components/AuthForm'
+import AuthForm from '../components/AuthForm'
+import { inputClass } from '../lib/styles'
 
 function registerErrorMessage(e: unknown): string {
   if (e instanceof ApiError && e.code === 'invalid_invite') return 'Nieprawidłowy lub zużyty kod zaproszenia'

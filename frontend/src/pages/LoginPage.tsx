@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
-import AuthForm, { inputClass } from '../components/AuthForm'
+import AuthForm from '../components/AuthForm'
+import { inputClass } from '../lib/styles'
 
 export default function LoginPage() {
   const { user, login } = useAuth()

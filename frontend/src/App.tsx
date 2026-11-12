@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router'
 import RequireAuth from './auth/RequireAuth'
 import Layout from './components/Layout'
 import Placeholder from './components/Placeholder'
+import ContestFormPage from './pages/ContestFormPage'
+import ContestsPage from './pages/ContestsPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
@@ -13,10 +15,10 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<Layout />}>
           <Route index element={<Placeholder title="Pilne" />} />
-          <Route path="konkursy" element={<Placeholder title="Konkursy" />} />
-          <Route path="konkursy/nowy" element={<Placeholder title="Nowy konkurs" />} />
+          <Route path="konkursy" element={<ContestsPage />} />
+          <Route path="konkursy/nowy" element={<ContestFormPage />} />
           <Route path="konkursy/:id" element={<Placeholder title="Konkurs" />} />
-          <Route path="konkursy/:id/edycja" element={<Placeholder title="Edycja konkursu" />} />
+          <Route path="konkursy/:id/edycja" element={<ContestFormPage />} />
           <Route path="zakupy" element={<Placeholder title="Zakupy" />} />
           <Route path="wiecej" element={<Placeholder title="Więcej" />} />
         </Route>
