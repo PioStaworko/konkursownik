@@ -3,6 +3,7 @@ using Konkursownik.Api.Data;
 using Konkursownik.Api.Domain;
 using Konkursownik.Api.Features.Auth;
 using Konkursownik.Api.Features.Contests;
+using Konkursownik.Api.Features.Entries;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,6 +57,8 @@ app.MapPublicAuthEndpoints();
 var secured = app.MapGroup("/api").RequireAuthorization();
 secured.MapAccountEndpoints();
 secured.MapContestEndpoints();
+secured.MapEntryEndpoints();
+secured.MapItemToggleEndpoints();
 
 app.Run();
 
