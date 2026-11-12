@@ -26,4 +26,22 @@ describe('AuthProvider.logout', () => {
     await userEvent.setup().click(screen.getByRole('button', { name: 'out' }))
     await waitFor(() => expect(screen.getByText('anon')).toBeInTheDocument())
   })
+
+  it('wipes cached user data and calls POST /api/auth/logout', async () => {
+    const fetchMock = vi.fn((input: RequestInfo | URL, _init?: RequestInit) =>
+      Promise.resolve(String(input).includes('logout') ? new Response(null, { status: 204 })
+        : new Response(JSON.stringify({ email: 'a@b.pl' }))))
+    vi.stubGlobal('fetch', fetchMock)
+    const client = new QueryClient()
+    client.setQueryData(['contests', 'active'], [{ id: 'c1' }])
+    client.setQueryData(['reminders'], [{ id: 'r1' }])
+    render(<QueryClientProvider client={client}><AuthProvider><Probe /></AuthProvider></QueryClientProvider>)
+    expect(await screen.findByText('a@b.pl')).toBeInTheDocument()
+    await userEvent.setup().click(screen.getByRole('button', { name: 'out' }))
+    await waitFor(() => expect(screen.getByText('anon')).toBeInTheDocument())
+    expect(client.getQueryData(['contests', 'active'])).toBeUndefined()
+    expect(client.getQueryData(['reminders'])).toBeUndefined()
+    const logoutCall = fetchMock.mock.calls.find(([u]) => String(u).includes('/api/auth/logout'))
+    expect(logoutCall?.[1]?.method).toBe('POST')
+  })
 })

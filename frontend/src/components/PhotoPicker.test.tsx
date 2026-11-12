@@ -18,10 +18,10 @@ function renderPicker() {
 const fileInput = () => screen.getByLabelText('Dodaj zdjęcie') as HTMLInputElement
 
 describe('PhotoPicker', () => {
-  it('uses the camera-friendly accept/capture attributes', () => {
+  it('accepts jpeg/png/webp and lets the OS offer camera or gallery (no capture)', () => {
     renderPicker()
-    expect(fileInput()).toHaveAttribute('accept', 'image/jpeg,image/png,image/webp,image/heic')
-    expect(fileInput()).toHaveAttribute('capture', 'environment')
+    expect(fileInput()).toHaveAttribute('accept', 'image/jpeg,image/png,image/webp')
+    expect(fileInput()).not.toHaveAttribute('capture')
   })
 
   it('rejects >10MB without upload', async () => {

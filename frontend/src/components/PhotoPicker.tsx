@@ -73,8 +73,7 @@ export default function PhotoPicker({ entryId, photoIds }: { entryId: string; ph
       <input
         ref={inputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/heic"
-        capture="environment"
+        accept="image/jpeg,image/png,image/webp"
         aria-label="Dodaj zdjęcie"
         className="sr-only"
         onChange={onChange}

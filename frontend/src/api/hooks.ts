@@ -47,10 +47,15 @@ export function useSaveContest() {
 }
 
 export function useDeleteContest() {
+  const qc = useQueryClient()
   const invalidate = useInvalidateContestData()
   return useMutation({
     mutationFn: (id: string) => apiFetch<void>(`/api/contests/${id}`, { method: 'DELETE' }),
-    onSuccess: invalidate,
+    onSuccess: async (_data, id) => {
+      // the deleted contest's detail query must not be refetched (it would 404)
+      qc.removeQueries({ queryKey: ['contests', 'detail', id] })
+      await invalidate()
+    },
   })
 }
 

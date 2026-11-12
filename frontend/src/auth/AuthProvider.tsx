@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import { ApiError, apiFetch, jsonBody } from '../api/client'
+import { clearUserData } from '../api/queryClient'
 import type { MeDto } from '../api/types'
 
 export interface AuthValue {
@@ -50,9 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch {
           // the user must end up logged out locally even if the server call fails
         }
-        // keep the observed ['me'] query alive: clear() would detach AuthProvider's observer
-        queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' })
-        queryClient.setQueryData(['me'], null)
+        clearUserData(queryClient)
       },
     }
   }, [data, isPending, queryClient])
