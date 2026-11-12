@@ -1,0 +1,28 @@
+@host = http://localhost:5080
+
+### Health
+GET {{host}}/api/health
+
+### Register (first user: bootstrap code from Invites:BootstrapCode; later: invite code)
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{ "email": "ja@example.com", "password": "Haslo123!", "inviteCode": "START" }
+
+### Login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "ja@example.com", "password": "Haslo123!" }
+
+### Me
+GET {{host}}/api/auth/me
+
+### Logout
+POST {{host}}/api/auth/logout
+
+### Create invite
+POST {{host}}/api/invites
+
+### List my invites
+GET {{host}}/api/invites

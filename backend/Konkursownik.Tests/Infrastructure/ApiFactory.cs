@@ -1,3 +1,5 @@
+using System.Net.Http.Json;
+using Konkursownik.Api.Features.Auth;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +16,49 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     private readonly string _storagePath = Path.Combine(Path.GetTempPath(), "konkursownik-tests-" + Guid.NewGuid().ToString("N"));
 
     public FakeTimeProvider Clock { get; } = new(DateTimeOffset.Parse("2026-11-12T10:00:00Z"));
+
+    private const string DefaultPassword = "Haslo123!";
+    private readonly SemaphoreSlim _seedLock = new(1, 1);
+    private HttpClient? _seedClient;
+
+    /// <summary>Registers (once) the seed user with the bootstrap code and returns its logged-in client.</summary>
+    private async Task<HttpClient> GetSeedClientAsync()
+    {
+        await _seedLock.WaitAsync();
+        try
+        {
+            if (_seedClient is null)
+            {
+                var client = CreateClient();
+                var res = await client.PostAsJsonAsync("/api/auth/register",
+                    new RegisterRequest("seed@test.local", DefaultPassword, "START"));
+                res.EnsureSuccessStatusCode();
+                _seedClient = client;
+            }
+            return _seedClient;
+        }
+        finally { _seedLock.Release(); }
+    }
+
+    /// <summary>Creates a fresh invite code issued by the seed user.</summary>
+    public async Task<string> CreateInviteCodeAsync()
+    {
+        var seed = await GetSeedClientAsync();
+        var res = await seed.PostAsync("/api/invites", null);
+        res.EnsureSuccessStatusCode();
+        return (await res.Content.ReadFromJsonAsync<InviteDto>())!.Code;
+    }
+
+    /// <summary>Registers a new user (invited by the seed user) and returns a client logged in as them.</summary>
+    public async Task<HttpClient> CreateUserClientAsync(string? email = null)
+    {
+        var code = await CreateInviteCodeAsync();
+        var client = CreateClient();
+        var res = await client.PostAsJsonAsync("/api/auth/register",
+            new RegisterRequest(email ?? $"{Guid.NewGuid():N}@test.local", DefaultPassword, code));
+        res.EnsureSuccessStatusCode();
+        return client;
+    }
 
     public async Task InitializeAsync() => await _db.StartAsync();
 
