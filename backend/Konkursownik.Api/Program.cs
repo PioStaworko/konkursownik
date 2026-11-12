@@ -6,6 +6,8 @@ using Konkursownik.Api.Features.Contests;
 using Konkursownik.Api.Features.Entries;
 using Konkursownik.Api.Features.Photos;
 using Konkursownik.Api.Features.Reminders;
+using Konkursownik.Api.Features.ShoppingList;
+using Konkursownik.Api.Features.Stats;
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +77,8 @@ secured.MapEntryEndpoints();
 secured.MapItemToggleEndpoints();
 secured.MapPhotoEndpoints();
 secured.MapReminderEndpoints();
+secured.MapShoppingListEndpoints();
+secured.MapStatsEndpoints();
 
 app.Run();
 

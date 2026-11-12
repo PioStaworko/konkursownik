@@ -78,6 +78,40 @@ public static class ContestEndpoints
             return Results.NoContent();
         });
 
+        group.MapPost("/{id:guid}/duplicate", async (Guid id, HttpContext http, AppDbContext db, TimeProvider time) =>
+        {
+            var userId = http.User.UserId();
+            var src = await db.Contests.AsNoTracking().AsSplitQuery()
+                .Include(c => c.Tasks)
+                .Include(c => c.Purchases)
+                .Include(c => c.Proofs)
+                .FirstOrDefaultAsync(c => c.Id == id && c.OwnerId == userId);
+            if (src is null) return Results.NotFound();
+
+            var copy = new Contest
+            {
+                OwnerId = userId,
+                Name = src.Name + " (kopia)",
+                Organizer = src.Organizer, Url = src.Url, RulesUrl = src.RulesUrl, Type = src.Type,
+                PrizeDescription = src.PrizeDescription, PrizeValue = src.PrizeValue, PrizeCount = src.PrizeCount,
+                StartDate = src.StartDate, EndDate = src.EndDate, ResultsDate = src.ResultsDate,
+                ResultsCheckNote = src.ResultsCheckNote,
+                EntryLimitPerDay = src.EntryLimitPerDay, EntryLimitTotal = src.EntryLimitTotal,
+                Status = ContestStatus.Planned, Notes = src.Notes,
+                CreatedAt = time.GetUtcNow(),
+            };
+            copy.Tasks = src.Tasks.OrderBy(t => t.Order)
+                .Select(t => new ContestTask { ContestId = copy.Id, Text = t.Text, Order = t.Order }).ToList();
+            copy.Purchases = src.Purchases.OrderBy(p => p.Order)
+                .Select(p => new PurchaseItem { ContestId = copy.Id, Product = p.Product, Store = p.Store, Quantity = p.Quantity, Order = p.Order }).ToList();
+            copy.Proofs = src.Proofs.OrderBy(p => p.Order)
+                .Select(p => new ProofItem { ContestId = copy.Id, What = p.What, KeepUntil = p.KeepUntil, Location = p.Location, Order = p.Order }).ToList();
+
+            db.Contests.Add(copy);
+            await db.SaveChangesAsync();
+            return Results.Created($"/api/contests/{copy.Id}", new IdDto(copy.Id));
+        });
+
         group.MapDelete("/{id:guid}", async (Guid id, HttpContext http, AppDbContext db, IPhotoStorage storage, ILogger<IPhotoStorage> log) =>
         {
             var userId = http.User.UserId();

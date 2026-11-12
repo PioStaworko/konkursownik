@@ -26,3 +26,115 @@ POST {{host}}/api/invites
 
 ### List my invites
 GET {{host}}/api/invites
+
+### List contests (view=archive for the archive)
+GET {{host}}/api/contests
+###
+GET {{host}}/api/contests?view=archive
+
+### Create contest
+POST {{host}}/api/contests
+Content-Type: application/json
+
+{
+  "name": "Wygraj rower", "organizer": "Marka", "url": null, "rulesUrl": null, "type": "Lottery",
+  "prizeDescription": "Rower", "prizeValue": 2000, "prizeCount": 1,
+  "startDate": "2026-11-01", "endDate": "2026-11-30", "resultsDate": "2026-12-10", "resultsCheckNote": null,
+  "entryLimitPerDay": 1, "entryLimitTotal": null, "status": "Planned", "notes": null,
+  "tasks": [{ "text": "Wypełnij formularz", "done": false }],
+  "purchases": [{ "product": "Mleko", "store": "Biedronka", "quantity": "2 szt.", "bought": false }],
+  "proofs": [{ "what": "Paragon", "keepUntil": "2027-01-31", "location": "Szuflada", "discarded": false }]
+}
+
+### Get contest
+@contestId = 00000000-0000-0000-0000-000000000000
+GET {{host}}/api/contests/{{contestId}}
+
+### Update contest (same body shape as create)
+PUT {{host}}/api/contests/{{contestId}}
+Content-Type: application/json
+
+{
+  "name": "Wygraj rower", "organizer": null, "url": null, "rulesUrl": null, "type": "Lottery",
+  "prizeDescription": null, "prizeValue": null, "prizeCount": null,
+  "startDate": "2026-11-01", "endDate": "2026-11-30", "resultsDate": null, "resultsCheckNote": null,
+  "entryLimitPerDay": null, "entryLimitTotal": null, "status": "Submitted", "notes": null,
+  "tasks": [], "purchases": [], "proofs": []
+}
+
+### Duplicate contest
+POST {{host}}/api/contests/{{contestId}}/duplicate
+
+### Delete contest
+DELETE {{host}}/api/contests/{{contestId}}
+
+### Add entry
+POST {{host}}/api/contests/{{contestId}}/entries
+Content-Type: application/json
+
+{ "date": "2026-11-12", "confirmationCode": "ABC123", "receiptNumber": null, "purchaseAmount": 12.50, "contactUsed": null, "answerText": null }
+
+### Update entry
+@entryId = 00000000-0000-0000-0000-000000000000
+PUT {{host}}/api/entries/{{entryId}}
+Content-Type: application/json
+
+{ "date": "2026-11-12", "confirmationCode": "XYZ", "receiptNumber": null, "purchaseAmount": 7.49, "contactUsed": null, "answerText": null }
+
+### Delete entry
+DELETE {{host}}/api/entries/{{entryId}}
+
+### Upload entry photo (JPEG/PNG/WebP)
+POST {{host}}/api/entries/{{entryId}}/photos
+Content-Type: multipart/form-data; boundary=B
+
+--B
+Content-Disposition: form-data; name="file"; filename="paragon.jpg"
+Content-Type: image/jpeg
+
+< ./paragon.jpg
+--B--
+
+### Get photo
+@photoId = 00000000-0000-0000-0000-000000000000
+GET {{host}}/api/photos/{{photoId}}
+
+### Delete photo
+DELETE {{host}}/api/photos/{{photoId}}
+
+### Set win
+PUT {{host}}/api/contests/{{contestId}}/win
+Content-Type: application/json
+
+{ "prizeWon": "Rower", "prizeValue": 2000, "laureateDeadline": "2026-12-20", "laureateDataSent": false }
+
+### Remove win
+DELETE {{host}}/api/contests/{{contestId}}/win
+
+### Toggle task
+@itemId = 00000000-0000-0000-0000-000000000000
+PATCH {{host}}/api/contest-tasks/{{itemId}}
+Content-Type: application/json
+
+{ "value": true }
+
+### Toggle purchase item
+PATCH {{host}}/api/purchase-items/{{itemId}}
+Content-Type: application/json
+
+{ "value": true }
+
+### Toggle proof item
+PATCH {{host}}/api/proof-items/{{itemId}}
+Content-Type: application/json
+
+{ "value": true }
+
+### Reminders
+GET {{host}}/api/reminders
+
+### Shopping list (grouped by store)
+GET {{host}}/api/shopping-list
+
+### Stats
+GET {{host}}/api/stats
