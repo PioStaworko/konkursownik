@@ -7,4 +7,5 @@ node_modules/
 .idea/
 backend/Konkursownik.Api/wwwroot/
 .env
-photos/
+/photos/
+/backend/Konkursownik.Api/photos/
