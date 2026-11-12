@@ -2,6 +2,7 @@ using Konkursownik.Api.Common;
 using Konkursownik.Api.Data;
 using Konkursownik.Api.Domain;
 using Konkursownik.Api.Features.Auth;
+using Konkursownik.Api.Features.Contests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,6 +55,7 @@ app.MapPublicAuthEndpoints();
 // Every other /api endpoint belongs on this group and therefore requires a signed-in user.
 var secured = app.MapGroup("/api").RequireAuthorization();
 secured.MapAccountEndpoints();
+secured.MapContestEndpoints();
 
 app.Run();
 

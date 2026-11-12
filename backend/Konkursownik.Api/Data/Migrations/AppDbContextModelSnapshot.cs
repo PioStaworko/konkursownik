@@ -86,6 +86,133 @@ namespace Konkursownik.Api.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Konkursownik.Api.Domain.Contest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<int?>("EntryLimitPerDay")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("EntryLimitTotal")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Organizer")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("PrizeCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PrizeDescription")
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("PrizeValue")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("ResultsCheckNote")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly?>("ResultsDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("RulesUrl")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Contests");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.ContestTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ContestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Done")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContestId");
+
+                    b.ToTable("Tasks");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Entry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AnswerText")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConfirmationCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ContactUsed")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ContestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<decimal?>("PurchaseAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("ReceiptNumber")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContestId");
+
+                    b.ToTable("Entries");
+                });
+
             modelBuilder.Entity("Konkursownik.Api.Domain.InviteCode", b =>
                 {
                     b.Property<string>("Code")
@@ -111,6 +238,126 @@ namespace Konkursownik.Api.Data.Migrations
                     b.HasIndex("UsedByUserId");
 
                     b.ToTable("InviteCodes");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Photo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("EntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StorageKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("UploadedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntryId");
+
+                    b.ToTable("Photos");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.ProofItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ContestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Discarded")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateOnly?>("KeepUntil")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("What")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContestId");
+
+                    b.ToTable("Proofs");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.PurchaseItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Bought")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ContestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Product")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Quantity")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Store")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContestId");
+
+                    b.ToTable("Purchases");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Win", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ContestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("LaureateDataSent")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateOnly?>("LaureateDeadline")
+                        .HasColumnType("date");
+
+                    b.Property<decimal?>("PrizeValue")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("PrizeWon")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContestId")
+                        .IsUnique();
+
+                    b.ToTable("Wins");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -245,6 +492,35 @@ namespace Konkursownik.Api.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Konkursownik.Api.Domain.Contest", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.ContestTask", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.Contest", null)
+                        .WithMany("Tasks")
+                        .HasForeignKey("ContestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Entry", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.Contest", "Contest")
+                        .WithMany("Entries")
+                        .HasForeignKey("ContestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Contest");
+                });
+
             modelBuilder.Entity("Konkursownik.Api.Domain.InviteCode", b =>
                 {
                     b.HasOne("Konkursownik.Api.Domain.AppUser", null)
@@ -256,6 +532,42 @@ namespace Konkursownik.Api.Data.Migrations
                         .WithMany()
                         .HasForeignKey("UsedByUserId")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Photo", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.Entry", null)
+                        .WithMany("Photos")
+                        .HasForeignKey("EntryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.ProofItem", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.Contest", null)
+                        .WithMany("Proofs")
+                        .HasForeignKey("ContestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.PurchaseItem", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.Contest", null)
+                        .WithMany("Purchases")
+                        .HasForeignKey("ContestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Win", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.Contest", null)
+                        .WithOne("Win")
+                        .HasForeignKey("Konkursownik.Api.Domain.Win", "ContestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -307,6 +619,24 @@ namespace Konkursownik.Api.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Contest", b =>
+                {
+                    b.Navigation("Entries");
+
+                    b.Navigation("Proofs");
+
+                    b.Navigation("Purchases");
+
+                    b.Navigation("Tasks");
+
+                    b.Navigation("Win");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Entry", b =>
+                {
+                    b.Navigation("Photos");
                 });
 #pragma warning restore 612, 618
         }
