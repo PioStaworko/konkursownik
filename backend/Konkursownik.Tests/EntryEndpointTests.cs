@@ -130,7 +130,7 @@ public class EntryEndpointTests(ApiFactory factory)
     }
 
     [Fact]
-    public async Task Delete_win_removes_it_keeps_status_and_is_idempotent()
+    public async Task Delete_win_removes_it_resets_won_status_and_is_idempotent()
     {
         var c = await factory.CreateUserClientAsync();
         var id = await Samples.CreateContestAsync(c, Samples.Contest());
@@ -140,8 +140,23 @@ public class EntryEndpointTests(ApiFactory factory)
         Assert.Equal(HttpStatusCode.NoContent, (await c.DeleteAsync($"/api/contests/{id}/win")).StatusCode);
         var got = await GetAsync(c, id);
         Assert.Null(got!.Win);
-        Assert.Equal(ContestStatus.Won, got.Status);
+        Assert.Equal(ContestStatus.Submitted, got.Status);
         Assert.Equal(HttpStatusCode.NoContent, (await c.DeleteAsync($"/api/contests/{id}/win")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_win_leaves_non_won_status_untouched()
+    {
+        var c = await factory.CreateUserClientAsync();
+        var id = await Samples.CreateContestAsync(c, Samples.Contest());
+        await c.PutAsJsonAsync($"/api/contests/{id}/win", new WinDto("Rower", null, null, false), JsonConfig.Options);
+        var dto = await GetAsync(c, id);
+        Assert.Equal(ContestStatus.Won, dto!.Status);
+        // user manually moved it to another status while keeping the win
+        var put = await c.PutAsJsonAsync($"/api/contests/{id}", Samples.Contest(status: ContestStatus.Bought), JsonConfig.Options);
+        put.EnsureSuccessStatusCode();
+        await c.DeleteAsync($"/api/contests/{id}/win");
+        Assert.Equal(ContestStatus.Bought, (await GetAsync(c, id))!.Status);
     }
 
     [Fact]

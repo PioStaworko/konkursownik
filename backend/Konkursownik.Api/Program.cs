@@ -8,7 +8,6 @@ using Konkursownik.Api.Features.Photos;
 using Konkursownik.Api.Features.Reminders;
 using Konkursownik.Api.Features.ShoppingList;
 using Konkursownik.Api.Features.Stats;
-using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -36,16 +35,7 @@ if (!string.IsNullOrWhiteSpace(keysPath))
     builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysPath));
 }
 
-builder.Services.AddSingleton<IPhotoStorage>(sp =>
-{
-    var cfg = sp.GetRequiredService<IConfiguration>();
-    return cfg["Storage:Provider"] switch
-    {
-        "AzureBlob" => new AzureBlobPhotoStorage(new BlobContainerClient(
-            cfg["Storage:BlobConnectionString"], cfg["Storage:BlobContainer"] ?? "photos")),
-        _ => new LocalPhotoStorage(cfg["Storage:LocalPath"] ?? "photos"),
-    };
-});
+builder.Services.AddSingleton<IPhotoStorage>(sp => PhotoStorageFactory.Create(sp.GetRequiredService<IConfiguration>()));
 
 builder.Services.AddIdentityCore<AppUser>(o =>
     {
@@ -73,6 +63,9 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Fail fast on bad storage configuration instead of at the first photo request.
+_ = app.Services.GetRequiredService<IPhotoStorage>();
 
 if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 {

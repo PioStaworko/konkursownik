@@ -81,6 +81,8 @@ public static class EntryEndpoints
             var userId = http.User.UserId();
             if (!await db.Contests.AnyAsync(c => c.Id == id && c.OwnerId == userId)) return Results.NotFound();
             await db.Wins.Where(w => w.ContestId == id).ExecuteDeleteAsync();
+            await db.Contests.Where(c => c.Id == id && c.OwnerId == userId && c.Status == ContestStatus.Won)
+                .ExecuteUpdateAsync(s => s.SetProperty(c => c.Status, ContestStatus.Submitted));
             return Results.NoContent();
         });
     }
