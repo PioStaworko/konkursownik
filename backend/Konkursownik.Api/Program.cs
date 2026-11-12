@@ -63,6 +63,8 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
 }
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -79,6 +81,9 @@ secured.MapPhotoEndpoints();
 secured.MapReminderEndpoints();
 secured.MapShoppingListEndpoints();
 secured.MapStatsEndpoints();
+
+// SPA fallback for client-side routes; unknown /api/... paths must stay 404.
+app.MapFallbackToFile("{**path:nonfile:regex(^(?!api(/|$)).*$)}", "index.html");
 
 app.Run();
 
