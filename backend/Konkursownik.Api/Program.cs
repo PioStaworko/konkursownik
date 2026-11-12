@@ -9,6 +9,8 @@ using Konkursownik.Api.Features.Reminders;
 using Konkursownik.Api.Features.ShoppingList;
 using Konkursownik.Api.Features.Stats;
 using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +20,21 @@ builder.Services.ConfigureHttpJsonOptions(o => JsonConfig.Configure(o.Serializer
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddDbContext<AppDbContext>(o =>
     o.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+// Behind Caddy / App Service front-ends: trust X-Forwarded-* from any proxy.
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    o.KnownIPNetworks.Clear();
+    o.KnownProxies.Clear();
+});
+
+// Container/selfhost: persist Data Protection keys so cookies survive restarts. Unset on App Service.
+var keysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrWhiteSpace(keysPath))
+{
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+}
 
 builder.Services.AddSingleton<IPhotoStorage>(sp =>
 {
@@ -63,6 +80,7 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
 }
 
+app.UseForwardedHeaders();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseAuthentication();

@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: konkursownik
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: konkursownik
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U konkursownik -d konkursownik"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      ConnectionStrings__Default: Host=db;Database=konkursownik;Username=konkursownik;Password=${POSTGRES_PASSWORD}
+      Invites__BootstrapCode: ${BOOTSTRAP_CODE}
+      Storage__Provider: Local
+      Storage__LocalPath: /data/photos
+      DataProtection__KeysPath: /data/keys
+      Database__MigrateOnStartup: "true"
+      ASPNETCORE_URLS: http://+:8080
+    volumes:
+      - photos:/data/photos
+      - keys:/data/keys
+
+volumes:
+  pgdata:
+  photos:
+  keys:
