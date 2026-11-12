@@ -4,6 +4,8 @@ using Konkursownik.Api.Domain;
 using Konkursownik.Api.Features.Auth;
 using Konkursownik.Api.Features.Contests;
 using Konkursownik.Api.Features.Entries;
+using Konkursownik.Api.Features.Photos;
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +15,17 @@ builder.Services.ConfigureHttpJsonOptions(o => JsonConfig.Configure(o.Serializer
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddDbContext<AppDbContext>(o =>
     o.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddSingleton<IPhotoStorage>(sp =>
+{
+    var cfg = sp.GetRequiredService<IConfiguration>();
+    return cfg["Storage:Provider"] switch
+    {
+        "AzureBlob" => new AzureBlobPhotoStorage(new BlobContainerClient(
+            cfg["Storage:BlobConnectionString"], cfg["Storage:BlobContainer"] ?? "photos")),
+        _ => new LocalPhotoStorage(cfg["Storage:LocalPath"] ?? "photos"),
+    };
+});
 
 builder.Services.AddIdentityCore<AppUser>(o =>
     {
@@ -59,6 +72,7 @@ secured.MapAccountEndpoints();
 secured.MapContestEndpoints();
 secured.MapEntryEndpoints();
 secured.MapItemToggleEndpoints();
+secured.MapPhotoEndpoints();
 
 app.Run();
 

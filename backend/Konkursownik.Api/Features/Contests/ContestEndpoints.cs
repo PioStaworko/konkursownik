@@ -1,6 +1,7 @@
 using Konkursownik.Api.Common;
 using Konkursownik.Api.Data;
 using Konkursownik.Api.Domain;
+using Konkursownik.Api.Features.Photos;
 using Microsoft.EntityFrameworkCore;
 
 namespace Konkursownik.Api.Features.Contests;
@@ -77,11 +78,14 @@ public static class ContestEndpoints
             return Results.NoContent();
         });
 
-        group.MapDelete("/{id:guid}", async (Guid id, HttpContext http, AppDbContext db) =>
+        group.MapDelete("/{id:guid}", async (Guid id, HttpContext http, AppDbContext db, IPhotoStorage storage, ILogger<IPhotoStorage> log) =>
         {
             var userId = http.User.UserId();
+            var keys = await PhotoEndpoints.KeysAsync(db, userId, contestId: id);
             var deleted = await db.Contests.Where(c => c.Id == id && c.OwnerId == userId).ExecuteDeleteAsync();
-            return deleted == 0 ? Results.NotFound() : Results.NoContent();
+            if (deleted == 0) return Results.NotFound();
+            await PhotoEndpoints.DeleteFilesAsync(storage, log, keys);
+            return Results.NoContent();
         });
     }
 }
