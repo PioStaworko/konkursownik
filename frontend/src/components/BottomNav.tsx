@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router'
+import { useReminders } from '../api/hooks'
 
 const items = [
   { to: '/', label: 'Pilne', end: true },
@@ -8,6 +9,7 @@ const items = [
 ]
 
 export default function BottomNav() {
+  const reminderCount = useReminders().data?.length ?? 0
   return (
     <nav
       aria-label="Nawigacja główna"
@@ -26,6 +28,14 @@ export default function BottomNav() {
               }
             >
               {item.label}
+              {item.to === '/' && reminderCount > 0 && (
+                <span
+                  aria-label={`${reminderCount} pilnych`}
+                  className="ml-1 rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white"
+                >
+                  {reminderCount}
+                </span>
+              )}
             </NavLink>
           </li>
         ))}

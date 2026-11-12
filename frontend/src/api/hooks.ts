@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch, jsonBody } from './client'
-import type { ContestDto, ContestSummaryDto, ContestUpsertDto, EntryUpsertDto, IdDto, WinDto } from './types'
+import type {
+  ContestDto, ContestSummaryDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto,
+  StatsDto, WinDto,
+} from './types'
 
 export type ContestView = 'active' | 'archive'
 
@@ -131,5 +134,29 @@ export function useDuplicateContest() {
   return useMutation({
     mutationFn: async (id: string) => (await apiFetch<IdDto>(`/api/contests/${id}/duplicate`, { method: 'POST' })).id,
     onSuccess: invalidate,
+  })
+}
+
+export function useReminders() {
+  return useQuery({ queryKey: ['reminders'], queryFn: () => apiFetch<Reminder[]>('/api/reminders') })
+}
+
+export function useShoppingList() {
+  return useQuery({ queryKey: ['shopping'], queryFn: () => apiFetch<ShoppingGroupDto[]>('/api/shopping-list') })
+}
+
+export function useStats() {
+  return useQuery({ queryKey: ['stats'], queryFn: () => apiFetch<StatsDto>('/api/stats') })
+}
+
+export function useInvites() {
+  return useQuery({ queryKey: ['invites'], queryFn: () => apiFetch<InviteDto[]>('/api/invites') })
+}
+
+export function useCreateInvite() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: () => apiFetch<InviteDto>('/api/invites', { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['invites'] }),
   })
 }

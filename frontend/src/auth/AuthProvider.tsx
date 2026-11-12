@@ -45,8 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await refreshMe()
       },
       async logout() {
-        await apiFetch('/api/auth/logout', { method: 'POST' })
-        queryClient.clear()
+        try {
+          await apiFetch('/api/auth/logout', { method: 'POST' })
+        } catch {
+          // the user must end up logged out locally even if the server call fails
+        }
+        // keep the observed ['me'] query alive: clear() would detach AuthProvider's observer
+        queryClient.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' })
         queryClient.setQueryData(['me'], null)
       },
     }
