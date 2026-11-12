@@ -145,11 +145,12 @@ az webapp config appsettings delete --name $APP --resource-group $RG --setting-n
 ```bash
 git clone <adres-repozytorium> konkursownik && cd konkursownik
 cp .env.example .env
-# edytuj .env: ustaw długie losowe POSTGRES_PASSWORD i własny BOOTSTRAP_CODE
+# edytuj .env: wpisz POSTGRES_PASSWORD (tylko litery i cyfry, np. `openssl rand -hex 24`)
+# oraz BOOTSTRAP_CODE (losowy, np. `openssl rand -hex 8`)
 docker compose up -d --build
 ```
 
-Aplikacja nasłuchuje na porcie 8080 (HTTP). Dane żyją w wolumenach Dockera: `pgdata` (baza), `photos` (zdjęcia), `keys` (klucze Data Protection — dzięki nim restart kontenera nie wylogowuje użytkowników). Pierwsze konto zakładasz jak w części A, krok 6; potem wyczyść `BOOTSTRAP_CODE` w `.env` i wykonaj `docker compose up -d`.
+Aplikacja nasłuchuje na porcie 8080 (HTTP), ale `docker-compose.yml` publikuje go tylko na `127.0.0.1` — z zewnątrz jest niedostępny, dopóki nie skonfigurujesz proxy (krok 2). Dane żyją w wolumenach Dockera: `pgdata` (baza), `photos` (zdjęcia), `keys` (klucze Data Protection — dzięki nim restart kontenera nie wylogowuje użytkowników). Pierwsze konto zakładasz jak w części A, krok 6; potem wyczyść `BOOTSTRAP_CODE` w `.env` (zostaw `BOOTSTRAP_CODE=` puste) i wykonaj `docker compose up -d` — puste znaczy: rejestracja bootstrap wyłączona.
 
 ### Krok 2. HTTPS przez Caddy
 
@@ -161,7 +162,7 @@ konkursy.example.com {
 }
 ```
 
-Przeładuj: `sudo systemctl reload caddy`. Caddy sam pobierze certyfikat Let's Encrypt. Aplikacja ufa nagłówkom `X-Forwarded-For` / `X-Forwarded-Proto`, więc ciasteczka i adresy działają poprawnie za proxy. Zalecane: zablokuj dostęp do portu 8080 z internetu (firewall) albo w `docker-compose.yml` zmień mapowanie na `"127.0.0.1:8080:8080"` — aplikacja ufa nagłówkom od każdego, więc powinna być osiągalna tylko przez proxy.
+Przeładuj: `sudo systemctl reload caddy`. Caddy sam pobierze certyfikat Let's Encrypt. Aplikacja ufa nagłówkom `X-Forwarded-For` / `X-Forwarded-Proto`, więc ciasteczka i adresy działają poprawnie za proxy. Mapowanie portu w `docker-compose.yml` to domyślnie `127.0.0.1:8080:8080`, czyli aplikacja jest osiągalna wyłącznie przez Caddy działającego na tym samym serwerze. Nie polegaj na firewallu (ufw/firewalld): Docker dopisuje własne reguły iptables, które go omijają, więc port opublikowany na wszystkich interfejsach byłby dostępny z internetu po zwykłym HTTP (hasła i zdjęcia bez szyfrowania), a aplikacja ufa nagłówkom `X-Forwarded-*` od każdego.
 
 ---
 
@@ -191,5 +192,5 @@ Dla Neon / Azure PostgreSQL użyj `pg_dump` z własnego komputera: `pg_dump "hos
 - **Rejestracja zwraca `invalid_invite`:** kod bootstrap działa tylko gdy nie ma jeszcze użytkowników i musi zgadzać się z ustawieniem (wielkość liter nie ma znaczenia). Kolejne konta wymagają kodu zaproszenia z aplikacji.
 - **Zdjęcia nie działają na Azure:** sprawdź `Storage__Provider=AzureBlob`, poprawność `Storage__BlobConnectionString` i istnienie kontenera `photos`.
 - **Wylogowuje po każdym restarcie (Docker):** upewnij się, że wolumen `keys` jest podpięty i ustawione `DataProtection__KeysPath=/data/keys`.
-- **Port 8080 zajęty:** zmień mapowanie w `docker-compose.yml`, np. `"8081:8080"`.
+- **Port 8080 zajęty:** ustaw `APP_PORT=8081` w `.env` (mapowanie pozostaje na `127.0.0.1`) i zaktualizuj `reverse_proxy` w Caddyfile.
 - **Błędne daty „dziś” / sortowanie polskich nazw:** aplikacja wymaga strefy `Europe/Warsaw` i ICU; oficjalny obraz `aspnet` je zawiera — nie ustawiaj `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT`.

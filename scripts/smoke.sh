@@ -5,7 +5,8 @@ cd "$(dirname "$0")/.."
 
 CREATED_ENV=0
 if [ ! -f .env ]; then
-  cp .env.example .env
+  rand() { head -c "$1" /dev/urandom | od -An -tx1 | tr -d ' \n'; }
+  printf 'POSTGRES_PASSWORD=%s\nBOOTSTRAP_CODE=%s\n' "$(rand 24)" "$(rand 8)" > .env
   CREATED_ENV=1
 fi
 
@@ -25,6 +26,11 @@ cleanup() {
 trap cleanup EXIT
 
 set -a; . ./.env; set +a
+# A user-provided .env may have the bootstrap code cleared (bootstrap disabled); the test needs one.
+if [ -z "${BOOTSTRAP_CODE:-}" ]; then
+  BOOTSTRAP_CODE="smoke$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+  export BOOTSTRAP_CODE
+fi
 BASE="http://localhost:$APP_PORT"
 
 docker compose -p konkursownik-smoke up -d --build
