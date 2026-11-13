@@ -10,7 +10,7 @@ function renderPicker() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <PhotoPicker entryId="e1" photoIds={['p1']} />
+      <PhotoPicker entryId="e1" photos={[{ id: 'p1', label: 'Receipt', sizeBytes: 10 }]} />
     </QueryClientProvider>,
   )
 }
@@ -43,6 +43,15 @@ describe('PhotoPicker', () => {
     const [url, init] = fetchMock.mock.calls[0]
     expect(url).toBe('/api/entries/e1/photos')
     expect((init.body as FormData).get('file')).toBeInstanceOf(File)
+  })
+
+  it('does not send a label field by default', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: 'p2' }), { status: 201 }))
+    vi.stubGlobal('fetch', fetchMock)
+    renderPicker()
+    await userEvent.setup().upload(fileInput(), new File(['x'], 'a.jpg', { type: 'image/jpeg' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+    expect((fetchMock.mock.calls[0][1].body as FormData).has('label')).toBe(false)
   })
 
   it('maps unsupported_type API error', async () => {

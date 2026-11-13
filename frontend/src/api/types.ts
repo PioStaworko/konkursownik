@@ -36,6 +36,14 @@ export interface ContestUpsertDto {
   proofs: ProofDto[]
 }
 
+export type PhotoLabel = 'Receipt' | 'Packaging' | 'Code' | 'Other'
+
+export interface PhotoDto {
+  id: string
+  label: PhotoLabel
+  sizeBytes: number
+}
+
 export interface EntryDto {
   id: string
   date: string
@@ -44,7 +52,8 @@ export interface EntryDto {
   purchaseAmount: number | null
   contactUsed: string | null
   answerText: string | null
-  photoIds: string[]
+  store: string | null
+  photos: PhotoDto[]
 }
 
 export interface WinDto {
@@ -82,6 +91,7 @@ export interface EntryUpsertDto {
   purchaseAmount: number | null
   contactUsed: string | null
   answerText: string | null
+  store: string | null
 }
 export interface StatusDto { status: ContestStatus }
 export interface ToggleDto { value: boolean }

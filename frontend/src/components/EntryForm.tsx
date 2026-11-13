@@ -20,6 +20,7 @@ export default function EntryForm({ contestId, contestType, entry, onDone }: Pro
   const [confirmationCode, setConfirmationCode] = useState(entry?.confirmationCode ?? '')
   const [receiptNumber, setReceiptNumber] = useState(entry?.receiptNumber ?? '')
   const [amount, setAmount] = useState(entry?.purchaseAmount == null ? '' : String(entry.purchaseAmount).replace('.', ','))
+  const [store, setStore] = useState(entry?.store ?? '')
   const [contactUsed, setContactUsed] = useState(entry?.contactUsed ?? '')
   const [answerText, setAnswerText] = useState(entry?.answerText ?? '')
   const [errors, setErrors] = useState<string[]>([])
@@ -40,6 +41,7 @@ export default function EntryForm({ contestId, contestType, entry, onDone }: Pro
       purchaseAmount,
       contactUsed: orNull(contactUsed),
       answerText: contestType === 'Creative' ? orNull(answerText) : null,
+      store: orNull(store),
     }
     try {
       await save.mutateAsync({ id: entry?.id, dto })
@@ -84,6 +86,10 @@ export default function EntryForm({ contestId, contestType, entry, onDone }: Pro
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
+      </label>
+      <label className={labelClass}>
+        Sklep
+        <input className={inputClass} value={store} onChange={(e) => setStore(e.target.value)} />
       </label>
       <label className={labelClass}>
         Użyty kontakt

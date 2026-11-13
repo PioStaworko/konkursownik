@@ -4,7 +4,7 @@ namespace Konkursownik.Api.Features.Entries;
 
 public record EntryUpsertDto(
     DateOnly Date, string? ConfirmationCode, string? ReceiptNumber,
-    decimal? PurchaseAmount, string? ContactUsed, string? AnswerText);
+    decimal? PurchaseAmount, string? ContactUsed, string? AnswerText, string? Store);
 
 public record ToggleDto(bool Value);
 
@@ -25,6 +25,8 @@ public static class EntryValidation
             Add(nameof(d.ReceiptNumber), "Maks. 200 znaków.");
         if (d.ContactUsed is { Length: > 200 })
             Add(nameof(d.ContactUsed), "Maks. 200 znaków.");
+        if (d.Store is { Length: > 100 })
+            Add(nameof(d.Store), "Maks. 100 znaków.");
         return errors;
     }
 

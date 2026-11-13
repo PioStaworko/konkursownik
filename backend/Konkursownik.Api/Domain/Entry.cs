@@ -11,6 +11,7 @@ public class Entry
     public decimal? PurchaseAmount { get; set; }
     public string? ContactUsed { get; set; }
     public string? AnswerText { get; set; }
+    public string? Store { get; set; }
 
     public List<Photo> Photos { get; set; } = new();
 }
@@ -23,4 +24,5 @@ public class Photo
     public string ContentType { get; set; } = "";
     public long SizeBytes { get; set; }
     public DateTimeOffset UploadedAt { get; set; }
+    public PhotoLabel Label { get; set; } = PhotoLabel.Receipt;
 }

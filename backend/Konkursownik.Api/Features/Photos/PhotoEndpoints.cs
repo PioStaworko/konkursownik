@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Konkursownik.Api.Features.Photos;
 
+public record PhotoLabelDto(PhotoLabel Label);
+
 public static class PhotoEndpoints
 {
     private const int MaxBytes = 10 * 1024 * 1024;
@@ -21,6 +23,11 @@ public static class PhotoEndpoints
                 var userId = http.User.UserId();
                 if (!await db.Entries.AnyAsync(e => e.Id == id && e.Contest.OwnerId == userId, ct)) return Results.NotFound();
                 if (file is null) return Results.BadRequest(new { error = "unsupported_type" });
+
+                var rawLabel = http.Request.Form["label"].ToString();
+                PhotoLabel label = PhotoLabel.Receipt;
+                if (rawLabel != "" && !(Enum.TryParse(rawLabel, ignoreCase: true, out label) && Enum.IsDefined(label)))
+                    return Results.BadRequest(new { error = "invalid_label" });
 
                 // Read at most limit + 1 bytes so the cap holds regardless of the declared length.
                 var buffer = new MemoryStream();
@@ -46,6 +53,7 @@ public static class PhotoEndpoints
                     EntryId = id,
                     ContentType = contentType,
                     SizeBytes = buffer.Length,
+                    Label = label,
                     UploadedAt = time.GetUtcNow(),
                 };
                 photo.StorageKey = $"{userId}/{photo.Id:N}";
@@ -67,6 +75,16 @@ public static class PhotoEndpoints
             .WithMetadata(new RequestSizeLimitAttribute(RequestLimit))
             // CSRF: the auth cookie is SameSite=Lax and the API is same-origin JSON/multipart from our SPA only, so antiforgery tokens are not used.
             .DisableAntiforgery();
+
+        secured.MapPatch("/photos/{id:guid}", async (Guid id, PhotoLabelDto dto, HttpContext http, AppDbContext db, CancellationToken ct) =>
+        {
+            if (!Enum.IsDefined(dto.Label)) return Results.BadRequest(new { error = "invalid_label" });
+            var photo = await OwnedPhotos(db, http.User.UserId()).FirstOrDefaultAsync(p => p.Id == id, ct);
+            if (photo is null) return Results.NotFound();
+            photo.Label = dto.Label;
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        });
 
         secured.MapGet("/photos/{id:guid}", async (Guid id, HttpContext http, AppDbContext db, IPhotoStorage storage, CancellationToken ct) =>
         {

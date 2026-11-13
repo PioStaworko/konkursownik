@@ -46,7 +46,7 @@ export default function EntryCard({
           ) : null,
         )}
       </dl>
-      <PhotoPicker entryId={entry.id} photoIds={entry.photoIds} />
+      <PhotoPicker entryId={entry.id} photos={entry.photos} />
       <div className="flex gap-2">
         <button type="button" className={secondaryButtonClass} onClick={() => setEditing(true)}>
           Edytuj zgłoszenie

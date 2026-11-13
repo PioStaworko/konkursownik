@@ -95,5 +95,6 @@ public static class EntryEndpoints
         e.PurchaseAmount = d.PurchaseAmount;
         e.ContactUsed = d.ContactUsed;
         e.AnswerText = d.AnswerText;
+        e.Store = d.Store;
     }
 }

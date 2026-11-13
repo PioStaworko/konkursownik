@@ -27,7 +27,7 @@ public class DuplicateTests(ApiFactory factory)
         await c.PatchAsJsonAsync($"/api/purchase-items/{src.Purchases[0].Id}", new ToggleDto(true), JsonConfig.Options);
         await c.PatchAsJsonAsync($"/api/proof-items/{src.Proofs[0].Id}", new ToggleDto(true), JsonConfig.Options);
         (await c.PostAsJsonAsync($"/api/contests/{id}/entries",
-            new EntryUpsertDto(DateOnly.Parse("2026-11-12"), "ABC", null, 5m, null, null), JsonConfig.Options)).EnsureSuccessStatusCode();
+            new EntryUpsertDto(DateOnly.Parse("2026-11-12"), "ABC", null, 5m, null, null, null), JsonConfig.Options)).EnsureSuccessStatusCode();
         (await c.PutAsJsonAsync($"/api/contests/{id}/win",
             new WinDto("Nagroda", 100m, null, false), JsonConfig.Options)).EnsureSuccessStatusCode();
 

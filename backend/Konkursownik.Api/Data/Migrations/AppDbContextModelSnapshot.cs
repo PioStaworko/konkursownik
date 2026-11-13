@@ -209,6 +209,10 @@ namespace Konkursownik.Api.Data.Migrations
                     b.Property<string>("ReceiptNumber")
                         .HasColumnType("text");
 
+                    b.Property<string>("Store")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ContestId");
@@ -254,6 +258,11 @@ namespace Konkursownik.Api.Data.Migrations
 
                     b.Property<Guid>("EntryId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Label")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<long>("SizeBytes")
                         .HasColumnType("bigint");

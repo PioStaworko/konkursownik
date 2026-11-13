@@ -47,9 +47,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         {
             e.Property(x => x.Id).ValueGeneratedNever();
             e.Property(x => x.PurchaseAmount).HasColumnType("decimal(10,2)");
+            e.Property(x => x.Store).HasMaxLength(100);
             e.HasMany(x => x.Photos).WithOne().HasForeignKey(p => p.EntryId).OnDelete(DeleteBehavior.Cascade);
         });
-        builder.Entity<Photo>().Property(x => x.Id).ValueGeneratedNever();
+        builder.Entity<Photo>(e =>
+        {
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.Label).HasDefaultValue(PhotoLabel.Receipt);
+        });
         builder.Entity<Win>(e =>
         {
             e.Property(x => x.Id).ValueGeneratedNever();

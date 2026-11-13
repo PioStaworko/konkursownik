@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { ApiError } from '../api/client'
+import type { PhotoDto } from '../api/types'
 import { useDeletePhoto, useUploadPhoto } from '../api/hooks'
 import { secondaryButtonClass } from '../lib/styles'
 
@@ -12,7 +13,7 @@ function uploadError(err: unknown): string {
   return 'Nie udało się wysłać zdjęcia. Spróbuj ponownie.'
 }
 
-export default function PhotoPicker({ entryId, photoIds }: { entryId: string; photoIds: string[] }) {
+export default function PhotoPicker({ entryId, photos }: { entryId: string; photos: PhotoDto[] }) {
   const upload = useUploadPhoto()
   const remove = useDeletePhoto()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -46,9 +47,9 @@ export default function PhotoPicker({ entryId, photoIds }: { entryId: string; ph
 
   return (
     <div className="space-y-2">
-      {photoIds.length > 0 && (
+      {photos.length > 0 && (
         <ul className="flex flex-wrap gap-2">
-          {photoIds.map((id, i) => (
+          {photos.map(({ id }, i) => (
             <li key={id} className="relative">
               <a href={`/api/photos/${id}`} target="_blank" rel="noopener noreferrer" aria-label={`Zdjęcie ${i + 1}`}>
                 <img

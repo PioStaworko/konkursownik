@@ -15,7 +15,7 @@ public class EntryEndpointTests(ApiFactory factory)
         c.GetFromJsonAsync<ContestDto>($"/api/contests/{id}", JsonConfig.Options);
 
     private static EntryUpsertDto Entry(string date, string? code = null, decimal? amount = null, string? answer = null) =>
-        new(DateOnly.Parse(date), code, null, amount, null, answer);
+        new(DateOnly.Parse(date), code, null, amount, null, answer, null);
 
     private static async Task<Guid> AddEntryAsync(HttpClient c, Guid contestId, EntryUpsertDto dto)
     {

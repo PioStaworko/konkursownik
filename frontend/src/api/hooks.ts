@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch, jsonBody } from './client'
 import type {
   ContestDto, ContestStatus, ContestSummaryDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto,
-  StatsDto, WinDto,
+  PhotoLabel, StatsDto, WinDto,
 } from './types'
 
 export type ContestView = 'active' | 'archive'
@@ -109,9 +109,10 @@ export function useDeleteEntry() {
 export function useUploadPhoto() {
   const invalidate = useInvalidateContestData()
   return useMutation({
-    mutationFn: ({ entryId, file }: { entryId: string; file: File }) => {
+    mutationFn: ({ entryId, file, label }: { entryId: string; file: File; label?: PhotoLabel }) => {
       const body = new FormData()
       body.append('file', file)
+      if (label) body.append('label', label)
       return apiFetch<IdDto>(`/api/entries/${entryId}/photos`, { method: 'POST', body })
     },
     onSuccess: invalidate,

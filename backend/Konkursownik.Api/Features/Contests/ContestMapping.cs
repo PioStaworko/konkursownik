@@ -18,8 +18,8 @@ public static class ContestMapping
         ContestRules.EntriesOn(c, today));
 
     private static EntryDto ToDto(Entry e) => new(
-        e.Id, e.Date, e.ConfirmationCode, e.ReceiptNumber, e.PurchaseAmount, e.ContactUsed, e.AnswerText,
-        e.Photos.Select(p => p.Id).ToList());
+        e.Id, e.Date, e.ConfirmationCode, e.ReceiptNumber, e.PurchaseAmount, e.ContactUsed, e.AnswerText, e.Store,
+        e.Photos.OrderBy(p => p.UploadedAt).Select(p => new PhotoDto(p.Id, p.Label, p.SizeBytes)).ToList());
 
     public static ContestSummaryDto ToSummary(Contest c, DateOnly today) => new(
         c.Id, c.Name, c.EndDate, c.ResultsDate, c.Status, ContestRules.EffectiveStatus(c, today),

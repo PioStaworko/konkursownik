@@ -13,9 +13,11 @@ public record ContestUpsertDto(
     int? EntryLimitPerDay, int? EntryLimitTotal, ContestStatus Status, string? Notes, string? Icon,
     List<TaskDto> Tasks, List<PurchaseDto> Purchases, List<ProofDto> Proofs);
 
+public record PhotoDto(Guid Id, PhotoLabel Label, long SizeBytes);
+
 public record EntryDto(
     Guid Id, DateOnly Date, string? ConfirmationCode, string? ReceiptNumber,
-    decimal? PurchaseAmount, string? ContactUsed, string? AnswerText, List<Guid> PhotoIds);
+    decimal? PurchaseAmount, string? ContactUsed, string? AnswerText, string? Store, List<PhotoDto> Photos);
 
 public record WinDto(string PrizeWon, decimal? PrizeValue, DateOnly? LaureateDeadline, bool LaureateDataSent);
 

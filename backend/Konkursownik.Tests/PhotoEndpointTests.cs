@@ -22,7 +22,7 @@ public class PhotoEndpointTests(ApiFactory factory)
     private static async Task<Guid> AddEntryAsync(HttpClient c, Guid contestId)
     {
         var res = await c.PostAsJsonAsync($"/api/contests/{contestId}/entries",
-            new EntryUpsertDto(DateOnly.Parse("2026-11-12"), null, null, null, null, null), JsonConfig.Options);
+            new EntryUpsertDto(DateOnly.Parse("2026-11-12"), null, null, null, null, null, null), JsonConfig.Options);
         res.EnsureSuccessStatusCode();
         return (await res.Content.ReadFromJsonAsync<IdDto>(JsonConfig.Options))!.Id;
     }

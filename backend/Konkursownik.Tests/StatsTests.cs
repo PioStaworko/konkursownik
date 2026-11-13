@@ -12,7 +12,7 @@ public class StatsTests(ApiFactory factory)
 {
     private static async Task AddEntryAsync(HttpClient c, Guid contestId, decimal? amount) =>
         (await c.PostAsJsonAsync($"/api/contests/{contestId}/entries",
-            new EntryUpsertDto(DateOnly.Parse("2026-11-12"), null, null, amount, null, null), JsonConfig.Options))
+            new EntryUpsertDto(DateOnly.Parse("2026-11-12"), null, null, amount, null, null, null), JsonConfig.Options))
             .EnsureSuccessStatusCode();
 
     [Fact]
