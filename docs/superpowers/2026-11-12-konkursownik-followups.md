@@ -46,3 +46,10 @@ Zebrane z recenzji zadań i końcowego przeglądu. Żadna nie blokuje używania 
 - Kafelek „Dziś / na dziś” liczy tylko przypomnienia o terminie ≤ dziś — przy samych przyszłych alertach pokazuje 0 (świadomie, jak w MVP).
 - Odczyt AI (Gemini) sprawdzony tylko na atrapie; w przeglądarce bez klucza przyciski są ukryte, przepływ z prawdziwym kluczem nie był przeklikany.
 - Karta „Czekam na wyniki” bez przycisków akcji ma pusty pasek z samym „⋮”.
+
+## Po końcowym przeglądzie rundy „redesign i AI” (2026-11-13)
+- Przełączenie zakładki w szczegółach zamyka niedokończony formularz zgłoszenia (traci wpisane dane i zdjęcie z odczytu AI czekające na wysłanie).
+- Pigułka „Archiwum” na liście konkursów nie ma licznika.
+- Brak UI do zmiany podpisu istniejącego zdjęcia (endpoint `PATCH /api/photos/{id}` jest).
+- Szacunek tokenów dla PDF z kompresowanymi strumieniami obiektów (PDF 1.5+) może być zaniżony — przed włączeniem AI przetestować kilka dużych regulaminów z prawdziwym kluczem.
+- Przed włączeniem AI: sprawdzić aktualne warunki Gemini API (plan darmowy vs płatny, EOG) i potwierdzić model (`gemini-3.5-flash-lite`) oraz limity 15 RPM / 250 tys. TPM.
