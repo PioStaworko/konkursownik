@@ -22,6 +22,7 @@ public static class ContestEndpoints
                 .Include(c => c.Entries)
                 .Include(c => c.Purchases)
                 .Include(c => c.Proofs)
+                .Include(c => c.Prizes)
                 .Include(c => c.Win).ThenInclude(w => w!.Steps)
                 .Where(c => c.OwnerId == userId)
                 .ToListAsync();
@@ -39,6 +40,7 @@ public static class ContestEndpoints
                 .Include(c => c.Tasks)
                 .Include(c => c.Purchases)
                 .Include(c => c.Proofs)
+                .Include(c => c.Prizes)
                 .Include(c => c.Entries).ThenInclude(e => e.Photos)
                 .Include(c => c.Win).ThenInclude(w => w!.Steps)
                 .FirstOrDefaultAsync(c => c.Id == id && c.OwnerId == userId);
@@ -64,6 +66,7 @@ public static class ContestEndpoints
                 .Include(c => c.Tasks)
                 .Include(c => c.Purchases)
                 .Include(c => c.Proofs)
+                .Include(c => c.Prizes)
                 .FirstOrDefaultAsync(c => c.Id == id && c.OwnerId == userId);
             if (contest is null) return Results.NotFound();
 
@@ -73,10 +76,12 @@ public static class ContestEndpoints
             var oldTasks = contest.Tasks.ToList();
             var oldPurchases = contest.Purchases.ToList();
             var oldProofs = contest.Proofs.ToList();
+            var oldPrizes = contest.Prizes.ToList();
             ContestMapping.Apply(contest, dto);
             db.Tasks.RemoveRange(oldTasks.Where(o => contest.Tasks.All(n => n.Id != o.Id)));
             db.Purchases.RemoveRange(oldPurchases.Where(o => contest.Purchases.All(n => n.Id != o.Id)));
             db.Proofs.RemoveRange(oldProofs.Where(o => contest.Proofs.All(n => n.Id != o.Id)));
+            db.Prizes.RemoveRange(oldPrizes.Where(o => contest.Prizes.All(n => n.Id != o.Id)));
             await db.SaveChangesAsync();
             return Results.NoContent();
         });
@@ -88,6 +93,7 @@ public static class ContestEndpoints
                 .Include(c => c.Tasks)
                 .Include(c => c.Purchases)
                 .Include(c => c.Proofs)
+                .Include(c => c.Prizes)
                 .FirstOrDefaultAsync(c => c.Id == id && c.OwnerId == userId);
             if (src is null) return Results.NotFound();
 
@@ -96,7 +102,6 @@ public static class ContestEndpoints
                 OwnerId = userId,
                 Name = src.Name + " (kopia)",
                 Organizer = src.Organizer, Url = src.Url, RulesUrl = src.RulesUrl, Type = src.Type,
-                PrizeDescription = src.PrizeDescription, PrizeValue = src.PrizeValue, PrizeCount = src.PrizeCount,
                 StartDate = src.StartDate, EndDate = src.EndDate, ResultsDate = src.ResultsDate,
                 ResultsCheckNote = src.ResultsCheckNote,
                 EntryLimitPerDay = src.EntryLimitPerDay, EntryLimitTotal = src.EntryLimitTotal,
@@ -107,6 +112,8 @@ public static class ContestEndpoints
                 .Select(t => new ContestTask { ContestId = copy.Id, Text = t.Text, Order = t.Order }).ToList();
             copy.Purchases = src.Purchases.OrderBy(p => p.Order)
                 .Select(p => new PurchaseItem { ContestId = copy.Id, Product = p.Product, Store = p.Store, Quantity = p.Quantity, Note = p.Note, Order = p.Order }).ToList();
+            copy.Prizes = src.Prizes.OrderBy(p => p.Order)
+                .Select(p => new ContestPrize { ContestId = copy.Id, Name = p.Name, Value = p.Value, Count = p.Count, Order = p.Order }).ToList();
             copy.Proofs = src.Proofs.OrderBy(p => p.Order)
                 .Select(p => new ProofItem { ContestId = copy.Id, What = p.What, KeepUntil = p.KeepUntil, Location = p.Location, Note = p.Note, Order = p.Order }).ToList();
 

@@ -13,15 +13,14 @@ export interface TaskDto { id: string | null; text: string; done: boolean }
 export interface PurchaseDto { id: string | null; product: string; store: string | null; quantity: string | null; bought: boolean; note: string | null }
 export interface ProofDto { id: string | null; what: string; keepUntil: string | null; location: string | null; discarded: boolean; note: string | null }
 
+export interface PrizeDto { id: string | null; name: string; value: number | null; count: number | null }
+
 export interface ContestUpsertDto {
   name: string
   organizer: string | null
   url: string | null
   rulesUrl: string | null
   type: ContestType
-  prizeDescription: string | null
-  prizeValue: number | null
-  prizeCount: number | null
   startDate: string
   endDate: string
   resultsDate: string | null
@@ -34,6 +33,7 @@ export interface ContestUpsertDto {
   tasks: TaskDto[]
   purchases: PurchaseDto[]
   proofs: ProofDto[]
+  prizes: PrizeDto[]
 }
 
 export type PhotoLabel = 'Receipt' | 'Packaging' | 'Code' | 'Other'

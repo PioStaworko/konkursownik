@@ -137,18 +137,6 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         </Field>
       </Section>
 
-      <Section icon="redeem" title="Nagroda">
-        <Field label="Opis nagrody" hint={badge('prizeDescription')}>
-          <input className={input} {...text('prizeDescription')} />
-        </Field>
-        <Field label="Wartość nagrody" error={errors.prizeValue} hint={badge('prizeValue')}>
-          <input className={`${input} font-mono`} type="text" inputMode="decimal" {...text('prizeValue')} />
-        </Field>
-        <Field label="Liczba nagród" error={errors.prizeCount} hint={badge('prizeCount')}>
-          <input className={`${input} font-mono`} type="text" inputMode="numeric" {...text('prizeCount')} />
-        </Field>
-      </Section>
-
       <Section icon="calendar_month" title="Daty">
         <Field label="Data startu" error={errors.startDate} hint={badge('startDate')}>
           <input className={`${input} font-mono`} type="date" {...text('startDate')} />

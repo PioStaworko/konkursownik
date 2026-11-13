@@ -13,9 +13,6 @@ public class Contest
     public string? Url { get; set; }
     public string? RulesUrl { get; set; }
     public ContestType Type { get; set; }
-    public string? PrizeDescription { get; set; }
-    public decimal? PrizeValue { get; set; }
-    public int? PrizeCount { get; set; }
     public DateOnly StartDate { get; set; }
     public DateOnly EndDate { get; set; }
     public DateOnly? ResultsDate { get; set; }
@@ -30,6 +27,7 @@ public class Contest
     public List<ContestTask> Tasks { get; set; } = new();
     public List<PurchaseItem> Purchases { get; set; } = new();
     public List<ProofItem> Proofs { get; set; } = new();
+    public List<ContestPrize> Prizes { get; set; } = new();
     public List<Entry> Entries { get; set; } = new();
     public Win? Win { get; set; }
 }

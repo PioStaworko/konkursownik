@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<ContestTask> Tasks => Set<ContestTask>();
     public DbSet<PurchaseItem> Purchases => Set<PurchaseItem>();
     public DbSet<ProofItem> Proofs => Set<ProofItem>();
+    public DbSet<ContestPrize> Prizes => Set<ContestPrize>();
     public DbSet<Entry> Entries => Set<Entry>();
     public DbSet<Photo> Photos => Set<Photo>();
     public DbSet<Win> Wins => Set<Win>();
@@ -34,16 +35,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             e.HasOne<AppUser>().WithMany().HasForeignKey(c => c.OwnerId).OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(c => c.OwnerId);
             e.Property(c => c.Name).HasMaxLength(200);
-            e.Property(c => c.PrizeValue).HasColumnType("decimal(10,2)");
             e.HasMany(c => c.Tasks).WithOne().HasForeignKey(t => t.ContestId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(c => c.Purchases).WithOne().HasForeignKey(t => t.ContestId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(c => c.Proofs).WithOne().HasForeignKey(t => t.ContestId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(c => c.Prizes).WithOne().HasForeignKey(t => t.ContestId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(c => c.Entries).WithOne(x => x.Contest).HasForeignKey(x => x.ContestId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(c => c.Win).WithOne().HasForeignKey<Win>(w => w.ContestId).OnDelete(DeleteBehavior.Cascade);
         });
         builder.Entity<ContestTask>().Property(x => x.Id).ValueGeneratedNever();
         builder.Entity<PurchaseItem>().Property(x => x.Id).ValueGeneratedNever();
         builder.Entity<ProofItem>().Property(x => x.Id).ValueGeneratedNever();
+        builder.Entity<ContestPrize>(e =>
+        {
+            e.ToTable("ContestPrizes");
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.Name).HasMaxLength(200);
+            e.Property(x => x.Value).HasColumnType("decimal(10,2)");
+        });
         builder.Entity<Entry>(e =>
         {
             e.Property(x => x.Id).ValueGeneratedNever();

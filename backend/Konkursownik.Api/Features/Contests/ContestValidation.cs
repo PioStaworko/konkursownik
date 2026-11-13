@@ -19,8 +19,6 @@ public static class ContestValidation
             Add(nameof(d.EntryLimitPerDay), "Limit musi być większy od zera.");
         if (d.EntryLimitTotal is <= 0)
             Add(nameof(d.EntryLimitTotal), "Limit musi być większy od zera.");
-        if (d.PrizeValue is < 0)
-            Add(nameof(d.PrizeValue), "Wartość nagrody nie może być ujemna.");
 
         static bool Bad(string? s) => string.IsNullOrWhiteSpace(s) || s.Length > 300;
         if (d.Tasks.Any(t => Bad(t.Text)))
@@ -29,6 +27,13 @@ public static class ContestValidation
             Add(nameof(d.Purchases), "Nazwa produktu jest wymagana (maks. 300 znaków).");
         if (d.Proofs.Any(p => Bad(p.What)))
             Add(nameof(d.Proofs), "Opis dowodu jest wymagany (maks. 300 znaków).");
+
+        if (d.Prizes.Any(p => string.IsNullOrWhiteSpace(p.Name) || p.Name.Length > 200))
+            Add(nameof(d.Prizes), "Nazwa nagrody jest wymagana (maks. 200 znaków).");
+        else if (d.Prizes.Any(p => p.Value is < 0))
+            Add(nameof(d.Prizes), "Wartość nagrody nie może być ujemna.");
+        else if (d.Prizes.Any(p => p.Count is <= 0))
+            Add(nameof(d.Prizes), "Liczba nagród musi być większa od zera.");
 
         if (d.Icon is not null && !ContestIcons.All.Contains(d.Icon))
             Add(nameof(d.Icon), "Nieznana ikona konkursu.");

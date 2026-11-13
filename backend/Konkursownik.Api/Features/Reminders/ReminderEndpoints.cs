@@ -18,6 +18,7 @@ public static class ReminderEndpoints
                 .Include(c => c.Entries)
                 .Include(c => c.Purchases)
                 .Include(c => c.Proofs)
+                .Include(c => c.Prizes)
                 .Include(c => c.Win).ThenInclude(w => w!.Steps)
                 .Where(c => c.OwnerId == userId)
                 .ToListAsync();

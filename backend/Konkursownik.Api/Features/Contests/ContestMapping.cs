@@ -6,12 +6,12 @@ public static class ContestMapping
 {
     public static ContestDto ToDto(Contest c, DateOnly today) => new(
         c.Id, c.Name, c.Organizer, c.Url, c.RulesUrl, c.Type,
-        c.PrizeDescription, c.PrizeValue, c.PrizeCount,
         c.StartDate, c.EndDate, c.ResultsDate, c.ResultsCheckNote,
         c.EntryLimitPerDay, c.EntryLimitTotal, c.Status, c.Notes, c.Icon,
         c.Tasks.OrderBy(t => t.Order).Select(t => new TaskDto(t.Id, t.Text, t.Done)).ToList(),
         c.Purchases.OrderBy(p => p.Order).Select(p => new PurchaseDto(p.Id, p.Product, p.Store, p.Quantity, p.Bought, p.Note)).ToList(),
         c.Proofs.OrderBy(p => p.Order).Select(p => new ProofDto(p.Id, p.What, p.KeepUntil, p.Location, p.Discarded, p.Note)).ToList(),
+        c.Prizes.OrderBy(p => p.Order).Select(p => new PrizeDto(p.Id, p.Name, p.Value, p.Count)).ToList(),
         ContestRules.EffectiveStatus(c, today),
         c.Entries.OrderByDescending(e => e.Date).Select(ToDto).ToList(),
         c.Win is null ? null : new WinDto(c.Win.PrizeWon, c.Win.PrizeValue, c.Win.LaureateDeadline, c.Win.LaureateDataSent,
@@ -48,9 +48,6 @@ public static class ContestMapping
         c.Url = d.Url;
         c.RulesUrl = d.RulesUrl;
         c.Type = d.Type;
-        c.PrizeDescription = d.PrizeDescription;
-        c.PrizeValue = d.PrizeValue;
-        c.PrizeCount = d.PrizeCount;
         c.StartDate = d.StartDate;
         c.EndDate = d.EndDate;
         c.ResultsDate = d.ResultsDate;
@@ -74,6 +71,14 @@ public static class ContestMapping
         {
             var x = dto.Id is { } id && purchases.TryGetValue(id, out var f) ? f : new PurchaseItem { ContestId = c.Id };
             x.Product = dto.Product; x.Store = dto.Store; x.Quantity = dto.Quantity; x.Bought = dto.Bought; x.Note = dto.Note; x.Order = i;
+            return x;
+        }).ToList();
+
+        var prizes = c.Prizes.ToDictionary(x => x.Id);
+        c.Prizes = d.Prizes.Select((dto, i) =>
+        {
+            var x = dto.Id is { } id && prizes.TryGetValue(id, out var f) ? f : new ContestPrize { ContestId = c.Id };
+            x.Name = dto.Name.Trim(); x.Value = dto.Value; x.Count = dto.Count; x.Order = i;
             return x;
         }).ToList();
 

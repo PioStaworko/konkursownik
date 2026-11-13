@@ -6,12 +6,13 @@ public record TaskDto(Guid? Id, string Text, bool Done);
 public record PurchaseDto(Guid? Id, string Product, string? Store, string? Quantity, bool Bought, string? Note);
 public record ProofDto(Guid? Id, string What, DateOnly? KeepUntil, string? Location, bool Discarded, string? Note);
 
+public record PrizeDto(Guid? Id, string Name, decimal? Value, int? Count);
+
 public record ContestUpsertDto(
     string Name, string? Organizer, string? Url, string? RulesUrl, ContestType Type,
-    string? PrizeDescription, decimal? PrizeValue, int? PrizeCount,
     DateOnly StartDate, DateOnly EndDate, DateOnly? ResultsDate, string? ResultsCheckNote,
     int? EntryLimitPerDay, int? EntryLimitTotal, ContestStatus Status, string? Notes, string? Icon,
-    List<TaskDto> Tasks, List<PurchaseDto> Purchases, List<ProofDto> Proofs);
+    List<TaskDto> Tasks, List<PurchaseDto> Purchases, List<ProofDto> Proofs, List<PrizeDto> Prizes);
 
 public record PhotoDto(Guid Id, PhotoLabel Label, long SizeBytes);
 
@@ -28,10 +29,9 @@ public record WinDto(
 public record ContestDto(
     Guid Id,
     string Name, string? Organizer, string? Url, string? RulesUrl, ContestType Type,
-    string? PrizeDescription, decimal? PrizeValue, int? PrizeCount,
     DateOnly StartDate, DateOnly EndDate, DateOnly? ResultsDate, string? ResultsCheckNote,
     int? EntryLimitPerDay, int? EntryLimitTotal, ContestStatus Status, string? Notes, string? Icon,
-    List<TaskDto> Tasks, List<PurchaseDto> Purchases, List<ProofDto> Proofs,
+    List<TaskDto> Tasks, List<PurchaseDto> Purchases, List<ProofDto> Proofs, List<PrizeDto> Prizes,
     ContestStatus EffectiveStatus, List<EntryDto> Entries, WinDto? Win, int EntriesToday);
 
 public record OpenPurchaseDto(string Product, string? Quantity, string? Store, string? Note);

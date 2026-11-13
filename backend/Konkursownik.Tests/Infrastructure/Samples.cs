@@ -15,15 +15,13 @@ public static class Samples
         string? resultsDate = null,
         string[]? tasks = null,
         (string Product, string? Store)[]? purchases = null,
-        ProofDto[]? proofs = null) => new(
+        ProofDto[]? proofs = null,
+        PrizeDto[]? prizes = null) => new(
             Name: name,
             Organizer: null,
             Url: null,
             RulesUrl: null,
             Type: ContestType.Lottery,
-            PrizeDescription: null,
-            PrizeValue: null,
-            PrizeCount: null,
             StartDate: DateOnly.Parse(start),
             EndDate: DateOnly.Parse(end),
             ResultsDate: resultsDate is null ? null : DateOnly.Parse(resultsDate),
@@ -35,7 +33,8 @@ public static class Samples
             Icon: null,
             Tasks: (tasks ?? []).Select(t => new TaskDto(null, t, false)).ToList(),
             Purchases: (purchases ?? []).Select(p => new PurchaseDto(null, p.Product, p.Store, null, false, null)).ToList(),
-            Proofs: (proofs ?? []).ToList());
+            Proofs: (proofs ?? []).ToList(),
+            Prizes: (prizes ?? []).ToList());
 
     public static async Task<Guid> CreateContestAsync(HttpClient c, ContestUpsertDto d)
     {

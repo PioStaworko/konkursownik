@@ -48,8 +48,9 @@ function Counter({ label, count, limit, icon, tone }: { label: string; count: nu
 
 export default function DetailsHeaderCard({ c }: { c: ContestDto }) {
   const badge = endingBadge(c.endDate)
-  const prizeName = [c.prizeDescription, c.prizeDescription && c.prizeCount != null && `(${c.prizeCount} szt.)`].filter(Boolean).join(' ')
-  const prize = [prizeName, c.prizeValue != null && formatMoney(c.prizeValue)].filter(Boolean).join(' · ')
+  const first = c.prizes[0]
+  const prizeName = first ? [first.name, first.count != null && `(${first.count} szt.)`].filter(Boolean).join(' ') : ''
+  const prize = [prizeName, first?.value != null && formatMoney(first.value)].filter(Boolean).join(' · ')
   return (
     <div className="overflow-hidden rounded-xl bg-surface-container p-space-md shadow-md">
       <div className="flex items-start gap-3.5">

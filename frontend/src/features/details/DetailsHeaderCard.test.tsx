@@ -17,8 +17,7 @@ describe('DetailsHeaderCard', () => {
           ...contestFixture,
           name: 'Loteria',
           resultsDate: '2026-12-05',
-          prizeDescription: 'Rower',
-          prizeValue: 1000,
+          prizes: [{ id: 'z1', name: 'Rower', value: 1000, count: null }],
           entryLimitTotal: 5,
           entryLimitPerDay: 1,
           entriesToday: 1,
@@ -52,7 +51,7 @@ describe('DetailsHeaderCard', () => {
   })
 
   it('shows the prize count next to the prize', () => {
-    render(<DetailsHeaderCard c={{ ...contestFixture, prizeDescription: 'Rower', prizeCount: 3 }} />)
+    render(<DetailsHeaderCard c={{ ...contestFixture, prizes: [{ id: 'z1', name: 'Rower', value: null, count: 3 }] }} />)
     expect(screen.getByText(/Rower/)).toHaveTextContent('3 szt.')
   })
 })

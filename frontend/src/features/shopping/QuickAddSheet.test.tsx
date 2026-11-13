@@ -10,7 +10,7 @@ afterEach(() => vi.unstubAllGlobals())
 const card = { id: 'c1', name: 'Loteria' } as ContestCardDto
 const upsert = {
   name: 'Loteria', organizer: 'Org', url: 'https://x.pl', rulesUrl: 'https://x.pl/regulamin', type: 'Lottery',
-  prizeDescription: 'Auto', prizeValue: 50000, prizeCount: 2, startDate: '2026-11-01', endDate: '2026-11-30',
+  prizes: [{ id: 'z1', name: 'Auto', value: 50000, count: 2 }], startDate: '2026-11-01', endDate: '2026-11-30',
   resultsDate: '2026-12-10', resultsCheckNote: 'sprawdź na stronie', entryLimitPerDay: 3, entryLimitTotal: 20,
   status: 'Planned', notes: 'moje notatki', icon: 'local_pizza',
   tasks: [{ id: 't1', text: 'Krok', done: true }],

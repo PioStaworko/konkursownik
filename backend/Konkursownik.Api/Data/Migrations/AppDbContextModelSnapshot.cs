@@ -121,15 +121,6 @@ namespace Konkursownik.Api.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("PrizeCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("PrizeDescription")
-                        .HasColumnType("text");
-
-                    b.Property<decimal?>("PrizeValue")
-                        .HasColumnType("decimal(10,2)");
-
                     b.Property<string>("ResultsCheckNote")
                         .HasColumnType("text");
 
@@ -156,6 +147,35 @@ namespace Konkursownik.Api.Data.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Contests");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.ContestPrize", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ContestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("Count")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("Value")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContestId");
+
+                    b.ToTable("ContestPrizes", (string)null);
                 });
 
             modelBuilder.Entity("Konkursownik.Api.Domain.ContestTask", b =>
@@ -545,6 +565,15 @@ namespace Konkursownik.Api.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Konkursownik.Api.Domain.ContestPrize", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.Contest", null)
+                        .WithMany("Prizes")
+                        .HasForeignKey("ContestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Konkursownik.Api.Domain.ContestTask", b =>
                 {
                     b.HasOne("Konkursownik.Api.Domain.Contest", null)
@@ -677,6 +706,8 @@ namespace Konkursownik.Api.Data.Migrations
             modelBuilder.Entity("Konkursownik.Api.Domain.Contest", b =>
                 {
                     b.Navigation("Entries");
+
+                    b.Navigation("Prizes");
 
                     b.Navigation("Proofs");
 

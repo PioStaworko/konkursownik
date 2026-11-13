@@ -3,12 +3,12 @@ import type {
   ContestStatus,
   ContestType,
   ContestUpsertDto,
+  PrizeDto,
   ProofDto,
   PurchaseDto,
   TaskDto,
 } from '../../api/types'
 import { CONTEST_ICONS } from '../../lib/contestIcons'
-import { parseAmount } from '../../lib/format'
 import { typeLabel } from '../../lib/labels'
 
 export interface FormValues {
@@ -18,9 +18,6 @@ export interface FormValues {
   rulesUrl: string
   type: ContestType
   status: ContestStatus
-  prizeDescription: string
-  prizeValue: string
-  prizeCount: string
   startDate: string
   endDate: string
   resultsDate: string
@@ -32,9 +29,10 @@ export interface FormValues {
   tasks: TaskDto[]
   purchases: PurchaseDto[]
   proofs: ProofDto[]
+  prizes: PrizeDto[]
 }
 
-export type TextKey = Exclude<keyof FormValues, 'icon' | 'tasks' | 'purchases' | 'proofs'>
+export type TextKey = Exclude<keyof FormValues, 'icon' | 'tasks' | 'purchases' | 'proofs' | 'prizes'>
 export type Errors = Partial<Record<keyof FormValues, string>>
 
 export const emptyValues: FormValues = {
@@ -44,9 +42,6 @@ export const emptyValues: FormValues = {
   rulesUrl: '',
   type: 'Lottery',
   status: 'Planned',
-  prizeDescription: '',
-  prizeValue: '',
-  prizeCount: '',
   startDate: '',
   endDate: '',
   resultsDate: '',
@@ -58,6 +53,7 @@ export const emptyValues: FormValues = {
   tasks: [],
   purchases: [],
   proofs: [],
+  prizes: [],
 }
 
 export const fromDto = (d: ContestUpsertDto): FormValues => ({
@@ -67,9 +63,6 @@ export const fromDto = (d: ContestUpsertDto): FormValues => ({
   rulesUrl: d.rulesUrl ?? '',
   type: d.type,
   status: d.status,
-  prizeDescription: d.prizeDescription ?? '',
-  prizeValue: d.prizeValue == null ? '' : String(d.prizeValue).replace('.', ','),
-  prizeCount: d.prizeCount == null ? '' : String(d.prizeCount),
   startDate: d.startDate,
   endDate: d.endDate,
   resultsDate: d.resultsDate ?? '',
@@ -81,6 +74,7 @@ export const fromDto = (d: ContestUpsertDto): FormValues => ({
   tasks: d.tasks,
   purchases: d.purchases,
   proofs: d.proofs,
+  prizes: d.prizes,
 })
 
 const orNull = (s: string) => (s.trim() === '' ? null : s.trim())
@@ -103,13 +97,6 @@ export function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto
     errors.endDate = 'Data końca nie może być przed datą startu'
   if (v.resultsDate && v.startDate && v.resultsDate < v.startDate)
     errors.resultsDate = 'Data wyników nie może być przed datą startu'
-
-  const prizeValue = parseAmount(v.prizeValue)
-  if (prizeValue !== null && Number.isNaN(prizeValue)) errors.prizeValue = 'Nieprawidłowa kwota'
-  else if (prizeValue !== null && prizeValue < 0) errors.prizeValue = 'Wartość nagrody nie może być ujemna.'
-
-  const prizeCount = parseCount(v.prizeCount)
-  if (Number.isNaN(prizeCount)) errors.prizeCount = 'Nieprawidłowa liczba'
 
   const perDay = parseCount(v.entryLimitPerDay)
   if (Number.isNaN(perDay)) errors.entryLimitPerDay = 'Nieprawidłowa liczba'
@@ -136,9 +123,6 @@ export function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto
       url: orNull(v.url),
       rulesUrl: orNull(v.rulesUrl),
       type: v.type,
-      prizeDescription: orNull(v.prizeDescription),
-      prizeValue,
-      prizeCount,
       startDate: v.startDate,
       endDate: v.endDate,
       resultsDate: v.resultsDate || null,
@@ -163,6 +147,7 @@ export function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto
         location: orNull(p.location ?? ''),
         note: orNull(p.note ?? ''),
       })),
+      prizes: v.prizes,
     },
   }
 }
@@ -179,9 +164,10 @@ export function extractionToValues(x: ContestExtractionDto): Partial<FormValues>
     rulesUrl: str(x.rulesUrl),
     type: x.type && x.type in typeLabel ? (x.type as ContestType) : undefined,
     icon: x.icon && (CONTEST_ICONS as readonly string[]).includes(x.icon) ? x.icon : undefined,
-    prizeDescription: str(x.prizeDescription),
-    prizeValue: num(x.prizeValue),
-    prizeCount: num(x.prizeCount),
+    prizes:
+      str(x.prizeDescription) || x.prizeValue != null
+        ? [{ id: null, name: str(x.prizeDescription) ?? 'Nagroda', value: x.prizeValue ?? null, count: x.prizeCount ?? null }]
+        : undefined,
     startDate: str(x.startDate),
     endDate: str(x.endDate),
     resultsDate: str(x.resultsDate),
