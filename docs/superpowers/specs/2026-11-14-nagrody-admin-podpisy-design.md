@@ -1,6 +1,6 @@
 # Konkursownik — wiele nagród, konto administratora, podpisy pól
 
-Data: 2026-11-14 · Status: do akceptacji
+Data: 2026-11-14 · Status: zaakceptowana (2026-11-14)
 Buduje na: `docs/superpowers/specs/2026-11-13-redesign-i-ai-design.md` (gałąź `feat/redesign`).
 
 ## 1. Po co
