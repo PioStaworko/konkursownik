@@ -1,0 +1,45 @@
+import type { ContestDto, EntryDto } from '../api/types'
+
+export const contestFixture: ContestDto = {
+  id: 'c1',
+  name: 'Konkurs',
+  organizer: null,
+  url: 'javascript:alert(1)',
+  rulesUrl: 'https://x.pl/regulamin',
+  type: 'Lottery',
+  prizeDescription: null,
+  prizeValue: null,
+  prizeCount: null,
+  startDate: '2026-11-01',
+  endDate: '2026-11-30',
+  resultsDate: null,
+  resultsCheckNote: null,
+  entryLimitPerDay: 1,
+  entryLimitTotal: 5,
+  status: 'Planned',
+  effectiveStatus: 'Planned',
+  notes: null,
+  icon: null,
+  tasks: [
+    { id: 't1', text: 'Krok pierwszy', done: true },
+    { id: 't2', text: 'Krok drugi', done: false },
+  ],
+  purchases: [],
+  proofs: [],
+  entries: [],
+  win: null,
+  entriesToday: 0,
+}
+
+export const entryFixture = (over: Partial<EntryDto> = {}): EntryDto => ({
+  id: 'e1',
+  date: '2026-11-10',
+  confirmationCode: null,
+  receiptNumber: null,
+  purchaseAmount: null,
+  contactUsed: null,
+  answerText: null,
+  store: null,
+  photos: [],
+  ...over,
+})

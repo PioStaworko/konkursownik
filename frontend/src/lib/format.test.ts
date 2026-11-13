@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDate, formatEntryCounter, formatMoney, parseAmount, pluralPl, safeHttpUrl, todayInPoland } from './format'
+import { formatBytes, formatDate, formatEntryCounter, formatMoney, parseAmount, pluralPl, safeHttpUrl, todayInPoland } from './format'
 
 describe('format', () => {
   it.each([
@@ -34,4 +34,14 @@ describe('pluralPl', () => {
     '%i -> %s',
     (n, form) => expect(pluralPl(n, 'a', 'b', 'c')).toBe(form),
   )
+})
+
+describe('formatBytes', () => {
+  it.each([
+    [0, '0 B'],
+    [1023, '1023 B'],
+    [1024, '1,0 KB'],
+    [1536, '1,5 KB'],
+    [Math.round(2.4 * 1024 * 1024), '2,4 MB'],
+  ])('formatBytes(%s)', (n, out) => expect(formatBytes(n)).toBe(out))
 })

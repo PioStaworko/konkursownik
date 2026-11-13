@@ -63,3 +63,10 @@ export function pluralPl(n: number, one: string, few: string, many: string): str
   const lastTwo = n % 100
   return last >= 2 && last <= 4 && !(lastTwo >= 12 && lastTwo <= 14) ? few : many
 }
+
+/** "512 B", "1,5 KB", "2,4 MB" (Polish decimal comma, one decimal). */
+export function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`
+  const [value, unit] = n < 1024 * 1024 ? [n / 1024, 'KB'] : [n / (1024 * 1024), 'MB']
+  return `${value.toFixed(1).replace('.', ',')} ${unit}`
+}

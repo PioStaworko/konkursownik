@@ -1,180 +1,100 @@
 import { useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
-import { useContest, useDeleteContest, useDuplicateContest } from '../api/hooks'
+import { useParams, useSearchParams } from 'react-router'
+import { useContest } from '../api/hooks'
 import type { ContestDto } from '../api/types'
-import ChecklistSection from '../components/ChecklistSection'
-import EntryCard from '../components/EntryCard'
-import EntryForm from '../components/EntryForm'
-import WinForm from '../components/WinForm'
-import { formatDate, formatEntryCounter, formatMoney, keepUntilDetail, safeHttpUrl } from '../lib/format'
-import { statusLabel, typeLabel } from '../lib/labels'
-import { primaryButtonClass, secondaryButtonClass } from '../lib/styles'
+import ChecklistTab from '../features/details/ChecklistTab'
+import ContestMenu from '../features/details/ContestMenu'
+import DetailsHeaderCard from '../features/details/DetailsHeaderCard'
+import EntriesTab from '../features/details/EntriesTab'
+import TabsBar, { type TabDef } from '../features/details/TabsBar'
+import WinSection from '../features/details/WinSection'
+import StatusMenu from '../features/details/StatusMenu'
+import { keepUntilDetail } from '../lib/format'
+import { typeLabel } from '../lib/labels'
+import { Icon } from '../ui/Icon'
+import { Section } from '../ui/Section'
 
-/** Renders a link only for http(s) URLs; anything else (e.g. javascript:) is shown as plain text. */
-function ExternalLink({ label, href }: { label: string; href: string | null }) {
-  if (!href) return null
-  const safe = safeHttpUrl(href)
-  return safe ? (
-    <a href={safe} target="_blank" rel="noopener noreferrer" className="text-indigo-700 underline">
-      {label}
-    </a>
-  ) : (
-    <span className="break-all text-slate-700">
-      {label}: {href}
-    </span>
-  )
-}
+type TabKey = 'steps' | 'purchases' | 'proofs' | 'entries'
 
-function Header({ c }: { c: ContestDto }) {
-  const navigate = useNavigate()
-  const duplicate = useDuplicateContest()
-  const remove = useDeleteContest()
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  return (
-    <header className="space-y-2">
-      <div className="flex items-start justify-between gap-2">
-        <h1 className="break-words text-2xl font-semibold text-slate-900">{c.name}</h1>
-        <button
-          type="button"
-          className={secondaryButtonClass}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((o) => !o)}
-        >
-          Menu
-        </button>
-      </div>
-      {menuOpen && (
-        <div className="flex flex-wrap gap-2">
-          <Link to={`/konkursy/${c.id}/edycja`} className={`${secondaryButtonClass} inline-flex items-center`}>
-            Edytuj
-          </Link>
-          <button
-            type="button"
-            className={secondaryButtonClass}
-            disabled={duplicate.isPending}
-            onClick={async () => navigate(`/konkursy/${await duplicate.mutateAsync(c.id)}/edycja`)}
-          >
-            Duplikuj
-          </button>
-          <button
-            type="button"
-            className={`${secondaryButtonClass} text-red-700`}
-            disabled={remove.isPending}
-            onClick={async () => {
-              if (!window.confirm('Usunąć konkurs razem ze zdjęciami?')) return
-              await remove.mutateAsync(c.id)
-              navigate('/konkursy')
-            }}
-          >
-            Usuń
-          </button>
-        </div>
-      )}
-      {(duplicate.isError || remove.isError) && (
-        <p role="alert" className="text-sm text-red-700">
-          Operacja nie powiodła się. Spróbuj ponownie.
-        </p>
-      )}
-      <p className="text-sm text-slate-600">
-        {statusLabel[c.effectiveStatus]} · {typeLabel[c.type]}
-        {c.organizer && ` · ${c.organizer}`}
-      </p>
-      <p className="text-sm text-slate-600">
-        {formatDate(c.startDate)} – {formatDate(c.endDate)}
-        {c.resultsDate && ` · wyniki ${formatDate(c.resultsDate)}`}
-      </p>
-      {c.resultsCheckNote && <p className="text-sm text-slate-600">Wyniki: {c.resultsCheckNote}</p>}
-      {(c.prizeDescription || c.prizeValue != null) && (
-        <p className="text-sm text-slate-700">
-          Nagroda: {c.prizeDescription}
-          {c.prizeCount != null && ` (${c.prizeCount} szt.)`}
-          {c.prizeValue != null && ` · ${formatMoney(c.prizeValue)}`}
-        </p>
-      )}
-      <p className="flex flex-wrap gap-x-4 text-sm">
-        <ExternalLink label="Strona konkursu" href={c.url} />
-        <ExternalLink label="Regulamin" href={c.rulesUrl} />
-      </p>
-      {c.notes && <p className="whitespace-pre-wrap text-sm text-slate-700">{c.notes}</p>}
-    </header>
-  )
-}
+const join = (...parts: (string | null | undefined)[]) => parts.filter(Boolean).join(' · ') || null
 
 function ContestDetails({ c }: { c: ContestDto }) {
-  const [addingEntry, setAddingEntry] = useState(false)
-  const [editingWin, setEditingWin] = useState(false)
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState<TabKey>('entries')
+  const openForm = params.get('zgloszenie') === '1'
+  const autoReceipt = openForm && params.get('paragon') === '1'
+
+  const tabs: TabDef<TabKey>[] = [
+    { key: 'steps', label: `Kroki (${c.tasks.filter((t) => t.done).length}/${c.tasks.length})`, icon: 'checklist' },
+    { key: 'purchases', label: 'Do kupienia', icon: 'shopping_cart' },
+    { key: 'proofs', label: 'Schowek', icon: 'inventory_2' },
+    { key: 'entries', label: 'Zgłoszenia', icon: 'assignment_turned_in' },
+  ]
 
   return (
-    <div className="space-y-6">
-      <Header c={c} />
+    <div className="flex flex-col gap-space-md">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-space-xs text-label-md text-on-surface-variant">
+          <Icon name="stars" size={16} className="shrink-0 text-tertiary" />
+          <span className="shrink-0">{typeLabel[c.type]}</span>
+          {c.organizer && (
+            <>
+              <span>•</span>
+              <span className="truncate">{c.organizer}</span>
+            </>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center">
+          <StatusMenu contestId={c.id} status={c.effectiveStatus} />
+          <ContestMenu contestId={c.id} />
+        </div>
+      </div>
 
-      <ChecklistSection
-        title="Do zrobienia"
-        kind="contest-tasks"
-        items={c.tasks.map((t) => ({ id: t.id, label: t.text, checked: t.done }))}
-      />
-      <ChecklistSection
-        title="Do kupienia"
-        kind="purchase-items"
-        items={c.purchases.map((p) => ({
-          id: p.id,
-          label: [p.product, p.quantity].filter(Boolean).join(' × '),
-          detail: p.store,
-          checked: p.bought,
-        }))}
-      />
-      <ChecklistSection
-        title="Do zachowania"
-        kind="proof-items"
-        items={c.proofs.map((p) => ({
-          id: p.id,
-          label: p.what,
-          detail: keepUntilDetail(p.keepUntil, p.location),
-          checked: p.discarded,
-        }))}
-      />
+      <DetailsHeaderCard c={c} />
+      {c.resultsCheckNote && <p className="text-body-md text-on-surface-variant">Wyniki: {c.resultsCheckNote}</p>}
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-900">
-          Zgłoszenia{' '}
-          <span className="text-sm font-normal text-slate-600">
-            {formatEntryCounter(c.entries.length, c.entryLimitTotal, c.entriesToday, c.entryLimitPerDay)}
-          </span>
-        </h2>
-        <ul className="space-y-3">
-          {c.entries.map((e) => (
-            <EntryCard key={e.id} contestId={c.id} contestType={c.type} entry={e} />
-          ))}
-        </ul>
-        {addingEntry ? (
-          <EntryForm contestId={c.id} contestType={c.type} onDone={() => setAddingEntry(false)} />
-        ) : (
-          <button type="button" className={primaryButtonClass} onClick={() => setAddingEntry(true)}>
-            + Zgłoszenie
-          </button>
-        )}
-      </section>
+      <TabsBar tabs={tabs} active={tab} onChange={setTab} />
 
-      <section className="space-y-3">
-        {editingWin ? (
-          <WinForm contestId={c.id} win={c.win} onDone={() => setEditingWin(false)} />
-        ) : (
-          <>
-            {c.win && (
-              <div className="rounded-lg bg-amber-50 p-3 text-sm ring-1 ring-amber-200">
-                <p className="font-semibold text-slate-900">Wygrana: {c.win.prizeWon}</p>
-                {c.win.prizeValue != null && <p>{formatMoney(c.win.prizeValue)}</p>}
-                {c.win.laureateDeadline && <p>Dane laureata do {formatDate(c.win.laureateDeadline)}</p>}
-                <p>{c.win.laureateDataSent ? 'Dane laureata wysłane' : 'Dane laureata niewysłane'}</p>
-              </div>
-            )}
-            <button type="button" className={secondaryButtonClass} onClick={() => setEditingWin(true)}>
-              Wygrana
-            </button>
-          </>
-        )}
-      </section>
+      {tab === 'steps' && (
+        <ChecklistTab
+          kind="contest-tasks"
+          empty="Brak kroków"
+          items={c.tasks.map((t) => ({ id: t.id, label: t.text, checked: t.done }))}
+        />
+      )}
+      {tab === 'purchases' && (
+        <ChecklistTab
+          kind="purchase-items"
+          empty="Nic do kupienia"
+          items={c.purchases.map((p) => ({
+            id: p.id,
+            label: [p.product, p.quantity].filter(Boolean).join(' × '),
+            detail: join(p.store, p.note),
+            checked: p.bought,
+          }))}
+        />
+      )}
+      {tab === 'proofs' && (
+        <ChecklistTab
+          kind="proof-items"
+          empty="Nic do zachowania"
+          items={c.proofs.map((p) => ({
+            id: p.id,
+            label: p.what,
+            detail: join(keepUntilDetail(p.keepUntil, p.location), p.note),
+            checked: p.discarded,
+          }))}
+        />
+      )}
+      {tab === 'entries' && <EntriesTab c={c} initialFormOpen={openForm} autoReceipt={autoReceipt} />}
+
+      <WinSection contestId={c.id} win={c.win} />
+
+      {c.notes && (
+        <Section icon="description" title="Notatki">
+          <p className="whitespace-pre-wrap text-body-md text-on-surface">{c.notes}</p>
+        </Section>
+      )}
     </div>
   )
 }
@@ -182,7 +102,7 @@ function ContestDetails({ c }: { c: ContestDto }) {
 export default function ContestDetailsPage() {
   const { id } = useParams()
   const { data, isPending, isError } = useContest(id)
-  if (isPending) return <p className="text-slate-500">Ładowanie…</p>
-  if (isError) return <p role="alert" className="text-red-700">Nie udało się wczytać konkursu</p>
+  if (isPending) return <p className="text-on-surface-variant">Ładowanie…</p>
+  if (isError) return <p role="alert" className="text-error">Nie udało się wczytać konkursu</p>
   return <ContestDetails c={data} />
 }

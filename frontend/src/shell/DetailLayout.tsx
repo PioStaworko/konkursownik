@@ -9,7 +9,7 @@ const titles: Record<string, string> = {
 
 export default function DetailLayout() {
   const { pathname } = useLocation()
-  const title = titles[pathname] ?? (pathname.endsWith('/edycja') ? 'Edycja konkursu' : 'Konkurs')
+  const title = titles[pathname] ?? (pathname.endsWith('/edycja') ? 'Edycja konkursu' : 'Szczegóły konkursu')
   return (
     <div className="min-h-dvh bg-surface text-on-surface">
       <AppHeader back title={title} />
