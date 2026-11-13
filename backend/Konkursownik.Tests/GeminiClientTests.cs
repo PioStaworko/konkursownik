@@ -22,6 +22,23 @@ public class GeminiClientTests
         }
     }
 
+    [Fact]
+    public void Estimate_counts_pdf_pages_not_bytes()
+    {
+        var pdf = Encoding.Latin1.GetBytes("%PDF-1.4 << /Type /Pages /Count 3 >> "
+            + string.Concat(Enumerable.Repeat("<< /Type /Page /Parent 1 0 R >> ", 3)) + "<< /Type/Page >> ");
+        var tokens = GeminiClient.Estimate("", [new GeminiPart(null, pdf, "application/pdf")]);
+        Assert.Equal(4 * 560, tokens);
+    }
+
+    [Fact]
+    public void Estimate_pdf_without_page_objects_falls_back_to_bytes_and_text_uses_three_chars_per_token()
+    {
+        Assert.Equal(2, GeminiClient.Estimate("", [new GeminiPart(null, new byte[8192], "application/pdf")]));
+        Assert.Equal(1_300, GeminiClient.Estimate("", [new GeminiPart(null, new byte[10], "image/jpeg")]));
+        Assert.Equal(10 + 20, GeminiClient.Estimate(new string('a', 30), [new GeminiPart(new string('b', 60), null, null)]));
+    }
+
     private static readonly JsonObject Schema = new() { ["type"] = "object" };
 
     private static string Candidate(string text, int tokens = 321) =>
@@ -100,7 +117,7 @@ public class GeminiClientTests
     public async Task Exhausted_quota_throws_busy()
     {
         var (client, quota, _, handler) = Create(HttpStatusCode.OK, Candidate("{}"));
-        Assert.NotNull(quota.TryAcquire(249_000));
+        Assert.NotNull(quota.TryAcquire(224_000));
         await Assert.ThrowsAsync<GeminiBusyException>(() => client.GenerateJsonAsync(new string('a', 40_000), [], Schema, default));
         Assert.Null(handler.Request);
     }

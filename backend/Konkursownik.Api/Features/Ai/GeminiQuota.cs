@@ -43,8 +43,9 @@ public class GeminiQuota(IOptions<GeminiOptions> options, TimeProvider time)
         {
             var now = time.GetUtcNow();
             _entries.RemoveAll(e => now - e.At >= Window);
+            var tokenLimit = o.MaxTokensPerMinute * (100 - Math.Clamp(o.TokenHeadroomPercent, 0, 100)) / 100.0;
             var tokens = _entries.Sum(e => e.Tokens);
-            if (_entries.Count + 1 > o.MaxRequestsPerMinute || tokens + estimatedTokens > o.MaxTokensPerMinute) return null;
+            if (_entries.Count + 1 > o.MaxRequestsPerMinute || tokens + estimatedTokens > tokenLimit) return null;
             var reservation = new QuotaReservation(now, estimatedTokens);
             _entries.Add(reservation);
             return reservation;

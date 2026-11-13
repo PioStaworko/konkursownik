@@ -9,7 +9,7 @@ public class GeminiQuotaTests
     private static (GeminiQuota Quota, FakeTimeProvider Time) Create()
     {
         var time = new FakeTimeProvider(DateTimeOffset.Parse("2026-11-12T10:00:00Z"));
-        return (new GeminiQuota(Options.Create(new GeminiOptions { ApiKey = "k", Model = "m" }), time), time);
+        return (new GeminiQuota(Options.Create(new GeminiOptions { ApiKey = "k", Model = "m", TokenHeadroomPercent = 0 }), time), time);
     }
 
     [Fact]
@@ -28,6 +28,17 @@ public class GeminiQuotaTests
         var (quota, _) = Create();
         Assert.NotNull(quota.TryAcquire(240_000));
         Assert.Null(quota.TryAcquire(20_000));
+    }
+
+    [Fact]
+    public void Quota_headroom_keeps_ten_percent_of_token_budget_free()
+    {
+        var time = new FakeTimeProvider(DateTimeOffset.Parse("2026-11-12T10:00:00Z"));
+        var quota = new GeminiQuota(Options.Create(new GeminiOptions { ApiKey = "k", Model = "m" }), time);
+        Assert.NotNull(quota.TryAcquire(225_000)); // exactly 90% of 250_000
+        Assert.Null(quota.TryAcquire(1));
+        time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Null(quota.TryAcquire(225_001));
     }
 
     [Fact]

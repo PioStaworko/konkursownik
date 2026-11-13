@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Konkursownik.Api.Features.Ai;
 
-public class GeminiClient(HttpClient http, IOptions<GeminiOptions> options, GeminiQuota quota) : IGeminiClient
+public partial class GeminiClient(HttpClient http, IOptions<GeminiOptions> options, GeminiQuota quota) : IGeminiClient
 {
     private const string BaseUrl = "https://generativelanguage.googleapis.com/v1beta/models/";
 
@@ -67,14 +67,29 @@ public class GeminiClient(HttpClient http, IOptions<GeminiOptions> options, Gemi
         }
     }
 
-    internal static int Estimate(string prompt, IReadOnlyList<GeminiPart> parts)
+    private const int TokensPerPdfPage = 560;
+    private const int TokensPerImage = 1_300;
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"/Type\s*/Page(?!s)")]
+    private static partial System.Text.RegularExpressions.Regex PdfPageRegex();
+
+    /// <summary>Conservative token estimate: text at 3 chars/token, images flat, PDFs per page (bytes/4096 when no page objects are found).</summary>
+    public static int Estimate(string prompt, IReadOnlyList<GeminiPart> parts)
     {
-        var tokens = prompt.Length / 4;
+        var tokens = prompt.Length / 3;
         foreach (var p in parts)
         {
-            if (p.Text is not null) tokens += p.Text.Length / 4;
+            if (p.Text is not null) tokens += p.Text.Length / 3;
             else if (p.Data is not null)
-                tokens += p.MimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true ? 1_300 : p.Data.Length / 1024 / 4;
+            {
+                if (p.MimeType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true) tokens += TokensPerImage;
+                else if (string.Equals(p.MimeType, "application/pdf", StringComparison.OrdinalIgnoreCase))
+                {
+                    var pages = PdfPageRegex().Count(System.Text.Encoding.Latin1.GetString(p.Data));
+                    tokens += pages > 0 ? pages * TokensPerPdfPage : p.Data.Length / 4096;
+                }
+                else tokens += p.Data.Length / 4096;
+            }
         }
         return tokens;
     }
