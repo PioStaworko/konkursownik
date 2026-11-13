@@ -45,15 +45,24 @@ function setup(active: ContestCardDto[], archive: ContestCardDto[] = [], reminde
 }
 
 describe('ContestsPage', () => {
-  it('card shows top prize and +N innych', async () => {
+  it('card shows top prize and +N inne', async () => {
     setup([card({ topPrize: { name: 'Samochód', value: 120000, count: 1 }, prizesCount: 3 })])
-    expect(await screen.findByText(/Samochód/)).toHaveTextContent(/120\s?000,00.*\+2 innych/)
+    expect(await screen.findByText(/Samochód/)).toHaveTextContent(/120\s?000,00.*\+2 inne/)
+  })
+
+  it.each([
+    [2, '+1 inna'],
+    [3, '+2 inne'],
+    [6, '+5 innych'],
+  ])('card with %i prizes shows "%s"', async (prizesCount, text) => {
+    setup([card({ topPrize: { name: 'Samochód', value: null, count: 1 }, prizesCount })])
+    expect(await screen.findByText(/Samochód/)).toHaveTextContent(text)
   })
 
   it('card shows top prize without suffix for a single prize', async () => {
     setup([card({ topPrize: { name: 'Rower', value: null, count: null }, prizesCount: 1 })])
     const el = await screen.findByText(/Rower/)
-    expect(el).not.toHaveTextContent('innych')
+    expect(el).not.toHaveTextContent(/\+\d/)
   })
 
   it('shows tiles, pills with counts and a card linking to details', async () => {

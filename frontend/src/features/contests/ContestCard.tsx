@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import { useDuplicateContest, useSaveWin, useSetStatus } from '../../api/hooks'
 import type { ContestCardDto } from '../../api/types'
 import { asIcon } from '../../lib/contestIcons'
-import { formatDate, formatEntryCounter, formatMoney, todayInPoland } from '../../lib/format'
+import { formatDate, formatEntryCounter, formatMoney, pluralPl, todayInPoland } from '../../lib/format'
 import { Icon } from '../../ui/Icon'
 import type { IconName } from '../../ui/icons'
 import { IconButton } from '../../ui/Button'
@@ -104,7 +104,7 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
   const left = daysUntil(c.endDate, today)
   const ending = status === 'Bought' && left >= 0 && left <= 3
   const prize = [c.topPrize?.name, c.topPrize?.value != null && formatMoney(c.topPrize.value)].filter(Boolean).join(' · ')
-  const more = c.prizesCount > 1 ? ` +${c.prizesCount - 1} innych` : ''
+  const more = c.prizesCount > 1 ? ` +${c.prizesCount - 1} ${pluralPl(c.prizesCount - 1, 'inna', 'inne', 'innych')}` : ''
   const subtitle =
     status === 'AwaitingResults' && c.resultsDate ? `Wyniki: ${formatDate(c.resultsDate)}` : `do ${formatDate(c.endDate)}`
   const error = setStatus.isError || saveWin.isError || duplicate.isError
@@ -218,7 +218,7 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
         <div className="grid grid-cols-2 gap-space-xs">
           {prize && (
             <Spec icon="military_tech" label="Nagroda">
-              {prize}{prize && more}
+              {prize}{more}
             </Spec>
           )}
           {(status === 'Bought' || status === 'Submitted') && (
