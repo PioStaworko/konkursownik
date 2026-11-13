@@ -217,4 +217,12 @@ describe('ContestsPage', () => {
     await user.click(screen.getByRole('menuitem', { name: 'Edytuj' }))
     expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
+
+  it('meta line has the separator only between organizer and date, bound to the date', async () => {
+    setup([card({ name: 'Z organizatorem', organizer: 'Danone' }), card({ id: 'c2', name: 'Bez', organizer: null })])
+    await screen.findByRole('link', { name: /Z organizatorem/ })
+    expect(within(screen.getAllByRole('article')[0]).getAllByText('•')).toHaveLength(1)
+    expect(within(screen.getAllByRole('article')[1]).queryByText('•')).not.toBeInTheDocument()
+    expect(within(screen.getAllByRole('article')[0]).getByText('•').parentElement).toHaveTextContent('•do 30.11.2026')
+  })
 })

@@ -7,12 +7,20 @@ export type TabDef<K extends string> = { key: K; label: string; icon: IconName }
 type Props<K extends string> = { tabs: TabDef<K>[]; active: K; onChange: (key: K) => void }
 
 export default function TabsBar<K extends string>({ tabs, active, onChange }: Props<K>) {
+  const listRef = useRef<HTMLDivElement>(null)
   const activeRef = useRef<HTMLButtonElement>(null)
+  // Horizontal-only: never scroll the page itself.
   useEffect(() => {
-    activeRef.current?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+    const list = listRef.current
+    const tab = activeRef.current
+    if (!list || !tab) return
+    const left = tab.offsetLeft
+    const right = left + tab.offsetWidth
+    if (left < list.scrollLeft) list.scrollLeft = left
+    else if (right > list.scrollLeft + list.clientWidth) list.scrollLeft = right - list.clientWidth
   }, [active])
   return (
-    <div role="tablist" className="flex items-center gap-1.5 overflow-x-auto rounded-xl bg-surface-container-lowest p-1 [scrollbar-width:none]">
+    <div ref={listRef} role="tablist" className="relative flex items-center gap-1.5 overflow-x-auto rounded-xl bg-surface-container-lowest p-1 [scrollbar-width:none]">
       {tabs.map((t) => {
         const on = t.key === active
         return (

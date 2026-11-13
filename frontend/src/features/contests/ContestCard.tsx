@@ -129,12 +129,14 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
           <div className="flex min-w-0 flex-col">
             <div className="flex flex-wrap items-center gap-1.5 font-mono text-label-xs">
               {c.organizer && (
-                <>
-                  <span className={`uppercase tracking-wider ${won ? 'font-bold text-secondary' : 'text-outline'}`}>{c.organizer}</span>
-                  <span className="text-outline-variant">•</span>
-                </>
+                <span className={`uppercase tracking-wider ${won ? 'font-bold text-secondary' : 'text-outline'}`}>{c.organizer}</span>
               )}
-              <span className="text-on-surface-variant">{subtitle}</span>
+              {subtitle && (
+                <span className="text-on-surface-variant">
+                  {c.organizer && <span className="mr-1.5 text-outline-variant">•</span>}
+                  {subtitle}
+                </span>
+              )}
             </div>
             <h3 className="truncate text-headline-sm text-on-surface">
               <Link to={`/konkursy/${c.id}`} className="after:absolute after:inset-0 focus-visible:outline-none">
