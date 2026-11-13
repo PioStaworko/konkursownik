@@ -33,6 +33,27 @@ describe('DetailsHeaderCard', () => {
     expect(screen.getByText('Limit na dziś').parentElement).toHaveTextContent('1 / 1')
   })
 
+  it('details list shows all prizes and hides the list when there are none', () => {
+    const { rerender } = render(
+      <DetailsHeaderCard
+        c={{
+          ...contestFixture,
+          prizes: [
+            { id: 'z1', name: 'Rower', value: 1000, count: 2 },
+            { id: 'z2', name: 'Bon', value: null, count: null },
+            { id: 'z3', name: 'Kubek', value: null, count: 5 },
+          ],
+        }}
+      />,
+    )
+    const items = screen.getAllByRole('listitem').map((li) => li.textContent)
+    expect(items[0]).toMatch(/^Rower — .*1\s?000.* ×2$/)
+    expect(items[1]).toBe('Bon')
+    expect(items[2]).toBe('Kubek ×5')
+    rerender(<DetailsHeaderCard c={{ ...contestFixture, prizes: [] }} />)
+    expect(screen.queryByText('Nagrody:')).not.toBeInTheDocument()
+  })
+
   it('badge: today and within 3 days only', () => {
     const { rerender } = render(<DetailsHeaderCard c={{ ...contestFixture, endDate: inDays(0) }} />)
     expect(screen.getByText('Kończy się dziś')).toBeInTheDocument()
@@ -52,6 +73,6 @@ describe('DetailsHeaderCard', () => {
 
   it('shows the prize count next to the prize', () => {
     render(<DetailsHeaderCard c={{ ...contestFixture, prizes: [{ id: 'z1', name: 'Rower', value: null, count: 3 }] }} />)
-    expect(screen.getByText(/Rower/)).toHaveTextContent('3 szt.')
+    expect(screen.getByText(/Rower/)).toHaveTextContent('Rower ×3')
   })
 })

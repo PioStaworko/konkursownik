@@ -9,7 +9,7 @@ import AiFillSection from '../features/ai/AiFillSection'
 import { mergeExtraction } from '../features/ai/mergeExtraction'
 import {
   emptyValues, extractionToValues, fromDto, validate,
-  type Errors, type FormValues, type TextKey,
+  type Errors, type FormValues, type PrizeForm, type TextKey,
 } from '../features/contests/contestForm'
 import IconPicker from '../features/contests/IconPicker'
 import { toUpsert } from '../lib/contestUpsert'
@@ -160,6 +160,32 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
           <input className={`${input} font-mono`} type="text" inputMode="numeric" {...text('entryLimitTotal')} />
         </Field>
       </Section>
+
+      <EditableList<PrizeForm>
+        title="Nagrody"
+        icon="emoji_events"
+        addLabel="Dodaj nagrodę"
+        items={v.prizes}
+        onChange={(items) => set('prizes', items)}
+        newItem={() => ({ id: null, name: '', value: '', count: '' })}
+        error={errors.prizes}
+        badge={badge('prizes')}
+        renderItem={(p, _i, update) => (
+          <>
+            <Field label="Nagroda">
+              <input className={input} value={p.name} onChange={(e) => update({ name: e.target.value })} />
+            </Field>
+            <div className="grid grid-cols-2 gap-space-sm">
+              <Field label="Wartość (zł)">
+                <input className={`${input} font-mono`} inputMode="decimal" value={p.value} onChange={(e) => update({ value: e.target.value })} />
+              </Field>
+              <Field label="Liczba sztuk">
+                <input className={`${input} font-mono`} inputMode="numeric" value={p.count} onChange={(e) => update({ count: e.target.value })} />
+              </Field>
+            </div>
+          </>
+        )}
+      />
 
       <EditableList<TaskDto>
         title="Do zrobienia"

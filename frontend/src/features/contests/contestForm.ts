@@ -3,13 +3,21 @@ import type {
   ContestStatus,
   ContestType,
   ContestUpsertDto,
-  PrizeDto,
   ProofDto,
   PurchaseDto,
   TaskDto,
 } from '../../api/types'
 import { CONTEST_ICONS } from '../../lib/contestIcons'
+import { parseAmount } from '../../lib/format'
 import { typeLabel } from '../../lib/labels'
+
+/** A prize as typed in the form: value and count stay text until validation. */
+export interface PrizeForm {
+  id: string | null
+  name: string
+  value: string
+  count: string
+}
 
 export interface FormValues {
   name: string
@@ -29,7 +37,7 @@ export interface FormValues {
   tasks: TaskDto[]
   purchases: PurchaseDto[]
   proofs: ProofDto[]
-  prizes: PrizeDto[]
+  prizes: PrizeForm[]
 }
 
 export type TextKey = Exclude<keyof FormValues, 'icon' | 'tasks' | 'purchases' | 'proofs' | 'prizes'>
@@ -56,6 +64,9 @@ export const emptyValues: FormValues = {
   prizes: [],
 }
 
+const num = (n: number | null | undefined) => (n == null ? undefined : String(n).replace('.', ','))
+const str = (s: string | null | undefined) => (s && s.trim() !== '' ? s.trim() : undefined)
+
 export const fromDto = (d: ContestUpsertDto): FormValues => ({
   name: d.name,
   organizer: d.organizer ?? '',
@@ -74,7 +85,7 @@ export const fromDto = (d: ContestUpsertDto): FormValues => ({
   tasks: d.tasks,
   purchases: d.purchases,
   proofs: d.proofs,
-  prizes: d.prizes,
+  prizes: d.prizes.map((p) => ({ id: p.id, name: p.name, value: num(p.value) ?? '', count: num(p.count) ?? '' })),
 })
 
 const orNull = (s: string) => (s.trim() === '' ? null : s.trim())
@@ -114,6 +125,15 @@ export function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto
   if (v.proofs.some((p) => (p.note ?? '').length > 300))
     errors.proofs ??= 'Notatka do dowodu może mieć maks. 300 znaków.'
 
+  const prizeAmounts = v.prizes.map((p) => parseAmount(p.value))
+  const prizeCounts = v.prizes.map((p) => parseCount(p.count))
+  if (v.prizes.some((p) => p.name.trim() === '' || p.name.length > 200))
+    errors.prizes = 'Nazwa nagrody jest wymagana (maks. 200 znaków).'
+  else if (prizeAmounts.some((a) => a !== null && Number.isNaN(a))) errors.prizes = 'Nieprawidłowa wartość nagrody.'
+  else if (prizeAmounts.some((a) => a !== null && a < 0)) errors.prizes = 'Wartość nagrody nie może być ujemna.'
+  else if (prizeCounts.some((c) => c !== null && (Number.isNaN(c) || c <= 0)))
+    errors.prizes = 'Liczba nagród musi być większa od zera.'
+
   if (Object.keys(errors).length > 0) return { errors, dto: null }
   return {
     errors,
@@ -147,13 +167,15 @@ export function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto
         location: orNull(p.location ?? ''),
         note: orNull(p.note ?? ''),
       })),
-      prizes: v.prizes,
+      prizes: v.prizes.map((p, i) => ({
+        id: p.id,
+        name: p.name.trim(),
+        value: prizeAmounts[i],
+        count: prizeCounts[i],
+      })),
     },
   }
 }
-
-const num = (n: number | null | undefined) => (n == null ? undefined : String(n).replace('.', ','))
-const str = (s: string | null | undefined) => (s && s.trim() !== '' ? s.trim() : undefined)
 
 /** Maps an AI extraction onto form values; anything the AI left empty is simply absent. */
 export function extractionToValues(x: ContestExtractionDto): Partial<FormValues> {
@@ -166,7 +188,7 @@ export function extractionToValues(x: ContestExtractionDto): Partial<FormValues>
     icon: x.icon && (CONTEST_ICONS as readonly string[]).includes(x.icon) ? x.icon : undefined,
     prizes: (x.prizes ?? [])
       .filter((p) => str(p.name))
-      .map((p) => ({ id: null, name: p.name!.trim(), value: p.value ?? null, count: p.count ?? null })),
+      .map((p) => ({ id: null, name: p.name!.trim(), value: num(p.value) ?? '', count: num(p.count) ?? '' })),
     startDate: str(x.startDate),
     endDate: str(x.endDate),
     resultsDate: str(x.resultsDate),

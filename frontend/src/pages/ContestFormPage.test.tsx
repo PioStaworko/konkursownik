@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -287,6 +287,67 @@ describe('ContestFormPage', () => {
     release(json(extraction))
     await waitFor(() => expect(screen.getByLabelText('Nazwa')).toHaveValue('Konkurs z linku'))
     expect(screen.getByLabelText('Notatki')).toHaveValue('moja notatka')
+  })
+
+  it('form round-trips prizes with ids and sends values as numbers', async () => {
+    const contest: ContestDto = {
+      id: 'c1', name: 'Stary', organizer: null, url: null, rulesUrl: null, type: 'Lottery',
+      startDate: '2026-11-01', endDate: '2026-11-30',
+      resultsDate: null, resultsCheckNote: null, entryLimitPerDay: null, entryLimitTotal: null,
+      status: 'Planned', notes: null, icon: null, tasks: [], purchases: [], proofs: [],
+      prizes: [{ id: 'z1', name: 'Rower', value: 10, count: null }],
+      effectiveStatus: 'Planned', entries: [], win: null, entriesToday: 0,
+    }
+    const api = stub((_, init) => (init?.method === 'PUT' ? new Response(null, { status: 204 }) : json(contest)))
+    renderPage('/konkursy/c1/edycja')
+    const user = userEvent.setup()
+    await waitFor(() => expect(screen.getByLabelText('Nazwa')).toHaveValue('Stary'))
+    const value = screen.getByLabelText('Wartość (zł)')
+    await user.clear(value)
+    await user.type(value, '2 500,50')
+    await user.type(screen.getByLabelText('Liczba sztuk'), '3')
+    await user.click(screen.getByRole('button', { name: 'Dodaj nagrodę' }))
+    await user.type(screen.getAllByLabelText('Nagroda')[1], 'Bon')
+    await user.click(screen.getByRole('button', { name: 'Zapisz' }))
+    await screen.findByText('Szczegóły konkursu')
+    const put = api.calls().find(([, i]) => i?.method === 'PUT')!
+    expect(JSON.parse(put[1]!.body as string).prizes).toEqual([
+      { id: 'z1', name: 'Rower', value: 2500.5, count: 3 },
+      { id: null, name: 'Bon', value: null, count: null },
+    ])
+  })
+
+  it('prize validation messages', async () => {
+    const api = stub(() => json({ id: 'abc' }, 201))
+    renderPage()
+    const user = userEvent.setup()
+    await fillBasics(user)
+    await user.click(screen.getByRole('button', { name: 'Dodaj nagrodę' }))
+    await user.click(screen.getByRole('button', { name: 'Zapisz' }))
+    expect(await screen.findByText('Nazwa nagrody jest wymagana (maks. 200 znaków).')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('Nagroda'), 'Rower')
+    await user.type(screen.getByLabelText('Wartość (zł)'), 'abc')
+    await user.click(screen.getByRole('button', { name: 'Zapisz' }))
+    expect(await screen.findByText('Nieprawidłowa wartość nagrody.')).toBeInTheDocument()
+    await user.clear(screen.getByLabelText('Wartość (zł)'))
+    await user.type(screen.getByLabelText('Liczba sztuk'), '0')
+    await user.click(screen.getByRole('button', { name: 'Zapisz' }))
+    expect(await screen.findByText('Liczba nagród musi być większa od zera.')).toBeInTheDocument()
+    expect(api.calls()).toHaveLength(0)
+  })
+
+  it('ai prizes appended with badge', async () => {
+    localStorage.setItem('konkursownik-ai-notice', '1')
+    stub((url) => (url === '/api/ai/contest' ? json(extraction) : json({})), true)
+    renderPage()
+    const user = userEvent.setup()
+    await user.type(await screen.findByLabelText('Link do konkursu lub regulaminu'), 'https://x.pl/k')
+    await user.click(screen.getByRole('button', { name: 'Odczytaj' }))
+    await waitFor(() => expect(screen.getByLabelText('Nagroda')).toHaveValue('Rower'))
+    expect(screen.getByLabelText('Wartość (zł)')).toHaveValue('1500,5')
+    expect(screen.getByLabelText('Liczba sztuk')).toHaveValue('2')
+    const section = screen.getByRole('heading', { name: 'Nagrody' }).closest('section')!
+    expect(within(section).getByText('AI — sprawdź')).toBeInTheDocument()
   })
 
   it('Enter in the link field reads the link and never saves the contest', async () => {

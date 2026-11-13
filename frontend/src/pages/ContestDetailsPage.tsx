@@ -126,7 +126,7 @@ function ContestDetails({ c }: { c: ContestDto }) {
         />
       )}
 
-      <WinSection contestId={c.id} win={c.win} />
+      <WinSection contestId={c.id} win={c.win} prizes={c.prizes} />
 
       {c.notes && (
         <Section icon="description" title="Notatki">

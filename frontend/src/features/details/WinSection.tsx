@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { ApiError } from '../../api/client'
 import { useDeleteWin, useSaveWin, useToggleItem } from '../../api/hooks'
-import type { WinDto, WinStepDto } from '../../api/types'
+import type { PrizeDto, WinDto, WinStepDto } from '../../api/types'
 import { formatDate, formatMoney, parseAmount } from '../../lib/format'
 import { tokenInputClass } from '../../lib/styles'
 import { Button, IconButton } from '../../ui/Button'
@@ -12,9 +12,17 @@ import { Section } from '../../ui/Section'
 
 const amountText = (n: number | null | undefined) => (n == null ? '' : String(n).replace('.', ','))
 
-function WinEditor({ contestId, win, onDone }: { contestId: string; win: WinDto | null; onDone: () => void }) {
+const OTHER = ''
+
+function WinEditor({
+  contestId, win, prizes, onDone,
+}: { contestId: string; win: WinDto | null; prizes: PrizeDto[]; onDone: () => void }) {
   const save = useSaveWin(contestId)
   const remove = useDeleteWin(contestId)
+  const options = prizes.filter((p) => p.id)
+  const [prizeId, setPrizeId] = useState<string | null>(
+    options.some((p) => p.id === win?.prizeId) ? (win?.prizeId ?? null) : null,
+  )
   const [prizeWon, setPrizeWon] = useState(win?.prizeWon ?? '')
   const [prizeValue, setPrizeValue] = useState(amountText(win?.prizeValue))
   const [deadline, setDeadline] = useState(win?.laureateDeadline ?? '')
@@ -29,6 +37,14 @@ function WinEditor({ contestId, win, onDone }: { contestId: string; win: WinDto 
         ? Object.values(err.errors).flat()
         : ['Nie udało się zapisać wygranej. Spróbuj ponownie.'],
     )
+
+  const pickPrize = (id: string) => {
+    const prize = options.find((p) => p.id === id)
+    if (!prize) return setPrizeId(null)
+    setPrizeId(prize.id)
+    setPrizeWon(prize.name)
+    setPrizeValue(amountText(prize.value))
+  }
 
   const addStep = () => {
     const text = newStep.trim()
@@ -51,7 +67,7 @@ function WinEditor({ contestId, win, onDone }: { contestId: string; win: WinDto 
       await save.mutateAsync({
         prizeWon: prizeWon.trim(),
         prizeValue: value,
-        ...(win?.prizeId ? { prizeId: win.prizeId } : {}),
+        prizeId,
         laureateDeadline: deadline || null,
         laureateDataSent: dataSent,
         steps: all.map((s) => ({ ...s, text: s.text.trim() })).filter((s) => s.text !== ''),
@@ -80,6 +96,18 @@ function WinEditor({ contestId, win, onDone }: { contestId: string; win: WinDto 
             <p key={m}>{m}</p>
           ))}
         </div>
+      )}
+      {options.length > 0 && (
+        <Field label="Nagroda">
+          <select className={tokenInputClass} value={prizeId ?? OTHER} onChange={(e) => pickPrize(e.target.value)}>
+            {options.map((p) => (
+              <option key={p.id} value={p.id!}>
+                {p.value != null ? `${p.name} (${formatMoney(p.value)})` : p.name}
+              </option>
+            ))}
+            <option value={OTHER}>Inna</option>
+          </select>
+        </Field>
       )}
       <Field label="Wygrana nagroda">
         <input className={tokenInputClass} value={prizeWon} onChange={(e) => setPrizeWon(e.target.value)} />
@@ -137,11 +165,11 @@ function WinEditor({ contestId, win, onDone }: { contestId: string; win: WinDto 
   )
 }
 
-export default function WinSection({ contestId, win }: { contestId: string; win: WinDto | null }) {
+export default function WinSection({ contestId, win, prizes = [] }: { contestId: string; win: WinDto | null; prizes?: PrizeDto[] }) {
   const [editing, setEditing] = useState(false)
   const toggle = useToggleItem('win-steps')
 
-  if (editing) return <WinEditor contestId={contestId} win={win} onDone={() => setEditing(false)} />
+  if (editing) return <WinEditor contestId={contestId} win={win} prizes={prizes} onDone={() => setEditing(false)} />
   if (!win) {
     return (
       <Button variant="secondary" icon="emoji_events" onClick={() => setEditing(true)}>

@@ -137,6 +137,20 @@ describe('ContestsPage', () => {
     })
   })
 
+  it('won card mark sent keeps prizeId in PUT', async () => {
+    const fetchMock = setup([
+      card({
+        effectiveStatus: 'Won',
+        win: { prizeWon: 'Karta', prizeValue: 500, prizeId: 'z1', laureateDeadline: null, laureateDataSent: false, stepsDone: 0, stepsTotal: 0 },
+      }),
+    ])
+    await userEvent.setup().click(await screen.findByRole('button', { name: /Oznacz dane jako wysłane/ }))
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([, init]) => init?.method === 'PUT')
+      expect(JSON.parse(call![1]!.body as string).prizeId).toBe('z1')
+    })
+  })
+
   it('card menu offers Edytuj and Duplikuj', async () => {
     setup([card({})])
     await userEvent.setup().click(await screen.findByRole('button', { name: 'Więcej opcji' }))

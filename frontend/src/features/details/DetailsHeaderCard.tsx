@@ -1,4 +1,4 @@
-import type { ContestDto } from '../../api/types'
+import type { ContestDto, PrizeDto } from '../../api/types'
 import { asIcon } from '../../lib/contestIcons'
 import { formatDate, formatMoney, pluralPl, safeHttpUrl, todayInPoland } from '../../lib/format'
 import { Icon } from '../../ui/Icon'
@@ -12,6 +12,9 @@ function endingBadge(endDate: string): string | null {
   if (days < 0 || days > 3) return null
   return days === 0 ? 'Kończy się dziś' : `Koniec za ${days} ${pluralPl(days, 'dzień', 'dni', 'dni')}`
 }
+
+const prizeLine = (p: PrizeDto) =>
+  [p.name, p.value != null && formatMoney(p.value)].filter(Boolean).join(' — ') + (p.count != null ? ` ×${p.count}` : '')
 
 function ExternalLink({ label, href, icon }: { label: string; href: string | null; icon: IconName }) {
   const safe = safeHttpUrl(href)
@@ -48,9 +51,6 @@ function Counter({ label, count, limit, icon, tone }: { label: string; count: nu
 
 export default function DetailsHeaderCard({ c }: { c: ContestDto }) {
   const badge = endingBadge(c.endDate)
-  const first = c.prizes[0]
-  const prizeName = first ? [first.name, first.count != null && `(${first.count} szt.)`].filter(Boolean).join(' ') : ''
-  const prize = [prizeName, first?.value != null && formatMoney(first.value)].filter(Boolean).join(' · ')
   return (
     <div className="overflow-hidden rounded-xl bg-surface-container p-space-md shadow-md">
       <div className="flex items-start gap-3.5">
@@ -75,14 +75,21 @@ export default function DetailsHeaderCard({ c }: { c: ContestDto }) {
           </div>
           {badge && <span className="rounded-full bg-error-container px-2 py-0.5 text-label-xs text-error">{badge}</span>}
         </div>
-        {(c.resultsDate || prize) && (
+        {c.resultsDate && (
           <div className="flex flex-wrap items-center justify-between gap-x-3 text-label-xs text-on-surface-variant">
-            {c.resultsDate && (
-              <span>
-                Ogłoszenie wyników: <span className="font-mono text-mono-data text-on-surface">{formatDate(c.resultsDate)}</span>
-              </span>
-            )}
-            {prize && <span className="text-tertiary">Nagroda: {prize}</span>}
+            <span>
+              Ogłoszenie wyników: <span className="font-mono text-mono-data text-on-surface">{formatDate(c.resultsDate)}</span>
+            </span>
+          </div>
+        )}
+        {c.prizes.length > 0 && (
+          <div className="flex flex-col gap-0.5 text-label-xs text-on-surface-variant">
+            <span>Nagrody:</span>
+            <ul className="flex flex-col text-tertiary">
+              {c.prizes.map((p, i) => (
+                <li key={p.id ?? i}>{prizeLine(p)}</li>
+              ))}
+            </ul>
           </div>
         )}
         <div className="mt-1 grid grid-cols-2 gap-2">
