@@ -35,5 +35,15 @@ public static class ItemToggleEndpoints
                 .ExecuteUpdateAsync(s => s.SetProperty(p => p.Discarded, dto.Value));
             return n == 0 ? Results.NotFound() : Results.NoContent();
         });
+
+        secured.MapPatch("/win-steps/{id:guid}", async (Guid id, ToggleDto dto, HttpContext http, AppDbContext db) =>
+        {
+            var userId = http.User.UserId();
+            var n = await db.WinSteps
+                .Where(s => s.Id == id && db.Wins.Any(w => w.Id == s.WinId
+                    && db.Contests.Any(c => c.Id == w.ContestId && c.OwnerId == userId)))
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.Done, dto.Value));
+            return n == 0 ? Results.NotFound() : Results.NoContent();
+        });
     }
 }

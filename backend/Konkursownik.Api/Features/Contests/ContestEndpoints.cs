@@ -37,7 +37,7 @@ public static class ContestEndpoints
                 .Include(c => c.Purchases)
                 .Include(c => c.Proofs)
                 .Include(c => c.Entries).ThenInclude(e => e.Photos)
-                .Include(c => c.Win)
+                .Include(c => c.Win).ThenInclude(w => w!.Steps)
                 .FirstOrDefaultAsync(c => c.Id == id && c.OwnerId == userId);
             return contest is null ? Results.NotFound() : Results.Ok(ContestMapping.ToDto(contest, time.TodayInPoland()));
         });

@@ -39,6 +39,8 @@ public static class EntryValidation
             Add(nameof(d.PrizeWon), "Opis wygranej jest wymagany (maks. 300 znaków).");
         if (d.PrizeValue is < 0)
             Add(nameof(d.PrizeValue), "Wartość nagrody nie może być ujemna.");
+        if (d.Steps is not null && d.Steps.Any(s => string.IsNullOrWhiteSpace(s.Text) || s.Text.Trim().Length > 300))
+            Add(nameof(d.Steps), "Tekst kroku jest wymagany (maks. 300 znaków).");
         return errors;
     }
 }

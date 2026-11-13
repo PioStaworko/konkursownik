@@ -42,6 +42,7 @@ export default function WinForm({ contestId, win, onDone }: Props) {
         prizeValue: value,
         laureateDeadline: deadline || null,
         laureateDataSent: dataSent,
+        steps: win?.steps ?? [],
       })
       onDone()
     } catch (err) {

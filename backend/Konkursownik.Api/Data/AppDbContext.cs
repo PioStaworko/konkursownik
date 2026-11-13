@@ -14,6 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Entry> Entries => Set<Entry>();
     public DbSet<Photo> Photos => Set<Photo>();
     public DbSet<Win> Wins => Set<Win>();
+    public DbSet<WinStep> WinSteps => Set<WinStep>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -60,6 +61,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             e.Property(x => x.Id).ValueGeneratedNever();
             e.HasIndex(x => x.ContestId).IsUnique();
             e.Property(x => x.PrizeValue).HasColumnType("decimal(10,2)");
+            e.HasMany(x => x.Steps).WithOne().HasForeignKey(s => s.WinId).OnDelete(DeleteBehavior.Cascade);
+        });
+        builder.Entity<WinStep>(e =>
+        {
+            e.Property(x => x.Id).ValueGeneratedNever();
+            e.Property(x => x.Text).HasMaxLength(300);
         });
     }
 }

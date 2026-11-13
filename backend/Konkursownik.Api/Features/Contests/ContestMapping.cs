@@ -14,7 +14,8 @@ public static class ContestMapping
         c.Proofs.OrderBy(p => p.Order).Select(p => new ProofDto(p.Id, p.What, p.KeepUntil, p.Location, p.Discarded, p.Note)).ToList(),
         ContestRules.EffectiveStatus(c, today),
         c.Entries.OrderByDescending(e => e.Date).Select(ToDto).ToList(),
-        c.Win is null ? null : new WinDto(c.Win.PrizeWon, c.Win.PrizeValue, c.Win.LaureateDeadline, c.Win.LaureateDataSent),
+        c.Win is null ? null : new WinDto(c.Win.PrizeWon, c.Win.PrizeValue, c.Win.LaureateDeadline, c.Win.LaureateDataSent,
+            c.Win.Steps.OrderBy(s => s.Order).Select(s => new WinStepDto(s.Id, s.Text, s.Done)).ToList()),
         ContestRules.EntriesOn(c, today));
 
     private static EntryDto ToDto(Entry e) => new(
@@ -24,6 +25,21 @@ public static class ContestMapping
     public static ContestSummaryDto ToSummary(Contest c, DateOnly today) => new(
         c.Id, c.Name, c.EndDate, c.ResultsDate, c.Status, ContestRules.EffectiveStatus(c, today),
         c.Entries.Count, c.EntryLimitTotal);
+
+    /// <summary>
+    /// Replaces the win's steps. An Id is honoured only when it is already a step of this win;
+    /// any other Id is treated as a new step with a fresh Id.
+    /// </summary>
+    public static void ApplySteps(Win w, List<WinStepDto> dtos)
+    {
+        var existing = w.Steps.ToDictionary(x => x.Id);
+        w.Steps = dtos.Select((dto, i) =>
+        {
+            var x = dto.Id is { } id && existing.TryGetValue(id, out var f) ? f : new WinStep { WinId = w.Id };
+            x.Text = dto.Text.Trim(); x.Done = dto.Done; x.Order = i;
+            return x;
+        }).ToList();
+    }
 
     /// <summary>
     /// Copies scalar fields and replaces child lists. A child Id is honoured only when it is already

@@ -19,7 +19,11 @@ public record EntryDto(
     Guid Id, DateOnly Date, string? ConfirmationCode, string? ReceiptNumber,
     decimal? PurchaseAmount, string? ContactUsed, string? AnswerText, string? Store, List<PhotoDto> Photos);
 
-public record WinDto(string PrizeWon, decimal? PrizeValue, DateOnly? LaureateDeadline, bool LaureateDataSent);
+public record WinStepDto(Guid? Id, string Text, bool Done);
+
+public record WinDto(
+    string PrizeWon, decimal? PrizeValue, DateOnly? LaureateDeadline, bool LaureateDataSent,
+    List<WinStepDto>? Steps = null);
 
 public record ContestDto(
     Guid Id,

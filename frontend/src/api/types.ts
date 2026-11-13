@@ -56,11 +56,14 @@ export interface EntryDto {
   photos: PhotoDto[]
 }
 
+export interface WinStepDto { id: string | null; text: string; done: boolean }
+
 export interface WinDto {
   prizeWon: string
   prizeValue: number | null
   laureateDeadline: string | null
   laureateDataSent: boolean
+  steps: WinStepDto[]
 }
 
 export interface ContestDto extends ContestUpsertDto {

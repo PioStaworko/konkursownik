@@ -8,4 +8,5 @@ public class Win
     public decimal? PrizeValue { get; set; }
     public DateOnly? LaureateDeadline { get; set; }
     public bool LaureateDataSent { get; set; }
+    public List<WinStep> Steps { get; set; } = [];
 }

@@ -110,11 +110,11 @@ public class EntryEndpointTests(ApiFactory factory)
 
         var got = await GetAsync(c, id);
         Assert.Equal(ContestStatus.Won, got!.Status);
-        Assert.Equal(win, got.Win);
+        Assert.Equal(win with { Steps = null }, got.Win! with { Steps = null });
 
         var update = win with { PrizeWon = "Hulajnoga", LaureateDataSent = true };
         Assert.Equal(HttpStatusCode.NoContent, (await c.PutAsJsonAsync($"/api/contests/{id}/win", update, JsonConfig.Options)).StatusCode);
-        Assert.Equal(update, (await GetAsync(c, id))!.Win);
+        Assert.Equal(update with { Steps = null }, (await GetAsync(c, id))!.Win! with { Steps = null });
     }
 
     [Fact]

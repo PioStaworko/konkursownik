@@ -68,7 +68,7 @@ export function useSetStatus() {
   })
 }
 
-export type ItemKind = 'contest-tasks' | 'purchase-items' | 'proof-items'
+export type ItemKind = 'contest-tasks' | 'purchase-items' | 'proof-items' | 'win-steps'
 
 export function useToggleItem(kind: ItemKind) {
   const invalidate = useInvalidateContestData()

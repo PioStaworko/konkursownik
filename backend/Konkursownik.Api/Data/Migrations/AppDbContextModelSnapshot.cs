@@ -378,6 +378,32 @@ namespace Konkursownik.Api.Data.Migrations
                     b.ToTable("Wins");
                 });
 
+            modelBuilder.Entity("Konkursownik.Api.Domain.WinStep", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Done")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("WinId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WinId");
+
+                    b.ToTable("WinSteps");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -588,6 +614,15 @@ namespace Konkursownik.Api.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Konkursownik.Api.Domain.WinStep", b =>
+                {
+                    b.HasOne("Konkursownik.Api.Domain.Win", null)
+                        .WithMany("Steps")
+                        .HasForeignKey("WinId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -655,6 +690,11 @@ namespace Konkursownik.Api.Data.Migrations
             modelBuilder.Entity("Konkursownik.Api.Domain.Entry", b =>
                 {
                     b.Navigation("Photos");
+                });
+
+            modelBuilder.Entity("Konkursownik.Api.Domain.Win", b =>
+                {
+                    b.Navigation("Steps");
                 });
 #pragma warning restore 612, 618
         }

@@ -54,7 +54,7 @@ public static class EntryEndpoints
         secured.MapPut("/contests/{id:guid}/win", async (Guid id, WinDto dto, HttpContext http, AppDbContext db) =>
         {
             var userId = http.User.UserId();
-            var contest = await db.Contests.Include(c => c.Win)
+            var contest = await db.Contests.Include(c => c.Win).ThenInclude(w => w!.Steps)
                 .FirstOrDefaultAsync(c => c.Id == id && c.OwnerId == userId);
             if (contest is null) return Results.NotFound();
 
@@ -71,6 +71,7 @@ public static class EntryEndpoints
             win.PrizeValue = dto.PrizeValue;
             win.LaureateDeadline = dto.LaureateDeadline;
             win.LaureateDataSent = dto.LaureateDataSent;
+            if (dto.Steps is not null) ContestMapping.ApplySteps(win, dto.Steps);
             contest.Status = ContestStatus.Won;
             await db.SaveChangesAsync();
             return Results.NoContent();
