@@ -7,10 +7,11 @@ import type {
 
 export type ContestView = 'active' | 'archive'
 
-export function useContests(view: ContestView) {
+export function useContests(view: ContestView, enabled = true) {
   return useQuery({
     queryKey: ['contests', 'list', view],
     queryFn: () => apiFetch<ContestCardDto[]>(`/api/contests?view=${view}`),
+    enabled,
   })
 }
 
@@ -130,7 +131,7 @@ export function useDeletePhoto() {
 export function useSaveWin(contestId: string) {
   const invalidate = useInvalidateContestData()
   return useMutation({
-    mutationFn: (dto: WinDto) =>
+    mutationFn: (dto: Omit<WinDto, 'steps'> & { steps?: WinDto['steps'] }) =>
       apiFetch<void>(`/api/contests/${contestId}/win`, { method: 'PUT', body: jsonBody(dto) }),
     onSuccess: invalidate,
   })
