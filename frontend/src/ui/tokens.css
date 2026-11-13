@@ -1,0 +1,151 @@
+/*
+ * Design tokens. Dark values are copied from the mockups' tailwind-config and are the default.
+ * Light overrides live under `:root:not(.dark)` (same palette family, Material-3 light roles).
+ *
+ * Light palette (contrast against its own surface #f8f9ff / #ffffff):
+ *   on-surface #181c21 (~16:1)   on-surface-variant #454654 (~9:1)   outline #767587 (~4.6:1)
+ *   primary #494bd6 + on-primary #ffffff (~6.6:1)     secondary #006c49 + #ffffff (~6.6:1)
+ *   tertiary #8a5100 + #ffffff (~6.1:1)               error #ba1a1a + #ffffff (~6.5:1)
+ *   containers (primary/secondary/tertiary/error) use their on-*-container colors (>= 9:1).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme static {
+  --color-background: #101419;
+  --color-on-background: #e0e2ea;
+  --color-surface: #101419;
+  --color-surface-dim: #101419;
+  --color-surface-bright: #36393f;
+  --color-surface-variant: #31353b;
+  --color-surface-tint: #c0c1ff;
+  --color-surface-container-lowest: #0a0e13;
+  --color-surface-container-low: #181c21;
+  --color-surface-container: #1c2025;
+  --color-surface-container-high: #262a30;
+  --color-surface-container-highest: #31353b;
+  --color-on-surface: #e0e2ea;
+  --color-on-surface-variant: #c7c4d7;
+  --color-inverse-surface: #e0e2ea;
+  --color-inverse-on-surface: #2d3136;
+  --color-outline: #908fa0;
+  --color-outline-variant: #464554;
+  --color-primary: #c0c1ff;
+  --color-on-primary: #1000a9;
+  --color-primary-container: #8083ff;
+  --color-on-primary-container: #0d0096;
+  --color-inverse-primary: #494bd6;
+  --color-primary-fixed: #e1e0ff;
+  --color-primary-fixed-dim: #c0c1ff;
+  --color-on-primary-fixed: #07006c;
+  --color-on-primary-fixed-variant: #2f2ebe;
+  --color-secondary: #4edea3;
+  --color-on-secondary: #003824;
+  --color-secondary-container: #00a572;
+  --color-on-secondary-container: #00311f;
+  --color-secondary-fixed: #6ffbbe;
+  --color-secondary-fixed-dim: #4edea3;
+  --color-on-secondary-fixed: #002113;
+  --color-on-secondary-fixed-variant: #005236;
+  --color-tertiary: #ffb95f;
+  --color-on-tertiary: #472a00;
+  --color-tertiary-container: #ca8100;
+  --color-on-tertiary-container: #3e2400;
+  --color-tertiary-fixed: #ffddb8;
+  --color-tertiary-fixed-dim: #ffb95f;
+  --color-on-tertiary-fixed: #2a1700;
+  --color-on-tertiary-fixed-variant: #653e00;
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  --font-sans: 'Geist Variable', Geist, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-label-xs: 10px;
+  --text-label-xs--line-height: 12px;
+  --text-label-xs--letter-spacing: 0.04em;
+  --text-label-xs--font-weight: 600;
+  --text-label-md: 12px;
+  --text-label-md--line-height: 16px;
+  --text-label-md--letter-spacing: 0.01em;
+  --text-label-md--font-weight: 500;
+  --text-mono-data: 12px;
+  --text-mono-data--line-height: 16px;
+  --text-mono-data--letter-spacing: -0.01em;
+  --text-mono-data--font-weight: 500;
+  --text-body-md: 13px;
+  --text-body-md--line-height: 18px;
+  --text-body-md--letter-spacing: 0em;
+  --text-body-md--font-weight: 400;
+  --text-body-lg: 15px;
+  --text-body-lg--line-height: 22px;
+  --text-body-lg--letter-spacing: -0.005em;
+  --text-body-lg--font-weight: 400;
+  --text-title-md: 16px;
+  --text-title-md--line-height: 22px;
+  --text-title-md--letter-spacing: -0.01em;
+  --text-title-md--font-weight: 500;
+  --text-headline-sm: 18px;
+  --text-headline-sm--line-height: 24px;
+  --text-headline-sm--letter-spacing: -0.015em;
+  --text-headline-sm--font-weight: 600;
+  --text-headline-lg: 24px;
+  --text-headline-lg--line-height: 32px;
+  --text-headline-lg--letter-spacing: -0.02em;
+  --text-headline-lg--font-weight: 600;
+  --text-display-lg: 36px;
+  --text-display-lg--line-height: 44px;
+  --text-display-lg--letter-spacing: -0.03em;
+  --text-display-lg--font-weight: 600;
+
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 0.875rem;
+  --spacing-space-lg: 1.25rem;
+  --spacing-space-xl: 2rem;
+  --spacing-margin-mobile: 1rem;
+  --spacing-gutter-mobile: 0.75rem;
+}
+
+:root:not(.dark) {
+  color-scheme: light;
+  --color-background: #f8f9ff;
+  --color-on-background: #181c21;
+  --color-surface: #f8f9ff;
+  --color-surface-dim: #d8dae2;
+  --color-surface-bright: #ffffff;
+  --color-surface-variant: #dfe2eb;
+  --color-surface-tint: #494bd6;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f1f3fb;
+  --color-surface-container: #eaedf5;
+  --color-surface-container-high: #e2e6ef;
+  --color-surface-container-highest: #dadee8;
+  --color-on-surface: #181c21;
+  --color-on-surface-variant: #454654;
+  --color-inverse-surface: #2d3136;
+  --color-inverse-on-surface: #eff1f9;
+  --color-outline: #767587;
+  --color-outline-variant: #c7c4d7;
+  --color-primary: #494bd6;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #e1e0ff;
+  --color-on-primary-container: #07006c;
+  --color-inverse-primary: #c0c1ff;
+  --color-secondary: #006c49;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #6ffbbe;
+  --color-on-secondary-container: #002113;
+  --color-tertiary: #8a5100;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #ffddb8;
+  --color-on-tertiary-container: #2a1700;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410002;
+}
