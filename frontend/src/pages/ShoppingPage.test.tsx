@@ -90,6 +90,22 @@ describe('ShoppingPage', () => {
     expect(screen.getByRole('button', { name: /Mleko/ })).toHaveAttribute('aria-pressed', 'false')
   })
 
+  it('reverts every item when several quick ticks all fail', async () => {
+    setup(base(), 500)
+    const user = userEvent.setup()
+    const mleko = await screen.findByRole('button', { name: /Mleko/ })
+    const chleb = screen.getByRole('button', { name: /Chleb/ })
+    await user.click(mleko)
+    await user.click(chleb)
+    expect(await screen.findByRole('alert')).toHaveTextContent('Nie udało się')
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Mleko/ })).toHaveAttribute('aria-pressed', 'false')
+      expect(screen.getByRole('button', { name: /Chleb/ })).toHaveAttribute('aria-pressed', 'false')
+    })
+    expect(screen.getByText('Mleko')).not.toHaveClass('line-through')
+    expect(screen.getByText('Chleb')).not.toHaveClass('line-through')
+  })
+
   it('progress bar reflects session checks', async () => {
     setup()
     const user = userEvent.setup()

@@ -45,15 +45,10 @@ export default function ShoppingPage() {
     setFailed(false)
     setSession((s) => (s.has(id) ? s : new Map(s).set(id, snap)))
     flip(id, value)
-    toggle.mutate(
-      { id, value },
-      {
-        onError: () => {
-          flip(id, !value)
-          setFailed(true)
-        },
-      },
-    )
+    toggle.mutateAsync({ id, value }).catch(() => {
+      flip(id, !value)
+      setFailed(true)
+    })
   }
 
   const groups = useMemo(() => {
