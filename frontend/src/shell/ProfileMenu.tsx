@@ -8,6 +8,7 @@ export default function ProfileMenu() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!open) return
@@ -15,7 +16,9 @@ export default function ProfileMenu() {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      triggerRef.current?.focus()
     }
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
@@ -31,10 +34,10 @@ export default function ProfileMenu() {
   return (
     <div ref={ref} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         aria-label="Profil"
         aria-expanded={open}
-        aria-haspopup="true"
         onClick={() => setOpen((o) => !o)}
         className="flex h-11 w-11 items-center justify-center"
       >

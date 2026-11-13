@@ -56,7 +56,7 @@ describe('RemindersPage timeline', () => {
     expect(screen.getByRole('button', { name: /Kończące się\s*2/ })).toBeInTheDocument()
     const names = screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)
     expect(names).toEqual(['Colgate', 'Tchibo', 'Wedel', 'Zakończony', 'Danone'])
-    expect(await screen.findByRole('link', { name: /Schowek dowodów — 3 przechowywanych/ })).toHaveAttribute('href', '/dowody')
+    expect(await screen.findByRole('link', { name: /Schowek dowodów — 3 przechowywane/ })).toHaveAttribute('href', '/dowody')
   })
 
   it('filters by pill', async () => {
@@ -128,5 +128,19 @@ describe('RemindersPage timeline', () => {
     const { container } = renderApp(<RemindersPage />)
     await screen.findByText('Colgate')
     expect(container.textContent).not.toMatch(/§|reklamac|rezerwow|audyt/i)
+  })
+
+  it('hides the alerts pill until reminders have loaded', async () => {
+    const fetchMock = stubApi({ '/api/reminders': [] })
+    fetchMock.mockImplementation(() => new Promise<Response>(() => {}))
+    renderApp(<RemindersPage />)
+    await screen.findByText('Ładowanie…')
+    expect(screen.queryByText(/alert/)).not.toBeInTheDocument()
+  })
+
+  it('proof bank banner uses correct Polish plurals', async () => {
+    stubApi({ '/api/reminders': [], '/api/proofs': [{}] })
+    renderApp(<RemindersPage />)
+    expect(await screen.findByRole('link', { name: /Schowek dowodów — 1 przechowywany$/ })).toBeInTheDocument()
   })
 })

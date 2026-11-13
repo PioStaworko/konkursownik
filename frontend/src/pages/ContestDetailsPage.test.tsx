@@ -115,8 +115,15 @@ describe('ContestDetailsPage', () => {
   it('the form is closed by default and opened with the add button', async () => {
     renderPage(serve(contestFixture))
     const user = userEvent.setup()
-    await user.click(await screen.findByRole('button', { name: /Dodaj zgłoszenie/ }))
+    await user.click(await screen.findByRole('button', { name: /Zarejestruj nowe zgłoszenie/ }))
     expect(screen.getByRole('button', { name: 'Zapisz zgłoszenie' })).toBeInTheDocument()
+  })
+
+  it('status menu marks the stored status, not the effective one', async () => {
+    renderPage(serve({ ...contestFixture, status: 'Submitted', effectiveStatus: 'AwaitingResults' }))
+    await userEvent.setup().click(await screen.findByRole('button', { name: /Status:/ }))
+    expect(screen.getByRole('menuitemradio', { name: 'Zgłoszony' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('menuitemradio', { name: 'Czekam na wyniki' })).toHaveAttribute('aria-checked', 'false')
   })
 
   it('toggles a step via contest-tasks', async () => {

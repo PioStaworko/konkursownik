@@ -29,4 +29,12 @@ describe('StatsPage', () => {
     renderApp(<StatsPage />)
     expect(await screen.findByRole('alert')).toHaveTextContent('Nie udało się wczytać statystyk')
   })
+
+  it('balance equal to zero after rounding is not an error', async () => {
+    stubApi({ '/api/stats': { contests: 1, entries: 1, wins: 0, totalSpent: 0.1 + 0.2, totalWonValue: 0.3 } })
+    renderApp(<StatsPage />)
+    const balance = await screen.findByTestId('balance')
+    expect(balance.className).toContain('text-secondary')
+    expect(balance.textContent).not.toContain('-')
+  })
 })

@@ -50,4 +50,9 @@ describe('DetailsHeaderCard', () => {
     expect(screen.queryByText('Limit na dziś')).not.toBeInTheDocument()
     expect(screen.getByText('Limit zgłoszeń')).toBeInTheDocument()
   })
+
+  it('shows the prize count next to the prize', () => {
+    render(<DetailsHeaderCard c={{ ...contestFixture, prizeDescription: 'Rower', prizeCount: 3 }} />)
+    expect(screen.getByText(/Rower/)).toHaveTextContent('3 szt.')
+  })
 })

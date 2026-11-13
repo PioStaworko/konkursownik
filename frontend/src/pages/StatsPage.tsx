@@ -22,7 +22,7 @@ function Tile({ label, value, icon, valueClass = 'text-on-surface', testId }: Ti
 export default function StatsPage() {
   const stats = useStats()
   const s = stats.data
-  const balance = s ? s.totalWonValue - s.totalSpent : 0
+  const balance = s ? (Math.round((s.totalWonValue - s.totalSpent) * 100) / 100 || 0) : 0
 
   return (
     <div className="flex flex-col gap-space-md">

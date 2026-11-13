@@ -77,4 +77,16 @@ describe('AppHeader', () => {
     expect(localStorage.getItem('konkursownik-theme')).toBe('dark')
     expect(document.documentElement.classList.contains('dark')).toBe(true)
   })
+
+  it('Escape closes the profile menu and returns focus to the trigger', async () => {
+    stubApi({ '/api/auth/me': { email: 'a@b.pl' } })
+    renderApp(<AppHeader title="Pilne" />)
+    const user = userEvent.setup()
+    const trigger = await screen.findByRole('button', { name: 'Profil' })
+    await user.click(trigger)
+    await user.keyboard('{Escape}')
+    expect(screen.queryByText('a@b.pl')).not.toBeInTheDocument()
+    expect(trigger).toHaveFocus()
+    expect(trigger).not.toHaveAttribute('aria-haspopup')
+  })
 })

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Icon } from '../../ui/Icon'
 import type { IconName } from '../../ui/icons'
 
@@ -6,13 +7,18 @@ export type TabDef<K extends string> = { key: K; label: string; icon: IconName }
 type Props<K extends string> = { tabs: TabDef<K>[]; active: K; onChange: (key: K) => void }
 
 export default function TabsBar<K extends string>({ tabs, active, onChange }: Props<K>) {
+  const activeRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    activeRef.current?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+  }, [active])
   return (
-    <div role="tablist" className="flex items-center gap-1.5 overflow-x-auto rounded-xl bg-surface-container-lowest p-1">
+    <div role="tablist" className="flex items-center gap-1.5 overflow-x-auto rounded-xl bg-surface-container-lowest p-1 [scrollbar-width:none]">
       {tabs.map((t) => {
         const on = t.key === active
         return (
           <button
             key={t.key}
+            ref={on ? activeRef : undefined}
             type="button"
             role="tab"
             aria-selected={on}

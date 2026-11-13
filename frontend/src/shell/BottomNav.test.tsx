@@ -19,9 +19,9 @@ describe('BottomNav', () => {
     renderApp(<BottomNav />)
     const nav = screen.getByRole('navigation', { name: 'Nawigacja główna' })
     const links = within(nav).getAllByRole('link')
-    expect(links.map((l) => l.textContent?.replace(/\d+$/, ''))).toEqual(['Konkursy', 'Pilne', 'Zakupy', 'Statystyki'])
-    expect(await within(nav).findByLabelText('3 pilnych')).toHaveTextContent('3')
-    expect(await within(nav).findByLabelText('2 do kupienia')).toHaveTextContent('2')
+    expect(links.map((l) => /Konkursy|Pilne|Zakupy|Statystyki/.exec(l.textContent ?? '')?.[0])).toEqual(['Konkursy', 'Pilne', 'Zakupy', 'Statystyki'])
+    expect(await within(nav).findByText('3 pilnych')).toBeInTheDocument()
+    expect(await within(nav).findByText('2 do kupienia')).toBeInTheDocument()
     expect(within(nav).getByRole('button', { name: 'Dodaj konkurs lub zgłoszenie' })).toBeInTheDocument()
   })
 
@@ -29,8 +29,8 @@ describe('BottomNav', () => {
     const fetchMock = stubApi({ '/api/reminders': [], '/api/shopping-list': [] })
     renderApp(<BottomNav />)
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
-    expect(screen.queryByLabelText(/pilnych/)).not.toBeInTheDocument()
-    expect(screen.queryByLabelText(/do kupienia/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/pilnych/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/do kupienia/)).not.toBeInTheDocument()
   })
 
   it('add sheet → new entry picker lists only open contests sorted by end date', async () => {
@@ -78,5 +78,13 @@ describe('BottomNav', () => {
     await user.click(screen.getByRole('button', { name: 'Dodaj konkurs lub zgłoszenie' }))
     await user.click(screen.getByRole('button', { name: /Nowy konkurs/ }))
     expect(screen.getByTestId('location')).toHaveTextContent('/konkursy/nowy')
+  })
+
+  it('badges expose readable text for screen readers', async () => {
+    stubApi({ '/api/reminders': reminders(3), '/api/shopping-list': shopping })
+    renderApp(<BottomNav />)
+    const nav = screen.getByRole('navigation', { name: 'Nawigacja główna' })
+    expect(await within(nav).findByRole('link', { name: /Pilne.*3 pilnych/ })).toBeInTheDocument()
+    expect(await within(nav).findByRole('link', { name: /Zakupy.*2 do kupienia/ })).toBeInTheDocument()
   })
 })

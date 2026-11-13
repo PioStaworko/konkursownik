@@ -66,7 +66,7 @@ function ContestDetails({ c }: { c: ContestDto }) {
           )}
         </div>
         <div className="flex shrink-0 items-center">
-          <StatusMenu contestId={c.id} status={c.effectiveStatus} />
+          <StatusMenu contestId={c.id} status={c.status} />
           <ContestMenu contestId={c.id} />
         </div>
       </div>

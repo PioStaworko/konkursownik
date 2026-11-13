@@ -97,7 +97,7 @@ export default function EntriesTab({ c, initialFormOpen, autoReceipt, renderAi }
         />
       ) : (
         <Button icon="add_circle" onClick={() => setAdding(true)}>
-          Dodaj zgłoszenie
+          Zarejestruj nowe zgłoszenie
         </Button>
       )}
       {c.entries.length === 0 && !adding && <p className="py-4 text-center text-on-surface-variant">Brak zgłoszeń</p>}

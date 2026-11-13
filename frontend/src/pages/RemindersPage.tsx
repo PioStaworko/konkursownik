@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { useProofs, useReminders } from '../api/hooks'
 import { groupReminders, GROUP_ORDER, pluralAlerts, type ReminderGroup } from '../features/reminders/groups'
 import Timeline from '../features/reminders/Timeline'
-import { nowInPolandLabel } from '../lib/format'
+import { nowInPolandLabel, pluralPl } from '../lib/format'
 import { FilterPill } from '../ui/FilterPill'
 import { Icon } from '../ui/Icon'
 
@@ -41,9 +41,11 @@ export default function RemindersPage() {
         </div>
         <div className="flex items-baseline justify-between gap-2">
           <h1 className="text-headline-sm font-semibold text-on-surface">Wymaga Twojej uwagi</h1>
-          <span className="rounded-full bg-tertiary-container/30 px-2.5 py-0.5 font-mono text-label-md font-semibold text-tertiary-fixed">
-            {pluralAlerts(total)}
-          </span>
+          {data && (
+            <span className="rounded-full bg-tertiary-container/30 px-2.5 py-0.5 font-mono text-label-md font-semibold text-tertiary-fixed">
+              {pluralAlerts(total)}
+            </span>
+          )}
         </div>
       </header>
       {isPending && <p className="text-on-surface-variant">Ładowanie…</p>}
@@ -51,7 +53,7 @@ export default function RemindersPage() {
       {data && total === 0 && <p className="py-8 text-center text-on-surface-variant">Nic pilnego. Wszystko pod kontrolą!</p>}
       {total > 0 && (
         <>
-          <div className="-mx-1 flex items-center gap-1 overflow-x-auto px-1">
+          <div className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 [scrollbar-width:none]">
             {pills.map((p) => (
               <FilterPill key={p.key} active={filter === p.key} count={count(p.key)} onClick={() => setFilter(p.key)}>
                 {p.label}
@@ -65,7 +67,7 @@ export default function RemindersPage() {
         <Link to="/dowody" className="flex min-h-11 items-center justify-between rounded-xl bg-surface-container-lowest p-space-md">
           <span className="flex items-center gap-3">
             <Icon name="inventory" size={20} className="text-on-surface-variant" />
-            <span className="text-label-md font-medium text-on-surface">Schowek dowodów — {proofs.data.length} przechowywanych</span>
+            <span className="text-label-md font-medium text-on-surface">Schowek dowodów — {proofs.data.length} {pluralPl(proofs.data.length, 'przechowywany', 'przechowywane', 'przechowywanych')}</span>
           </span>
           <Icon name="chevron_right" size={20} className="text-on-surface-variant" />
         </Link>

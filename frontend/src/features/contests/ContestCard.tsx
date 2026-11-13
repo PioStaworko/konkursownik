@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useDuplicateContest, useSaveWin, useSetStatus } from '../../api/hooks'
 import type { ContestCardDto } from '../../api/types'
-import { DEFAULT_CONTEST_ICON } from '../../lib/contestIcons'
+import { asIcon } from '../../lib/contestIcons'
 import { formatDate, formatEntryCounter, formatMoney, todayInPoland } from '../../lib/format'
 import { Icon } from '../../ui/Icon'
-import { icons, type IconName } from '../../ui/icons'
+import type { IconName } from '../../ui/icons'
 import { IconButton } from '../../ui/Button'
 import { StatusBadge } from '../../ui/StatusBadge'
 
@@ -17,18 +17,36 @@ const daysLabel = (n: number) => (n === 1 ? '1 dzień' : `${n} dni`)
 
 const shortDate = (d: string) => formatDate(d).slice(0, 5)
 
-const asIcon = (name: string | null): IconName => (name && name in icons ? (name as IconName) : (DEFAULT_CONTEST_ICON as IconName))
-
 const actionClass =
   'flex h-10 w-full items-center justify-center gap-1.5 rounded-lg px-3 text-label-md font-semibold transition-colors disabled:opacity-60'
 
-function Menu({ id }: { id: string }) {
+function Menu({ id, onDuplicate, pending }: { id: string; onDuplicate: () => void; pending: boolean }) {
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
-  const duplicate = useDuplicateContest()
+  const ref = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      triggerRef.current?.focus()
+    }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
   return (
-    <div className="relative z-10">
+    <div ref={ref} className="relative z-10">
       <IconButton
+        ref={triggerRef}
         icon="more_vert"
         label="Więcej opcji"
         aria-expanded={open}
@@ -41,6 +59,7 @@ function Menu({ id }: { id: string }) {
           <Link
             role="menuitem"
             to={`/konkursy/${id}/edycja`}
+            onClick={() => setOpen(false)}
             className="flex min-h-11 items-center rounded-md px-3 text-body-md text-on-surface hover:bg-surface-container-high"
           >
             Edytuj
@@ -48,9 +67,12 @@ function Menu({ id }: { id: string }) {
           <button
             role="menuitem"
             type="button"
-            disabled={duplicate.isPending}
+            disabled={pending}
             className="flex min-h-11 w-full items-center rounded-md px-3 text-left text-body-md text-on-surface hover:bg-surface-container-high disabled:opacity-60"
-            onClick={async () => navigate(`/konkursy/${await duplicate.mutateAsync(id)}/edycja`)}
+            onClick={() => {
+              setOpen(false)
+              onDuplicate()
+            }}
           >
             Duplikuj
           </button>
@@ -74,6 +96,8 @@ function Spec({ icon, label, children }: { icon: IconName; label: string; childr
 export default function ContestCard({ contest: c }: { contest: ContestCardDto }) {
   const setStatus = useSetStatus()
   const saveWin = useSaveWin(c.id)
+  const duplicate = useDuplicateContest()
+  const navigate = useNavigate()
   const today = todayInPoland()
   const status = c.effectiveStatus
   const won = status === 'Won'
@@ -82,11 +106,17 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
   const prize = [c.prizeDescription, c.prizeValue != null && formatMoney(c.prizeValue)].filter(Boolean).join(' · ')
   const subtitle =
     status === 'AwaitingResults' && c.resultsDate ? `Wyniki: ${formatDate(c.resultsDate)}` : `do ${formatDate(c.endDate)}`
-  const error = setStatus.isError || saveWin.isError
+  const error = setStatus.isError || saveWin.isError || duplicate.isError
+  const onDuplicate = () =>
+    duplicate.mutate(c.id, { onSuccess: (id) => navigate(`/konkursy/${id}/edycja`) })
 
   return (
-    <article className="relative flex flex-col gap-space-sm overflow-hidden rounded-xl bg-surface-container-low p-space-md shadow-md transition-colors hover:bg-surface-container">
-      {won && <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-secondary/15 blur-2xl" />}
+    <article className="relative flex flex-col gap-space-sm rounded-xl bg-surface-container-low p-space-md shadow-md transition-colors hover:bg-surface-container">
+      {won && (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+          <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-secondary/15 blur-2xl" />
+        </div>
+      )}
       <div className="flex items-start justify-between gap-space-sm">
         <div className="flex min-w-0 items-center gap-space-sm">
           <div
@@ -153,7 +183,7 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
         <div className="flex items-center justify-between gap-space-sm rounded-lg bg-surface-container-high p-space-sm">
           <div className="flex min-w-0 items-center gap-2 text-body-md text-on-surface">
             <Icon name="mark_email_unread" size={18} className="shrink-0 text-primary" />
-            <p className="truncate">{c.resultsDate ? `Wyniki: ${formatDate(c.resultsDate)}` : 'Czekam na wyniki'}</p>
+            <p className="truncate">Czekam na wyniki</p>
           </div>
           <span className="shrink-0 rounded bg-secondary/10 px-2 py-0.5 font-mono text-label-xs font-bold text-secondary">
             {c.entryCount} zgł.
@@ -213,6 +243,15 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
             <Icon name="receipt_long" size={18} />+ Zgłoś paragon
           </Link>
         )}
+        {status === 'Bought' && (
+          <IconButton
+            icon="content_copy"
+            label="Duplikuj"
+            disabled={duplicate.isPending}
+            className="shrink-0 bg-surface-container disabled:opacity-60"
+            onClick={onDuplicate}
+          />
+        )}
         {status === 'Planned' && (
           <button
             type="button"
@@ -243,7 +282,7 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
           </button>
         )}
         <div className="ml-auto">
-          <Menu id={c.id} />
+          <Menu id={c.id} onDuplicate={onDuplicate} pending={duplicate.isPending} />
         </div>
       </div>
       {error && (

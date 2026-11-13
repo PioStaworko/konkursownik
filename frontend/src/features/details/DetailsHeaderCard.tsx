@@ -1,10 +1,8 @@
 import type { ContestDto } from '../../api/types'
-import { DEFAULT_CONTEST_ICON } from '../../lib/contestIcons'
+import { asIcon } from '../../lib/contestIcons'
 import { formatDate, formatMoney, pluralPl, safeHttpUrl, todayInPoland } from '../../lib/format'
 import { Icon } from '../../ui/Icon'
-import { icons, type IconName } from '../../ui/icons'
-
-const asIcon = (name: string | null): IconName => (name && name in icons ? (name as IconName) : (DEFAULT_CONTEST_ICON as IconName))
+import type { IconName } from '../../ui/icons'
 
 const daysUntil = (date: string, today: string) =>
   Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000)
@@ -50,7 +48,8 @@ function Counter({ label, count, limit, icon, tone }: { label: string; count: nu
 
 export default function DetailsHeaderCard({ c }: { c: ContestDto }) {
   const badge = endingBadge(c.endDate)
-  const prize = [c.prizeDescription, c.prizeValue != null ? formatMoney(c.prizeValue) : null].filter(Boolean).join(' · ')
+  const prizeName = [c.prizeDescription, c.prizeDescription && c.prizeCount != null && `(${c.prizeCount} szt.)`].filter(Boolean).join(' ')
+  const prize = [prizeName, c.prizeValue != null && formatMoney(c.prizeValue)].filter(Boolean).join(' · ')
   return (
     <div className="overflow-hidden rounded-xl bg-surface-container p-space-md shadow-md">
       <div className="flex items-start gap-3.5">

@@ -47,10 +47,12 @@ export default function ContestsPage() {
           <span className="font-mono text-label-xs text-outline-variant">•</span>
           <span className="font-mono text-label-xs text-on-surface-variant">{formatDate(today)}</span>
         </div>
-        <div className="flex items-center gap-1.5 rounded-full bg-surface-container-high px-2 py-0.5 font-mono text-label-xs text-tertiary">
-          <Icon name="alarm" size={13} />
-          <span>{dueToday} na dziś</span>
-        </div>
+        {reminders.data && (
+          <div className="flex items-center gap-1.5 rounded-full bg-surface-container-high px-2 py-0.5 font-mono text-label-xs text-tertiary">
+            <Icon name="alarm" size={13} />
+            <span>{dueToday} na dziś</span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-space-xs">
@@ -109,6 +111,7 @@ export default function ContestsPage() {
         </div>
         <button
           type="button"
+          aria-label={`Sortuj: ${sortLabel[sort]}`}
           onClick={() => setSort(sortOrder[(sortOrder.indexOf(sort) + 1) % sortOrder.length])}
           className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg bg-surface-container px-3 text-label-md text-on-surface-variant transition-colors hover:text-on-surface"
         >

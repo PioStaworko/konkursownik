@@ -30,7 +30,7 @@ function NavItem({ to, end, icon, label, badge, badgeLabel, badgeClass }: ItemPr
         <Icon name={icon} size={22} />
         {badge ? (
           <span
-            aria-label={badgeLabel}
+            aria-hidden="true"
             className={`absolute -right-2 -top-1 rounded-full px-1.5 font-mono text-[10px] font-bold leading-tight ${badgeClass}`}
           >
             {badge}
@@ -38,6 +38,7 @@ function NavItem({ to, end, icon, label, badge, badgeLabel, badgeClass }: ItemPr
         ) : null}
       </span>
       <span className="mt-1 text-label-xs">{label}</span>
+      {badge ? <span className="sr-only">{badgeLabel}</span> : null}
     </NavLink>
   )
 }
@@ -69,7 +70,7 @@ export default function BottomNav() {
               type="button"
               aria-label="Dodaj konkurs lub zgłoszenie"
               onClick={() => setAdding(true)}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-primary-container to-surface-tint text-on-primary shadow-[0_4px_12px_rgba(128,131,255,0.4)] transition-transform active:scale-95"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_4px_12px_rgba(128,131,255,0.4)] transition-transform active:scale-95"
             >
               <Icon name="add" size={28} />
             </button>

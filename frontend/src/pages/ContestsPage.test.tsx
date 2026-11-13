@@ -142,4 +142,79 @@ describe('ContestsPage', () => {
     expect(await screen.findByRole('link', { name: /Stary konkurs/ })).toBeInTheDocument()
     expect(fetchMock.mock.calls.some(([u]) => String(u).includes('view=archive'))).toBe(true)
   })
+
+  it('hides the "na dziś" badge until reminders have loaded', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: RequestInfo | URL) =>
+        String(input).includes('/api/reminders')
+          ? new Promise<Response>(() => {})
+          : Promise.resolve(new Response(JSON.stringify([card({})]))),
+      ),
+    )
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <MemoryRouter>
+          <ContestsPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+    await screen.findByRole('link', { name: /Wielka loteria/ })
+    expect(screen.queryByText(/na dziś/)).not.toBeInTheDocument()
+  })
+
+  it('sort button has an accessible name starting with Sortuj', async () => {
+    setup([card({})])
+    expect(await screen.findByRole('button', { name: 'Sortuj: Termin' })).toBeInTheDocument()
+  })
+
+  it('awaiting results card shows the results date once', async () => {
+    setup([card({ id: 'c2', name: 'Czekam', effectiveStatus: 'AwaitingResults', resultsDate: '2026-12-05' })])
+    await screen.findByRole('link', { name: /Czekam/ })
+    expect(screen.getAllByText(/05\.12\.2026/)).toHaveLength(1)
+  })
+
+  it('bought card has a visible Duplikuj button that duplicates the contest', async () => {
+    const fetchMock = setup([card({ effectiveStatus: 'Bought' })])
+    fetchMock.mockImplementation((input: RequestInfo | URL, init?: RequestInit) =>
+      Promise.resolve(
+        init?.method === 'POST'
+          ? new Response(JSON.stringify({ id: 'copy1' }))
+          : new Response(JSON.stringify(String(input).includes('/api/reminders') ? [] : [card({ effectiveStatus: 'Bought' })])),
+      ),
+    )
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Duplikuj' }))
+    await waitFor(() => {
+      const call = fetchMock.mock.calls.find(([, init]) => init?.method === 'POST')
+      expect(String(call![0])).toBe('/api/contests/c1/duplicate')
+    })
+  })
+
+  it('duplicate failure shows the card error line', async () => {
+    const fetchMock = setup([card({ effectiveStatus: 'Bought' })])
+    fetchMock.mockImplementation((input: RequestInfo | URL, init?: RequestInit) =>
+      Promise.resolve(
+        init?.method === 'POST'
+          ? new Response(null, { status: 500 })
+          : new Response(JSON.stringify(String(input).includes('/api/reminders') ? [] : [card({ effectiveStatus: 'Bought' })])),
+      ),
+    )
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Duplikuj' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Operacja nie powiodła się')
+  })
+
+  it('card menu closes on Escape, outside click and after choosing', async () => {
+    setup([card({})])
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: 'Więcej opcji' }))
+    expect(screen.getByRole('menu')).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Więcej opcji' }))
+    await user.click(screen.getByText('Panel'))
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Więcej opcji' }))
+    await user.click(screen.getByRole('menuitem', { name: 'Edytuj' }))
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument()
+  })
 })

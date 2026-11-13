@@ -28,4 +28,16 @@ describe('StatusMenu', () => {
     expect(JSON.parse(init.body as string)).toEqual({ status: 'Submitted' })
     expect(screen.queryByRole('menu')).not.toBeInTheDocument()
   })
+
+  it('marks the stored status as current, not the effective one', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 204 })))
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <StatusMenu contestId="c1" status="Submitted" />
+      </QueryClientProvider>,
+    )
+    await userEvent.setup().click(screen.getByRole('button', { name: /Status/ }))
+    expect(screen.getByRole('menuitemradio', { name: 'Zgłoszony' })).toHaveAttribute('aria-checked', 'true')
+  })
 })

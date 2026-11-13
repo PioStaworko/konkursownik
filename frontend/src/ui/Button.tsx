@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from 'react'
 import { Icon } from './Icon'
 import type { IconName } from './icons'
 
@@ -28,7 +28,7 @@ export function Button({ variant = 'primary', icon, className, children, type = 
   )
 }
 
-type IconButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> & {
+type IconButtonProps = Omit<ComponentProps<'button'>, 'children'> & {
   icon: IconName
   label: string
 }
