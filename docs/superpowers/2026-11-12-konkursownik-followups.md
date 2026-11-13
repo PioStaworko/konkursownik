@@ -53,3 +53,10 @@ Zebrane z recenzji zadań i końcowego przeglądu. Żadna nie blokuje używania 
 - Brak UI do zmiany podpisu istniejącego zdjęcia (endpoint `PATCH /api/photos/{id}` jest).
 - Szacunek tokenów dla PDF z kompresowanymi strumieniami obiektów (PDF 1.5+) może być zaniżony — przed włączeniem AI przetestować kilka dużych regulaminów z prawdziwym kluczem.
 - Przed włączeniem AI: sprawdzić aktualne warunki Gemini API (plan darmowy vs płatny, EOG) i potwierdzić model (`gemini-3.5-flash-lite`) oraz limity 15 RPM / 250 tys. TPM.
+
+## Po rundzie „nagrody, administrator, podpisy” (2026-11-14)
+- Brak listy `tasks`/`purchases`/`proofs` w body zapisu konkursu → 500 zamiast 400 (dla `prizes` już 400).
+- Rola administratora nie jest odbierana po zmianie `ADMIN_USERNAME` (może powstać drugi administrator); rola trzymana w ciasteczku do ponownego logowania.
+- `Admin:UserName` nie jest sprawdzany regułami nicku; zgadywalny nick admina pozwala komuś wywołać tymczasową blokadę konta.
+- Kwoty powyżej limitu `numeric(10,2)` → 500; nazwy nagród z AI > 200 znaków trzeba skrócić ręcznie.
+- Równoczesny start dwóch instancji może jednorazowo wywrócić zakładanie administratora (samo się naprawia po restarcie).
