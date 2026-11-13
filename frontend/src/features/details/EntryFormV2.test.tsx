@@ -25,6 +25,29 @@ const fileInput = () => screen.getByLabelText('Dodaj zdjęcie') as HTMLInputElem
 const jpg = (name = 'a.jpg') => new File(['x'], name, { type: 'image/jpeg' })
 
 describe('EntryFormV2', () => {
+  it('marks receipt-filled fields with the AI badge and clears a badge when its field is edited', async () => {
+    vi.stubGlobal('fetch', vi.fn())
+    const { user } = renderForm('Lottery', {
+      renderAi: (onExtracted) => (
+        <button
+          type="button"
+          onClick={() => onExtracted({ receiptNumber: 'R-7', purchaseAmount: 9.9, store: 'Żabka', date: '2026-11-09' }, jpg('r.jpg'))}
+        >
+          Odczytaj
+        </button>
+      ),
+    })
+    expect(screen.queryByText('AI — sprawdź')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Odczytaj' }))
+    expect(screen.getAllByText('AI — sprawdź')).toHaveLength(4)
+    await user.type(screen.getByLabelText('Kwota zakupu'), '0')
+    expect(screen.getAllByText('AI — sprawdź')).toHaveLength(3)
+    await user.type(screen.getByLabelText('Sklep'), 'x')
+    await user.type(screen.getByLabelText('Numer paragonu'), 'x')
+    expect(screen.getAllByText('AI — sprawdź')).toHaveLength(1)
+  })
+
+
   it('saves store and photo label (photo uploaded after the entry)', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(created('e1')).mockResolvedValueOnce(created('p1'))
     vi.stubGlobal('fetch', fetchMock)

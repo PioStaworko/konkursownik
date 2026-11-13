@@ -6,6 +6,7 @@ import { formatBytes, parseAmount, todayInPoland } from '../../lib/format'
 import { photoLabel } from '../../lib/labels'
 import { tokenInputClass } from '../../lib/styles'
 import { Button, IconButton } from '../../ui/Button'
+import { AiBadge } from '../ai/AiBadge'
 import { Field } from '../../ui/Field'
 import { Icon } from '../../ui/Icon'
 import PhotoTile from './PhotoTile'
@@ -38,6 +39,7 @@ interface Pending {
 
 const LABELS = Object.keys(photoLabel) as PhotoLabel[]
 const orNull = (s: string) => (s.trim() === '' ? null : s.trim())
+type AiKey = 'receiptNumber' | 'amount' | 'date' | 'store'
 const amountText = (n: number) => String(n).replace('.', ',')
 
 export default function EntryFormV2({ contestId, contestType, entry, onDone, autoReceipt = false, renderAi }: Props) {
@@ -53,9 +55,19 @@ export default function EntryFormV2({ contestId, contestType, entry, onDone, aut
   const [contactUsed, setContactUsed] = useState(entry?.contactUsed ?? '')
   const [confirmationCode, setConfirmationCode] = useState(entry?.confirmationCode ?? '')
   const [answerText, setAnswerText] = useState(entry?.answerText ?? '')
+  const [aiFields, setAiFields] = useState<ReadonlySet<AiKey>>(new Set())
   const [pending, setPending] = useState<Pending[]>([])
   const [errors, setErrors] = useState<string[]>([])
   const [photoFailure, setPhotoFailure] = useState<string | null>(null)
+
+  const clearAi = (key: AiKey) =>
+    setAiFields((s) => {
+      if (!s.has(key)) return s
+      const next = new Set(s)
+      next.delete(key)
+      return next
+    })
+  const badge = (key: AiKey) => (aiFields.has(key) ? <AiBadge /> : undefined)
 
   const addFile = (file: File) => {
     if (file.size > MAX_PHOTO_BYTES) {
@@ -74,10 +86,12 @@ export default function EntryFormV2({ contestId, contestType, entry, onDone, aut
   }
 
   const onExtracted = (dto: ExtractedReceipt, file: File) => {
-    if (dto.receiptNumber) setReceiptNumber(dto.receiptNumber)
-    if (dto.purchaseAmount != null) setAmount(amountText(dto.purchaseAmount))
-    if (dto.store) setStore(dto.store)
-    if (dto.date) setDate(dto.date)
+    const filled: AiKey[] = []
+    if (dto.receiptNumber) { setReceiptNumber(dto.receiptNumber); filled.push('receiptNumber') }
+    if (dto.purchaseAmount != null) { setAmount(amountText(dto.purchaseAmount)); filled.push('amount') }
+    if (dto.store) { setStore(dto.store); filled.push('store') }
+    if (dto.date) { setDate(dto.date); filled.push('date') }
+    setAiFields((s) => new Set([...s, ...filled]))
     setErrors([])
     addFile(file)
   }
@@ -161,23 +175,23 @@ export default function EntryFormV2({ contestId, contestType, entry, onDone, aut
         </div>
       )}
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Numer paragonu">
-          <input className={`${tokenInputClass} font-mono`} value={receiptNumber} onChange={(e) => setReceiptNumber(e.target.value)} />
+        <Field label="Numer paragonu" hint={badge('receiptNumber')}>
+          <input className={`${tokenInputClass} font-mono`} value={receiptNumber} onChange={(e) => { setReceiptNumber(e.target.value); clearAi('receiptNumber') }} />
         </Field>
-        <Field label="Kwota zakupu">
+        <Field label="Kwota zakupu" hint={badge('amount')}>
           <input
             className={`${tokenInputClass} font-mono`}
             inputMode="decimal"
             placeholder="0,00"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => { setAmount(e.target.value); clearAi('amount') }}
           />
         </Field>
-        <Field label="Data zgłoszenia">
-          <input className={`${tokenInputClass} font-mono`} type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        <Field label="Data zgłoszenia" hint={badge('date')}>
+          <input className={`${tokenInputClass} font-mono`} type="date" value={date} onChange={(e) => { setDate(e.target.value); clearAi('date') }} />
         </Field>
-        <Field label="Sklep">
-          <input className={tokenInputClass} value={store} onChange={(e) => setStore(e.target.value)} />
+        <Field label="Sklep" hint={badge('store')}>
+          <input className={tokenInputClass} value={store} onChange={(e) => { setStore(e.target.value); clearAi('store') }} />
         </Field>
       </div>
       <Field label="E-mail lub telefon użyty w zgłoszeniu">
