@@ -31,7 +31,7 @@ describe('createQueryClient', () => {
 
   it('on a 401 from a non-me query removes user data and sets me to null', async () => {
     const client = createQueryClient()
-    client.setQueryData(['me'], { email: 'a@b.pl' })
+    client.setQueryData(['me'], { userName: 'ania', isAdmin: true })
     client.setQueryData(['reminders'], [1])
     renderHook(
       () => useQuery({ queryKey: ['contests', 'active'], queryFn: () => Promise.reject(new ApiError(401)) }),
@@ -43,7 +43,7 @@ describe('createQueryClient', () => {
 
   it('on a 401 from a mutation also logs out locally', async () => {
     const client = createQueryClient()
-    client.setQueryData(['me'], { email: 'a@b.pl' })
+    client.setQueryData(['me'], { userName: 'ania', isAdmin: true })
     await client
       .getMutationCache()
       .build(client, { mutationFn: () => Promise.reject(new ApiError(401)) })

@@ -8,41 +8,50 @@ afterEach(() => vi.unstubAllGlobals())
 
 describe('AppHeader', () => {
   it('shows brand and title', () => {
-    stubApi({ '/api/auth/me': { email: 'a@b.pl' } })
+    stubApi({ '/api/auth/me': { userName: 'ania', isAdmin: true } })
     renderApp(<AppHeader title="Konkursy" />)
     expect(screen.getByText('Konkursownik')).toBeInTheDocument()
     expect(screen.getByText('· Konkursy')).toBeInTheDocument()
   })
 
   it('back variant goes to the fallback when there is no history', async () => {
-    stubApi({ '/api/auth/me': { email: 'a@b.pl' } })
+    stubApi({ '/api/auth/me': { userName: 'ania', isAdmin: true } })
     renderApp(<AppHeader back title="Zaproszenia" />, '/zaproszenia')
     await userEvent.setup().click(screen.getByRole('button', { name: 'Wróć' }))
     expect(screen.getByTestId('location')).toHaveTextContent('/')
     expect(screen.getByTestId('location')).not.toHaveTextContent('zaproszenia')
   })
 
-  it('profile menu shows email, opens invites, closes on Esc', async () => {
-    stubApi({ '/api/auth/me': { email: 'a@b.pl' } })
+  it('profile menu shows user name, opens invites, closes on Esc', async () => {
+    stubApi({ '/api/auth/me': { userName: 'ania', isAdmin: true } })
     renderApp(<AppHeader title="Pilne" />)
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: 'Profil' }))
-    expect(await screen.findByText('a@b.pl')).toBeInTheDocument()
+    expect(await screen.findByText('ania')).toBeInTheDocument()
     await user.keyboard('{Escape}')
-    expect(screen.queryByText('a@b.pl')).not.toBeInTheDocument()
+    expect(screen.queryByText('ania')).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Profil' }))
     await user.click(screen.getByRole('link', { name: 'Zaproszenia' }))
     expect(screen.getByTestId('location')).toHaveTextContent('/zaproszenia')
-    expect(screen.queryByText('a@b.pl')).not.toBeInTheDocument()
+    expect(screen.queryByText('ania')).not.toBeInTheDocument()
+  })
+
+  it('profile menu hides Zaproszenia for non-admin', async () => {
+    stubApi({ '/api/auth/me': { userName: 'ania', isAdmin: false } })
+    renderApp(<AppHeader title="Pilne" />)
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole('button', { name: 'Profil' }))
+    expect(await screen.findByText('ania')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Zaproszenia' })).not.toBeInTheDocument()
   })
 
   it('profile menu closes on outside click', async () => {
-    stubApi({ '/api/auth/me': { email: 'a@b.pl' } })
+    stubApi({ '/api/auth/me': { userName: 'ania', isAdmin: true } })
     renderApp(<AppHeader title="Pilne" />)
     const user = userEvent.setup()
     await user.click(await screen.findByRole('button', { name: 'Profil' }))
     await user.click(document.body)
-    expect(screen.queryByText('a@b.pl')).not.toBeInTheDocument()
+    expect(screen.queryByText('ania')).not.toBeInTheDocument()
   })
 
   it('profile menu logout clears user and goes to /login', async () => {
@@ -53,7 +62,7 @@ describe('AppHeader', () => {
         return Promise.resolve(new Response(null, { status: 204 }))
       }
       return Promise.resolve(
-        loggedOut ? new Response(null, { status: 401 }) : new Response(JSON.stringify({ email: 'a@b.pl' })),
+        loggedOut ? new Response(null, { status: 401 }) : new Response(JSON.stringify({ userName: 'ania', isAdmin: true })),
       )
     })
     vi.stubGlobal('fetch', fetchMock)
@@ -66,7 +75,7 @@ describe('AppHeader', () => {
   })
 
   it('theme toggle switches theme and persists it', async () => {
-    stubApi({ '/api/auth/me': { email: 'a@b.pl' } })
+    stubApi({ '/api/auth/me': { userName: 'ania', isAdmin: true } })
     localStorage.removeItem('konkursownik-theme')
     renderApp(<AppHeader title="Pilne" />)
     const user = userEvent.setup()
@@ -79,13 +88,13 @@ describe('AppHeader', () => {
   })
 
   it('Escape closes the profile menu and returns focus to the trigger', async () => {
-    stubApi({ '/api/auth/me': { email: 'a@b.pl' } })
+    stubApi({ '/api/auth/me': { userName: 'ania', isAdmin: true } })
     renderApp(<AppHeader title="Pilne" />)
     const user = userEvent.setup()
     const trigger = await screen.findByRole('button', { name: 'Profil' })
     await user.click(trigger)
     await user.keyboard('{Escape}')
-    expect(screen.queryByText('a@b.pl')).not.toBeInTheDocument()
+    expect(screen.queryByText('ania')).not.toBeInTheDocument()
     expect(trigger).toHaveFocus()
     expect(trigger).not.toHaveAttribute('aria-haspopup')
   })

@@ -47,10 +47,12 @@ export default function ProfileMenu() {
       </button>
       {open && (
         <div className="absolute right-0 top-full z-50 mt-space-xs w-64 rounded-xl bg-surface-container-high p-space-sm shadow-lg">
-          {user && <p className="break-all px-space-sm py-space-sm text-label-md text-on-surface-variant">{user.email}</p>}
-          <Link to="/zaproszenia" onClick={() => setOpen(false)} className={itemClass}>
-            Zaproszenia
-          </Link>
+          {user && <p className="break-all px-space-sm py-space-sm text-label-md text-on-surface-variant">{user.userName}</p>}
+          {user?.isAdmin && (
+            <Link to="/zaproszenia" onClick={() => setOpen(false)} className={itemClass}>
+              Zaproszenia
+            </Link>
+          )}
           <button
             type="button"
             className={itemClass}

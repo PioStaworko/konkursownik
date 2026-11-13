@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router'
+import RequireAdmin from './auth/RequireAdmin'
 import RequireAuth from './auth/RequireAuth'
 import ContestDetailsPage from './pages/ContestDetailsPage'
 import ContestFormPage from './pages/ContestFormPage'
@@ -29,7 +30,9 @@ export default function App() {
           <Route path="konkursy/nowy" element={<ContestFormPage />} />
           <Route path="konkursy/:id" element={<ContestDetailsPage />} />
           <Route path="konkursy/:id/edycja" element={<ContestFormPage />} />
-          <Route path="zaproszenia" element={<InvitesPage />} />
+          <Route element={<RequireAdmin />}>
+            <Route path="zaproszenia" element={<InvitesPage />} />
+          </Route>
           <Route path="dowody" element={<ProofsPage />} />
         </Route>
         <Route path="wiecej" element={<Navigate to="/statystyki" replace />} />

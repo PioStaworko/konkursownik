@@ -10,7 +10,7 @@ function Probe() {
   const { user, logout } = useAuth()
   return (
     <>
-      <p>{user ? user.email : 'anon'}</p>
+      <p>{user ? user.userName : 'anon'}</p>
       <button onClick={() => void logout()}>out</button>
     </>
   )
@@ -20,9 +20,9 @@ describe('AuthProvider.logout', () => {
   it('logs out locally even when the request fails', async () => {
     vi.stubGlobal('fetch', vi.fn((input: RequestInfo | URL) =>
       String(input).includes('logout') ? Promise.reject(new TypeError('offline'))
-        : Promise.resolve(new Response(JSON.stringify({ email: 'a@b.pl' })))))
+        : Promise.resolve(new Response(JSON.stringify({ userName: 'ania', isAdmin: true })))))
     render(<QueryClientProvider client={new QueryClient()}><AuthProvider><Probe /></AuthProvider></QueryClientProvider>)
-    expect(await screen.findByText('a@b.pl')).toBeInTheDocument()
+    expect(await screen.findByText('ania')).toBeInTheDocument()
     await userEvent.setup().click(screen.getByRole('button', { name: 'out' }))
     await waitFor(() => expect(screen.getByText('anon')).toBeInTheDocument())
   })
@@ -30,13 +30,13 @@ describe('AuthProvider.logout', () => {
   it('wipes cached user data and calls POST /api/auth/logout', async () => {
     const fetchMock = vi.fn((input: RequestInfo | URL, _init?: RequestInit) =>
       Promise.resolve(String(input).includes('logout') ? new Response(null, { status: 204 })
-        : new Response(JSON.stringify({ email: 'a@b.pl' }))))
+        : new Response(JSON.stringify({ userName: 'ania', isAdmin: true }))))
     vi.stubGlobal('fetch', fetchMock)
     const client = new QueryClient()
     client.setQueryData(['contests', 'active'], [{ id: 'c1' }])
     client.setQueryData(['reminders'], [{ id: 'r1' }])
     render(<QueryClientProvider client={client}><AuthProvider><Probe /></AuthProvider></QueryClientProvider>)
-    expect(await screen.findByText('a@b.pl')).toBeInTheDocument()
+    expect(await screen.findByText('ania')).toBeInTheDocument()
     await userEvent.setup().click(screen.getByRole('button', { name: 'out' }))
     await waitFor(() => expect(screen.getByText('anon')).toBeInTheDocument())
     expect(client.getQueryData(['contests', 'active'])).toBeUndefined()

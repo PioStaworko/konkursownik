@@ -196,8 +196,10 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         newItem={() => ({ id: null, text: '', done: false })}
         error={errors.tasks}
         badge={badge('tasks')}
-        renderItem={(t, i, update) => (
-          <input className={input} aria-label={`Krok ${i + 1}`} value={t.text} onChange={(e) => update({ text: e.target.value })} />
+        renderItem={(t, _i, update) => (
+          <Field label="Krok">
+            <input className={input} value={t.text} onChange={(e) => update({ text: e.target.value })} />
+          </Field>
         )}
       />
 
@@ -212,10 +214,19 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         badge={badge('purchases')}
         renderItem={(p, i, update) => (
           <>
-            <input className={input} aria-label={`Produkt ${i + 1}`} value={p.product} onChange={(e) => update({ product: e.target.value })} />
-            <input className={input} aria-label={`Sklep ${i + 1}`} value={p.store ?? ''} onChange={(e) => update({ store: e.target.value })} />
-            <input className={input} aria-label={`Ilość ${i + 1}`} value={p.quantity ?? ''} onChange={(e) => update({ quantity: e.target.value })} />
-            <input className={input} aria-label={`Notatka pozycji ${i + 1}`} placeholder="Notatka" value={p.note ?? ''} onChange={(e) => update({ note: e.target.value })} />
+            <p className="text-label-md font-semibold text-on-surface">Produkt {i + 1}</p>
+            <Field label="Produkt">
+              <input className={input} value={p.product} onChange={(e) => update({ product: e.target.value })} />
+            </Field>
+            <Field label="Sklep">
+              <input className={input} value={p.store ?? ''} onChange={(e) => update({ store: e.target.value })} />
+            </Field>
+            <Field label="Ilość lub kwota">
+              <input className={input} placeholder="np. 2 szt., min. 20 zł" value={p.quantity ?? ''} onChange={(e) => update({ quantity: e.target.value })} />
+            </Field>
+            <Field label="Notatka">
+              <input className={input} value={p.note ?? ''} onChange={(e) => update({ note: e.target.value })} />
+            </Field>
           </>
         )}
       />
@@ -231,10 +242,19 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         badge={badge('proofs')}
         renderItem={(p, i, update) => (
           <>
-            <input className={input} aria-label={`Dowód ${i + 1}`} value={p.what} onChange={(e) => update({ what: e.target.value })} />
-            <input className={`${input} font-mono`} type="date" aria-label={`Przechowaj do ${i + 1}`} value={p.keepUntil ?? ''} onChange={(e) => update({ keepUntil: e.target.value })} />
-            <input className={input} aria-label={`Miejsce ${i + 1}`} value={p.location ?? ''} onChange={(e) => update({ location: e.target.value })} />
-            <input className={input} aria-label={`Notatka dowodu ${i + 1}`} placeholder="Notatka" value={p.note ?? ''} onChange={(e) => update({ note: e.target.value })} />
+            <p className="text-label-md font-semibold text-on-surface">Dowód {i + 1}</p>
+            <Field label="Co zachować">
+              <input className={input} placeholder="np. paragon, opakowanie" value={p.what} onChange={(e) => update({ what: e.target.value })} />
+            </Field>
+            <Field label="Trzymać do">
+              <input className={`${input} font-mono`} type="date" value={p.keepUntil ?? ''} onChange={(e) => update({ keepUntil: e.target.value })} />
+            </Field>
+            <Field label="Gdzie leży">
+              <input className={input} value={p.location ?? ''} onChange={(e) => update({ location: e.target.value })} />
+            </Field>
+            <Field label="Notatka">
+              <input className={input} value={p.note ?? ''} onChange={(e) => update({ note: e.target.value })} />
+            </Field>
           </>
         )}
       />

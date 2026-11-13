@@ -64,11 +64,11 @@ describe('WinSection', () => {
   it('sends the full edited steps list (rename, remove, add)', async () => {
     const { fetchMock, user } = renderWin(win)
     await user.click(screen.getByRole('button', { name: 'Edytuj wygraną' }))
-    const first = screen.getByLabelText('Krok laureata 1')
+    const first = screen.getAllByLabelText('Krok')[0]
     await user.clear(first)
     await user.type(first, 'Nowy tekst')
     await user.click(screen.getByRole('button', { name: 'Usuń krok laureata 2' }))
-    await user.type(screen.getByLabelText('Nowy krok laureata'), 'Wyślij dane')
+    await user.type(screen.getByLabelText('Nowy krok'), 'Wyślij dane')
     await user.click(screen.getByRole('button', { name: 'Dodaj krok laureata' }))
     await user.click(screen.getByRole('button', { name: 'Zapisz wygraną' }))
     await waitFor(() => expect(fetchMock).toHaveBeenCalled())

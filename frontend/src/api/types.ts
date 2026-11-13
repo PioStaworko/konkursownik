@@ -4,9 +4,9 @@ export type ContestType = 'Lottery' | 'Creative'
 export type ContestStatus = 'Planned' | 'Bought' | 'Submitted' | 'AwaitingResults' | 'Won' | 'Lost' | 'Archived'
 export type ReminderKind = 'EndingSoon' | 'Ended' | 'ResultsDue' | 'LaureateDeadline' | 'ProofDisposable'
 
-export interface RegisterRequest { email: string; password: string; inviteCode: string }
-export interface LoginRequest { email: string; password: string }
-export interface MeDto { email: string }
+export interface RegisterRequest { userName: string; password: string; inviteCode: string }
+export interface LoginRequest { userName: string; password: string }
+export interface MeDto { userName: string; isAdmin: boolean }
 export interface InviteDto { code: string; createdAt: string; used: boolean }
 
 export interface TaskDto { id: string | null; text: string; done: boolean }

@@ -7,8 +7,8 @@ import type { MeDto } from '../api/types'
 export interface AuthValue {
   user: MeDto | null
   loading: boolean
-  login(email: string, password: string): Promise<void>
-  register(email: string, password: string, inviteCode: string): Promise<void>
+  login(userName: string, password: string): Promise<void>
+  register(userName: string, password: string, inviteCode: string): Promise<void>
   logout(): Promise<void>
 }
 
@@ -37,12 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {
       user: data ?? null,
       loading: isPending,
-      async login(email, password) {
-        await apiFetch('/api/auth/login', { method: 'POST', body: jsonBody({ email, password }) })
+      async login(userName, password) {
+        await apiFetch('/api/auth/login', { method: 'POST', body: jsonBody({ userName, password }) })
         await refreshMe()
       },
-      async register(email, password, inviteCode) {
-        await apiFetch('/api/auth/register', { method: 'POST', body: jsonBody({ email, password, inviteCode }) })
+      async register(userName, password, inviteCode) {
+        await apiFetch('/api/auth/register', { method: 'POST', body: jsonBody({ userName, password, inviteCode }) })
         await refreshMe()
       },
       async logout() {

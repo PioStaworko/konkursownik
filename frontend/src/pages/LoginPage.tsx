@@ -10,7 +10,7 @@ export default function LoginPage() {
   const { user, login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('')
+  const [userName, setUserName] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -22,12 +22,12 @@ export default function LoginPage() {
     setBusy(true)
     setError(null)
     try {
-      await login(email, password)
+      await login(userName, password)
       navigate(from, { replace: true })
     } catch (e) {
       setError(
         e instanceof ApiError && e.status === 401
-          ? 'Nieprawidłowy e-mail lub hasło'
+          ? 'Nieprawidłowa nazwa użytkownika lub hasło'
           : 'Nie udało się zalogować. Spróbuj ponownie.',
       )
     } finally {
@@ -51,8 +51,8 @@ export default function LoginPage() {
         </>
       }
     >
-      <Field label="E-mail">
-        <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={tokenInputClass} />
+      <Field label="Nazwa użytkownika">
+        <input type="text" required autoComplete="username" autoCapitalize="none" value={userName} onChange={(e) => setUserName(e.target.value)} className={tokenInputClass} />
       </Field>
       <Field label="Hasło">
         <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={tokenInputClass} />
