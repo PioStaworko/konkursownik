@@ -183,6 +183,8 @@ Kształt DTO (jedno wspólne „podsumowanie karty” + pola specyficzne dla rod
 - **Przypomnienia:** reguły i progi z MVP bez zmian (np. „Kończy się” = 0–3 dni); etapy 1 i 3 tylko rozszerzają dane i wygląd.
 - **Odpowiedź AI spoza zamkniętych list** (`type`, `icon`, daty w złym formacie): serwer zamienia takie wartości na `null`, nie zwraca błędu.
 
+- **Limity Gemini (informacja właściciela):** model Flash 3.5 ma limit **15 zapytań na minutę** i **250 tys. tokenów** (na minutę); przekroczenie blokuje klucz do końca doby (reset w nowym dniu). Aplikacja pilnuje tego sama, wspólnie dla wszystkich użytkowników: globalnie maks. 15 wywołań/min i budżet 250 tys. tokenów/min (szacowany przed wywołaniem, rozliczany z `usageMetadata` odpowiedzi); po przekroczeniu → 429 `{ "error": "ai_busy" }` („Za dużo odczytów naraz — spróbuj za minutę”). Tekst strony przycinany do ~200 tys. znaków. Jeśli mimo to Gemini zwróci 429, odczyt AI jest wyłączany do północy czasu pacyficznego (reset dziennych limitów Gemini) → 503 `ai_unavailable`. Limity i strefa w konfiguracji. Domyślny model: Flash 3.5 (dokładną nazwę sprawdzić w dokumentacji).
+
 ## 9. Decyzje pozostawione builderowi (oznaczone jako jego)
 - Ostateczna lista ~20 ikon i mapa ikon sklepów.
 - Kształt DTO dla bogatych kart i przypomnień (§4.9).

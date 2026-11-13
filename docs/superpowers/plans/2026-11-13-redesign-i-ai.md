@@ -236,6 +236,8 @@ Front: `win_form_preserves_steps` — edycja kwoty nagrody wysyła istniejące k
   - `GET /api/features` (zalogowany) → `{ "aiExtraction": bool }`
   - Polityka limitu `"ai"`: ASP.NET RateLimiter, okno stałe 1 h, partycja = `UserId()`, limit `RequestsPerHour`; odrzucenie → 429 `{ "error": "rate_limited" }`
   - Endpointy AI (Task 7–8) przy `!Enabled` → 503 `{ "error": "ai_unavailable" }`; filtr `RequireAiEnabled()` w `AiFeatures.cs`
+  - **Globalny strażnik limitów Gemini** (singleton `GeminiQuota`, wspólny dla wszystkich użytkowników, wołany przez `GeminiClient` przed i po wywołaniu): `GeminiOptions.MaxRequestsPerMinute = 15`, `MaxTokensPerMinute = 250_000`, `QuotaResetTimeZone = "America/Los_Angeles"`; okno przesuwne 60 s; `bool TryAcquire(int estimatedTokens)` (szacunek: tekst `znaki/4`, obraz 1 300, PDF `rozmiar_KB/4` — z zapasem), `void Record(int actualTokens)` z `usageMetadata.totalTokenCount`; brak miejsca → `GeminiBusyException` → endpoint 429 `{ "error": "ai_busy" }`; odpowiedź 429 od Gemini → `GeminiQuota.BlockUntilNextReset()` (do północy w `QuotaResetTimeZone`), w tym czasie `Enabled`-owe endpointy zwracają 503 `ai_unavailable`, a `/api/features` → `aiExtraction:false`
+  - Domyślny `Model` w `appsettings.json`: model Flash 3.5 (dokładny identyfikator z aktualnej dokumentacji Gemini)
   - `ApiFactory` rejestruje atrapę `FakeGeminiClient` (kolejka odpowiedzi/wyjątków) i ustawia `Gemini:ApiKey=test`, `Gemini:Model=test`
 
 - [ ] **Step 1: Testy**
@@ -246,6 +248,10 @@ Front: `win_form_preserves_steps` — edycja kwoty nagrody wysyła istniejące k
 [Fact] public async Task GeminiClient_parses_json_candidate()           // HttpMessageHandler-atrapa zwraca odpowiedź generateContent → JsonElement z polem "store"
 [Fact] public async Task GeminiClient_unparsable_text_returns_null()
 [Fact] public async Task GeminiClient_500_throws_unavailable()
+[Fact] public void Quota_allows_15_per_minute_then_rejects()      // FakeTimeProvider: 15× TryAcquire(100) true, 16. false; po 61 s znowu true
+[Fact] public void Quota_rejects_when_token_budget_exceeded()     // TryAcquire(240_000) true, potem TryAcquire(20_000) false
+[Fact] public void Quota_record_uses_actual_tokens()
+[Fact] public async Task Upstream_429_blocks_until_pacific_midnight() // po 429 od atrapy HTTP: /api/features false; po przesunięciu zegara za północ PT → true
 ```
 - [ ] **Step 2: FAIL** · **Step 3: Implementacja** (docs/deploy.md: zmienne `Gemini__ApiKey`, `Gemini__Model`; akapit „przed włączeniem sprawdź aktualne warunki Gemini API dot. wykorzystania danych — plan darmowy vs płatny, EOG”) · **Step 4: PASS**
 - [ ] **Step 5: Commit** — `feat: gemini client, feature flag, rate limit`
@@ -294,7 +300,7 @@ Front: `win_form_preserves_steps` — edycja kwoty nagrody wysyła istniejące k
 **Interfaces:**
 - Produces:
   - `static bool IpPolicy.IsPublic(IPAddress ip)` — false dla: loopback, prywatnych (10/8, 172.16/12, 192.168/16), link-local (169.254/16, fe80::/10), CGNAT 100.64/10, 0.0.0.0/8, unique-local fc00::/7, multicast, IPv4-mapped IPv6 tych zakresów
-  - `interface IPageFetcher { Task<PageText?> FetchAsync(Uri url, CancellationToken ct); }`; `record PageText(string Title, string Text, List<string> Links)`; implementacja: tylko http/https; `SocketsHttpHandler.ConnectCallback` rozwiązuje DNS i łączy wyłącznie z adresem spełniającym `IsPublic` (odporne na DNS rebinding); `AllowAutoRedirect=false`, ręcznie maks. 3 przekierowania (każde przez ten sam handler); limit 2 MB, 10 s; HTML → tekst (usuń `script`/`style`/tagi, zdekoduj encje, zwiń białe znaki); `Links` = href zawierające „regulamin” lub kończące się `.pdf` (absolutne); `null` przy błędzie lub tekście < 200 znaków
+  - `interface IPageFetcher { Task<PageText?> FetchAsync(Uri url, CancellationToken ct); }`; `record PageText(string Title, string Text, List<string> Links)`; implementacja: tylko http/https; `SocketsHttpHandler.ConnectCallback` rozwiązuje DNS i łączy wyłącznie z adresem spełniającym `IsPublic` (odporne na DNS rebinding); `AllowAutoRedirect=false`, ręcznie maks. 3 przekierowania (każde przez ten sam handler); limit 2 MB, 10 s; HTML → tekst (usuń `script`/`style`/tagi, zdekoduj encje, zwiń białe znaki, przytnij do 200 000 znaków); `Links` = href zawierające „regulamin” lub kończące się `.pdf` (absolutne); `null` przy błędzie lub tekście < 200 znaków
   - `record ExtractedPurchaseDto(string Product, string? Store, string? Quantity, string? Note)`; `record ExtractedProofDto(string What, DateOnly? KeepUntil, string? Note)`
   - `record ContestExtractionDto(string? Name, string? Organizer, string? Url, string? RulesUrl, ContestType? Type, string? Icon, string? PrizeDescription, decimal? PrizeValue, int? PrizeCount, DateOnly? StartDate, DateOnly? EndDate, DateOnly? ResultsDate, string? ResultsCheckNote, int? EntryLimitPerDay, int? EntryLimitTotal, List<string> Tasks, List<ExtractedPurchaseDto> Purchases, List<ExtractedProofDto> Proofs, string? Notes)`
   - `static ContestExtractionDto ContestExtraction.Map(JsonElement json)` — `Type`/`Icon` spoza list → null; ujemne/zerowe limity → null; daty tylko `YYYY-MM-DD`
@@ -536,7 +542,7 @@ it("no share button and no fabricated badges", ...)      // brak „Udostępnij�
   - Oznaczenie pól z AI: plakietka „AI — sprawdź” przy polu; znika po edycji pola
   - `AiFillSection` (formularz konkursu): pole linku + „Odczytaj”, „Wgraj PDF / zrzut”; `page_unreadable` → komunikat „Nie mogę odczytać tej strony. Wgraj regulamin (PDF) albo zrzut ekranu.” i podświetlony przycisk pliku
   - `AiReceiptButton` (formularz zgłoszenia): „Odczytaj z paragonu” → plik → wypełnia sklep, datę, kwotę, nr paragonu; plik trzymany i przy zapisie wysyłany jako zdjęcie `label=Receipt` po utworzeniu zgłoszenia; błąd zdjęcia → zgłoszenie zostaje, przy nim „Nie udało się dodać zdjęcia” + „Spróbuj ponownie”
-  - Komunikaty: 422 `extraction_failed` → „Nie udało się odczytać — uzupełnij ręcznie”; 503 → „Odczyt AI jest teraz niedostępny”; 429 → „Limit odczytów na tę godzinę wyczerpany”
+  - Komunikaty: 422 `extraction_failed` → „Nie udało się odczytać — uzupełnij ręcznie”; 503 → „Odczyt AI jest teraz niedostępny”; 429 `rate_limited` → „Limit odczytów na tę godzinę wyczerpany”; 429 `ai_busy` → „Za dużo odczytów naraz — spróbuj za minutę”
   - `IconPicker`: siatka 20 ikon, `aria-pressed`, wybrana podświetlona; formularz w nowym stylu z sekcjami jak MVP + notatki pozycji i dowodów
 
 - [ ] **Step 1: Testy**
