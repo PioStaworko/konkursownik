@@ -4,7 +4,7 @@ import AppHeader from './AppHeader'
 const titles: Record<string, string> = {
   '/konkursy/nowy': 'Nowy konkurs',
   '/zaproszenia': 'Zaproszenia',
-  '/dowody': 'Dowody',
+  '/dowody': 'Schowek dowodów',
 }
 
 export default function DetailLayout() {

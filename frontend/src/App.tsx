@@ -5,6 +5,7 @@ import ContestFormPage from './pages/ContestFormPage'
 import ContestsPage from './pages/ContestsPage'
 import InvitesPage from './pages/InvitesPage'
 import LoginPage from './pages/LoginPage'
+import ProofsPage from './pages/ProofsPage'
 import RegisterPage from './pages/RegisterPage'
 import RemindersPage from './pages/RemindersPage'
 import ShoppingPage from './pages/ShoppingPage'
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="konkursy/:id" element={<ContestDetailsPage />} />
           <Route path="konkursy/:id/edycja" element={<ContestFormPage />} />
           <Route path="zaproszenia" element={<InvitesPage />} />
+          <Route path="dowody" element={<ProofsPage />} />
         </Route>
         <Route path="wiecej" element={<Navigate to="/statystyki" replace />} />
       </Route>

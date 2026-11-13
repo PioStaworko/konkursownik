@@ -43,5 +43,15 @@ export function todayInPoland(): string {
   return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Warsaw' }).format(new Date())
 }
 
+/** Current Polish local time as "dd.MM.yyyy, HH:mm". */
+export function nowInPolandLabel(now: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('pl-PL', {
+    timeZone: 'Europe/Warsaw', day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(now)
+  const p = (t: string) => parts.find((x) => x.type === t)?.value ?? ''
+  return `${p('day')}.${p('month')}.${p('year')}, ${p('hour')}:${p('minute')}`
+}
+
 export const keepUntilDetail = (keepUntil: string | null, location: string | null) =>
   [keepUntil && `do ${formatDate(keepUntil)}`, location].filter(Boolean).join(' · ') || null
