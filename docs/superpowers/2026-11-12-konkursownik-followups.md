@@ -37,3 +37,12 @@ Zebrane z recenzji zadań i końcowego przeglądu. Żadna nie blokuje używania 
 - Toggle 404 dla zakupów/dowodów; klucze błędów w testach 400.
 - Usunięcie cudzego zgłoszenia nie rusza cudzych plików; awaria storage przy DELETE → 204; body > 11 MB.
 - Komunikat 401 przy logowaniu, przekierowanie `RequireAuth`, zaproszenia/schowek na stronie „Więcej”.
+
+## Odłożone w rundzie „redesign i AI”
+- Zakładki szczegółów bez `aria-controls` i bez nawigacji strzałkami (wzorzec tablist); menu „⋮” na karcie i menu statusu bez nawigacji strzałkami.
+- Przewijanie aktywnej zakładki do widoku używa `scrollIntoView` (na starcie może przesunąć stronę, gdy zakładki są poniżej ekranu).
+- Miniatury zdjęć nadal są pełnymi plikami (do 10 MB) — małe podglądy po stronie serwera.
+- Zrzuty ekranu przy 375 i 1280 px zrobione ręcznie z wbudowanej przeglądarki; brak automatycznych testów wizualnych/regresji układu.
+- Kafelek „Dziś / na dziś” liczy tylko przypomnienia o terminie ≤ dziś — przy samych przyszłych alertach pokazuje 0 (świadomie, jak w MVP).
+- Odczyt AI (Gemini) sprawdzony tylko na atrapie; w przeglądarce bez klucza przyciski są ukryte, przepływ z prawdziwym kluczem nie był przeklikany.
+- Karta „Czekam na wyniki” bez przycisków akcji ma pusty pasek z samym „⋮”.
