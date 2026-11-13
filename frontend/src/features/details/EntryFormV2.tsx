@@ -55,6 +55,7 @@ export default function EntryFormV2({ contestId, contestType, entry, onDone, aut
   const [answerText, setAnswerText] = useState(entry?.answerText ?? '')
   const [pending, setPending] = useState<Pending[]>([])
   const [errors, setErrors] = useState<string[]>([])
+  const [photoFailure, setPhotoFailure] = useState<string | null>(null)
 
   const addFile = (file: File) => {
     if (file.size > MAX_PHOTO_BYTES) {
@@ -113,13 +114,18 @@ export default function EntryFormV2({ contestId, contestType, entry, onDone, aut
       )
       return
     }
-    // Photos go up after the entry exists; a failed one stays queued and a retry updates the same entry.
+    await uploadPending(id)
+  }
+
+  // Photos go up after the entry exists; a failed one stays queued and only the photos are retried.
+  const uploadPending = async (id: string) => {
+    setPhotoFailure(null)
     for (const p of pending) {
       try {
         await upload.mutateAsync({ entryId: id, file: p.file, label: p.label })
         setPending((list) => list.filter((x) => x.key !== p.key))
       } catch (err) {
-        setErrors([uploadError(err)])
+        setPhotoFailure(uploadError(err))
         return
       }
     }
@@ -137,6 +143,16 @@ export default function EntryFormV2({ contestId, contestType, entry, onDone, aut
         <h3 className="text-title-md text-on-surface">{entry ? 'Edycja zgłoszenia' : 'Nowe zgłoszenie'}</h3>
       </div>
       {renderAi?.(onExtracted, { autoReceipt })}
+      {photoFailure && savedId && (
+        <div role="alert" className="flex flex-col gap-2 rounded-lg bg-error-container p-space-sm text-body-md text-on-error-container">
+          <p className="font-medium">Nie udało się dodać zdjęcia</p>
+          <p>{photoFailure}</p>
+          <p>Zgłoszenie zostało zapisane.</p>
+          <Button variant="secondary" icon="cloud_upload" disabled={busy} onClick={() => void uploadPending(savedId)}>
+            Spróbuj ponownie
+          </Button>
+        </div>
+      )}
       {errors.length > 0 && (
         <div role="alert" className="text-body-md text-error">
           {errors.map((m) => (

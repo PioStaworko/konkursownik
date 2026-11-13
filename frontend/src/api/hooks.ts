@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch, jsonBody } from './client'
 import type {
   ContestDto, ContestStatus, ContestCardDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto, ProofListItemDto,
-  PhotoLabel, StatsDto, WinDto,
+  PhotoLabel, StatsDto, WinDto, ReceiptExtractionDto, ContestExtractionDto,
 } from './types'
 
 export type ContestView = 'active' | 'archive'
@@ -179,4 +179,38 @@ export function useCreateInvite() {
 
 export function useProofs() {
   return useQuery({ queryKey: ['proofs'], queryFn: () => apiFetch<ProofListItemDto[]>('/api/proofs') })
+}
+
+/** Server feature flags; an error (or a missing flag) means the feature is off. */
+export function useFeatures(): { aiExtraction: boolean } {
+  const q = useQuery({
+    queryKey: ['features'],
+    queryFn: () => apiFetch<{ aiExtraction: boolean }>('/api/features'),
+    staleTime: Infinity,
+    retry: false,
+  })
+  return { aiExtraction: q.data?.aiExtraction === true }
+}
+
+export function useExtractReceipt() {
+  return useMutation({
+    mutationFn: (file: File) => {
+      const body = new FormData()
+      body.append('file', file)
+      return apiFetch<ReceiptExtractionDto>('/api/ai/receipt', { method: 'POST', body })
+    },
+  })
+}
+
+export function useExtractContest() {
+  return useMutation({
+    mutationFn: (input: { url: string } | { file: File }) => {
+      if ('file' in input) {
+        const body = new FormData()
+        body.append('file', input.file)
+        return apiFetch<ContestExtractionDto>('/api/ai/contest', { method: 'POST', body })
+      }
+      return apiFetch<ContestExtractionDto>('/api/ai/contest', { method: 'POST', body: jsonBody({ url: input.url }) })
+    },
+  })
 }

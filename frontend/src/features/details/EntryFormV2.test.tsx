@@ -142,4 +142,22 @@ describe('EntryFormV2', () => {
     await user.click(screen.getByRole('button', { name: 'Zapisz zgłoszenie' }))
     await waitFor(() => expect(onDone).toHaveBeenCalled())
   })
+
+  it('photo upload failure keeps entry and offers retry of the photo only', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(created('e1'))
+      .mockResolvedValueOnce(new Response(null, { status: 500 }))
+      .mockResolvedValueOnce(created('p1'))
+    vi.stubGlobal('fetch', fetchMock)
+    const { onDone, user } = renderForm()
+    await user.upload(fileInput(), jpg())
+    await user.click(screen.getByRole('button', { name: 'Zapisz zgłoszenie' }))
+    expect(await screen.findByText('Nie udało się dodać zdjęcia')).toBeInTheDocument()
+    expect(onDone).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: 'Spróbuj ponownie' }))
+    await waitFor(() => expect(onDone).toHaveBeenCalled())
+    const urls = fetchMock.mock.calls.map(([u, i]) => `${i?.method} ${u}`)
+    expect(urls).toEqual(['POST /api/contests/c1/entries', 'POST /api/entries/e1/photos', 'POST /api/entries/e1/photos'])
+  })
 })

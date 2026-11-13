@@ -2,10 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ContestDto } from '../api/types'
 import { todayInPoland } from '../lib/format'
 import { contestFixture, entryFixture } from '../test/fixtures'
+import { LocationProbe } from '../test/render'
 import ContestDetailsPage from './ContestDetailsPage'
 
 afterEach(() => vi.unstubAllGlobals())
@@ -21,6 +22,7 @@ function renderPage(fetchMock: ReturnType<typeof vi.fn>, initial = '/konkursy/c1
           <Route path="/konkursy/:id/edycja" element={<p>Edycja kopii</p>} />
           <Route path="/konkursy" element={<p>Lista konkursów</p>} />
         </Routes>
+        <LocationProbe />
       </MemoryRouter>
     </QueryClientProvider>,
   )
@@ -187,5 +189,89 @@ describe('ContestDetailsPage', () => {
       expect(within(page).queryByText(new RegExp(text))).not.toBeInTheDocument()
     }
     expect(screen.queryByRole('button', { name: /Udostępnij/ })).not.toBeInTheDocument()
+  })
+
+  describe('AI receipt reading', () => {
+    beforeEach(() => localStorage.clear())
+
+    const receipt = { store: 'Żabka', date: '2026-11-09', amount: 12.5, receiptNumber: 'R-77', products: [] }
+    const aiApi = (ai: boolean, extra: (url: string, init?: RequestInit) => Response | undefined = () => undefined) =>
+      vi.fn((url: string, init?: RequestInit) => {
+        if (url === '/api/features') return Promise.resolve(ok({ aiExtraction: ai }))
+        const custom = extra(url, init)
+        if (custom) return Promise.resolve(custom)
+        if (url === '/api/ai/receipt') return Promise.resolve(ok(receipt))
+        return Promise.resolve(init?.method && init.method !== 'GET' ? ok({ id: 'x1' }, 201) : ok(contestFixture))
+      })
+
+    it('receipt extraction fills fields and attaches same file as Receipt on save', async () => {
+      localStorage.setItem('konkursownik-ai-notice', '1')
+      const fetchMock = aiApi(true)
+      renderPage(fetchMock, '/konkursy/c1?zgloszenie=1')
+      const user = userEvent.setup()
+      const file = new File(['img'], 'paragon.jpg', { type: 'image/jpeg' })
+      await user.upload(await screen.findByLabelText('Plik paragonu'), file)
+      await waitFor(() => expect(screen.getByLabelText('Numer paragonu')).toHaveValue('R-77'))
+      expect(screen.getByLabelText('Kwota zakupu')).toHaveValue('12,5')
+      expect(screen.getByLabelText('Sklep')).toHaveValue('Żabka')
+      expect(screen.getByLabelText('Data zgłoszenia')).toHaveValue('2026-11-09')
+      const aiCall = fetchMock.mock.calls.find(([u]) => u === '/api/ai/receipt')!
+      expect((aiCall[1]!.body as FormData).get('file')).toBe(file)
+      await user.click(screen.getByRole('button', { name: 'Zapisz zgłoszenie' }))
+      await waitFor(() => expect(fetchMock.mock.calls.some(([u]) => u === '/api/entries/x1/photos')).toBe(true))
+      const photo = fetchMock.mock.calls.find(([u]) => u === '/api/entries/x1/photos')!
+      const form = photo[1]!.body as FormData
+      expect(form.get('label')).toBe('Receipt')
+      expect(form.get('file')).toBe(file)
+    })
+
+    it('notice is shown before the first reading', async () => {
+      const fetchMock = aiApi(true)
+      renderPage(fetchMock, '/konkursy/c1?zgloszenie=1')
+      const user = userEvent.setup()
+      await user.click(await screen.findByRole('button', { name: 'Odczytaj z paragonu' }))
+      expect(screen.getByText('Zdjęcie lub plik zostanie wysłany do Google Gemini w celu odczytania danych.')).toBeInTheDocument()
+      await user.click(screen.getByRole('button', { name: 'Rozumiem' }))
+      expect(localStorage.getItem('konkursownik-ai-notice')).toBe('1')
+    })
+
+    it('ai buttons hidden when feature disabled', async () => {
+      const fetchMock = aiApi(false)
+      renderPage(fetchMock, '/konkursy/c1?zgloszenie=1')
+      await screen.findByRole('button', { name: 'Zapisz zgłoszenie' })
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledWith('/api/features', expect.anything()))
+      expect(screen.queryByRole('button', { name: 'Odczytaj z paragonu' })).not.toBeInTheDocument()
+    })
+
+    it('receipt errors show a message and keep the form', async () => {
+      localStorage.setItem('konkursownik-ai-notice', '1')
+      const fetchMock = aiApi(true, (u) =>
+        u === '/api/ai/receipt' ? ok({ error: 'rate_limited' }, 429) : undefined,
+      )
+      renderPage(fetchMock, '/konkursy/c1?zgloszenie=1')
+      const user = userEvent.setup()
+      await user.type(await screen.findByLabelText('Sklep'), 'Dino')
+      await user.upload(screen.getByLabelText('Plik paragonu'), new File(['i'], 'p.jpg', { type: 'image/jpeg' }))
+      expect(await screen.findByText('Limit odczytów na tę godzinę wyczerpany')).toBeInTheDocument()
+      expect(screen.getByLabelText('Sklep')).toHaveValue('Dino')
+    })
+
+    it('?paragon=1 opens the picker once and the params are consumed', async () => {
+      localStorage.setItem('konkursownik-ai-notice', '1')
+      const click = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {})
+      try {
+        renderPage(aiApi(true), '/konkursy/c1?zgloszenie=1&paragon=1')
+        expect(await screen.findByRole('button', { name: 'Odczytaj z paragonu' })).toBeInTheDocument()
+        await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent(/^\/konkursy\/c1$/))
+        expect(click).toHaveBeenCalledTimes(1)
+        const user = userEvent.setup()
+        await user.click(screen.getByRole('tab', { name: /Kroki/ }))
+        await user.click(screen.getByRole('tab', { name: 'Zgłoszenia' }))
+        expect(screen.queryByRole('button', { name: 'Zapisz zgłoszenie' })).not.toBeInTheDocument()
+        expect(click).toHaveBeenCalledTimes(1)
+      } finally {
+        click.mockRestore()
+      }
+    })
   })
 })

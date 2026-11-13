@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { apiFetch } from '../../api/client'
 import { useContests, useSaveContest } from '../../api/hooks'
-import type { ContestDto, ContestUpsertDto } from '../../api/types'
+import type { ContestDto } from '../../api/types'
+import { toUpsert } from '../../lib/contestUpsert'
 import { BottomSheet } from '../../ui/BottomSheet'
 import { Button } from '../../ui/Button'
 import { Field } from '../../ui/Field'
@@ -10,17 +11,6 @@ const control =
   'min-h-11 w-full rounded-lg bg-surface-container-highest px-3 text-body-md text-on-surface outline-none focus:ring-2 focus:ring-primary'
 
 const orNull = (s: string) => (s.trim() === '' ? null : s.trim())
-
-/** Strips the read-only parts of a fetched contest; children keep their ids. */
-function toUpsert(c: ContestDto): ContestUpsertDto {
-  return {
-    name: c.name, organizer: c.organizer, url: c.url, rulesUrl: c.rulesUrl, type: c.type,
-    prizeDescription: c.prizeDescription, prizeValue: c.prizeValue, prizeCount: c.prizeCount,
-    startDate: c.startDate, endDate: c.endDate, resultsDate: c.resultsDate, resultsCheckNote: c.resultsCheckNote,
-    entryLimitPerDay: c.entryLimitPerDay, entryLimitTotal: c.entryLimitTotal, status: c.status, notes: c.notes,
-    icon: c.icon, tasks: c.tasks, purchases: c.purchases, proofs: c.proofs,
-  }
-}
 
 export default function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const contests = useContests('active')

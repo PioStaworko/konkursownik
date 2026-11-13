@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router'
-import { useContest } from '../api/hooks'
+import { useContest, useFeatures } from '../api/hooks'
 import type { ContestDto } from '../api/types'
+import AiReceiptButton from '../features/ai/AiReceiptButton'
 import ChecklistTab from '../features/details/ChecklistTab'
 import ContestMenu from '../features/details/ContestMenu'
 import DetailsHeaderCard from '../features/details/DetailsHeaderCard'
@@ -19,10 +20,30 @@ type TabKey = 'steps' | 'purchases' | 'proofs' | 'entries'
 const join = (...parts: (string | null | undefined)[]) => parts.filter(Boolean).join(' · ') || null
 
 function ContestDetails({ c }: { c: ContestDto }) {
-  const [params] = useSearchParams()
+  const [params, setParams] = useSearchParams()
+  const { aiExtraction } = useFeatures()
   const [tab, setTab] = useState<TabKey>('entries')
-  const openForm = params.get('zgloszenie') === '1'
-  const autoReceipt = openForm && params.get('paragon') === '1'
+  // Deep link (?zgloszenie=1&paragon=1) is read once and then removed from the URL,
+  // so switching tabs or re-rendering never re-opens the form or the file picker.
+  const [deepLink, setDeepLink] = useState(() => {
+    const open = params.get('zgloszenie') === '1'
+    return { open, autoReceipt: open && params.get('paragon') === '1' }
+  })
+  useEffect(() => {
+    if (!params.has('zgloszenie') && !params.has('paragon')) return
+    setParams(
+      (p) => {
+        const next = new URLSearchParams(p)
+        next.delete('zgloszenie')
+        next.delete('paragon')
+        return next
+      },
+      { replace: true },
+    )
+    // the receipt picker is consumed by the AI button itself (it may mount after /api/features answers)
+    setDeepLink((d) => ({ ...d, open: false }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const tabs: TabDef<TabKey>[] = [
     { key: 'steps', label: `Kroki (${c.tasks.filter((t) => t.done).length}/${c.tasks.length})`, icon: 'checklist' },
@@ -86,7 +107,24 @@ function ContestDetails({ c }: { c: ContestDto }) {
           }))}
         />
       )}
-      {tab === 'entries' && <EntriesTab c={c} initialFormOpen={openForm} autoReceipt={autoReceipt} />}
+      {tab === 'entries' && (
+        <EntriesTab
+          c={c}
+          initialFormOpen={deepLink.open}
+          autoReceipt={deepLink.autoReceipt}
+          renderAi={
+            aiExtraction
+              ? (onExtracted, ctx) => (
+                  <AiReceiptButton
+                    onExtracted={onExtracted}
+                    autoReceipt={ctx.autoReceipt}
+                    onAutoOpened={() => setDeepLink((d) => ({ ...d, autoReceipt: false }))}
+                  />
+                )
+              : undefined
+          }
+        />
+      )}
 
       <WinSection contestId={c.id} win={c.win} />
 

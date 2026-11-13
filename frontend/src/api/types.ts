@@ -157,3 +157,33 @@ export interface StatsDto { contests: number; entries: number; wins: number; tot
 
 // Error bodies: `{ "error": ApiErrorCode }`
 export type ApiErrorCode = 'invalid_invite' | 'too_large' | 'unsupported_type'
+
+export interface ReceiptExtractionDto {
+  store: string | null
+  date: string | null
+  amount: number | null
+  receiptNumber: string | null
+  products: { name: string; price: number | null }[]
+}
+
+export interface ContestExtractionDto {
+  name: string | null
+  organizer: string | null
+  url: string | null
+  rulesUrl: string | null
+  type: string | null
+  icon: string | null
+  prizeDescription: string | null
+  prizeValue: number | null
+  prizeCount: number | null
+  startDate: string | null
+  endDate: string | null
+  resultsDate: string | null
+  resultsCheckNote: string | null
+  entryLimitPerDay: number | null
+  entryLimitTotal: number | null
+  tasks: string[] | null
+  purchases: { product: string | null; store: string | null; quantity: string | null; note: string | null }[] | null
+  proofs: { what: string | null; keepUntil: string | null; note: string | null }[] | null
+  notes: string | null
+}

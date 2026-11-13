@@ -1,204 +1,64 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { ApiError } from '../api/client'
-import { useContest, useSaveContest } from '../api/hooks'
-import type {
-  ContestStatus,
-  ContestType,
-  ContestUpsertDto,
-  ProofDto,
-  PurchaseDto,
-  TaskDto,
-} from '../api/types'
+import { useContest, useFeatures, useSaveContest } from '../api/hooks'
+import type { ContestExtractionDto, ContestStatus, ContestType, ProofDto, PurchaseDto, TaskDto } from '../api/types'
 import EditableList from '../components/EditableList'
-import { parseAmount } from '../lib/format'
+import { AiBadge } from '../features/ai/AiBadge'
+import AiFillSection from '../features/ai/AiFillSection'
+import { mergeExtraction } from '../features/ai/mergeExtraction'
+import {
+  emptyValues, extractionToValues, fromDto, validate,
+  type Errors, type FormValues, type TextKey,
+} from '../features/contests/contestForm'
+import IconPicker from '../features/contests/IconPicker'
+import { toUpsert } from '../lib/contestUpsert'
 import { statusLabel, typeLabel } from '../lib/labels'
-import { inputClass, labelClass, primaryButtonClass } from '../lib/styles'
+import { tokenInputClass } from '../lib/styles'
+import { Button } from '../ui/Button'
+import { Field } from '../ui/Field'
+import { Section } from '../ui/Section'
 
-interface FormValues {
-  name: string
-  organizer: string
-  url: string
-  rulesUrl: string
-  type: ContestType
-  status: ContestStatus
-  prizeDescription: string
-  prizeValue: string
-  prizeCount: string
-  startDate: string
-  endDate: string
-  resultsDate: string
-  resultsCheckNote: string
-  entryLimitPerDay: string
-  entryLimitTotal: string
-  notes: string
-  icon: string | null
-  tasks: TaskDto[]
-  purchases: PurchaseDto[]
-  proofs: ProofDto[]
-}
+const input = tokenInputClass
 
-type TextKey = Exclude<keyof FormValues, 'icon' | 'tasks' | 'purchases' | 'proofs'>
-type Errors = Partial<Record<keyof FormValues, string>>
-
-const emptyValues: FormValues = {
-  name: '',
-  organizer: '',
-  url: '',
-  rulesUrl: '',
-  type: 'Lottery',
-  status: 'Planned',
-  prizeDescription: '',
-  prizeValue: '',
-  prizeCount: '',
-  startDate: '',
-  endDate: '',
-  resultsDate: '',
-  resultsCheckNote: '',
-  entryLimitPerDay: '',
-  entryLimitTotal: '',
-  notes: '',
-  icon: null,
-  tasks: [],
-  purchases: [],
-  proofs: [],
-}
-
-const fromDto = (d: ContestUpsertDto): FormValues => ({
-  name: d.name,
-  organizer: d.organizer ?? '',
-  url: d.url ?? '',
-  rulesUrl: d.rulesUrl ?? '',
-  type: d.type,
-  status: d.status,
-  prizeDescription: d.prizeDescription ?? '',
-  prizeValue: d.prizeValue == null ? '' : String(d.prizeValue).replace('.', ','),
-  prizeCount: d.prizeCount == null ? '' : String(d.prizeCount),
-  startDate: d.startDate,
-  endDate: d.endDate,
-  resultsDate: d.resultsDate ?? '',
-  resultsCheckNote: d.resultsCheckNote ?? '',
-  entryLimitPerDay: d.entryLimitPerDay == null ? '' : String(d.entryLimitPerDay),
-  entryLimitTotal: d.entryLimitTotal == null ? '' : String(d.entryLimitTotal),
-  notes: d.notes ?? '',
-  icon: d.icon ?? null,
-  tasks: d.tasks,
-  purchases: d.purchases,
-  proofs: d.proofs,
-})
-
-const orNull = (s: string) => (s.trim() === '' ? null : s.trim())
-
-function parseCount(s: string): number | null {
-  const t = s.trim()
-  if (t === '') return null
-  return /^\d+$/.test(t) ? Number(t) : NaN
-}
-
-const badText = (s: string) => s.trim() === '' || s.length > 300
-
-/** Mirrors the server's ContestValidation. */
-function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto | null } {
-  const errors: Errors = {}
-  if (v.name.trim() === '' || v.name.length > 200) errors.name = 'Nazwa jest wymagana (maks. 200 znaków).'
-  if (!v.startDate) errors.startDate = 'Podaj datę startu'
-  if (!v.endDate) errors.endDate = 'Podaj datę końca'
-  if (v.startDate && v.endDate && v.endDate < v.startDate)
-    errors.endDate = 'Data końca nie może być przed datą startu'
-  if (v.resultsDate && v.startDate && v.resultsDate < v.startDate)
-    errors.resultsDate = 'Data wyników nie może być przed datą startu'
-
-  const prizeValue = parseAmount(v.prizeValue)
-  if (prizeValue !== null && Number.isNaN(prizeValue)) errors.prizeValue = 'Nieprawidłowa kwota'
-  else if (prizeValue !== null && prizeValue < 0) errors.prizeValue = 'Wartość nagrody nie może być ujemna.'
-
-  const prizeCount = parseCount(v.prizeCount)
-  if (Number.isNaN(prizeCount)) errors.prizeCount = 'Nieprawidłowa liczba'
-
-  const perDay = parseCount(v.entryLimitPerDay)
-  if (Number.isNaN(perDay)) errors.entryLimitPerDay = 'Nieprawidłowa liczba'
-  else if (perDay !== null && perDay <= 0) errors.entryLimitPerDay = 'Limit musi być większy od zera.'
-  const total = parseCount(v.entryLimitTotal)
-  if (Number.isNaN(total)) errors.entryLimitTotal = 'Nieprawidłowa liczba'
-  else if (total !== null && total <= 0) errors.entryLimitTotal = 'Limit musi być większy od zera.'
-
-  if (v.tasks.some((t) => badText(t.text))) errors.tasks = 'Treść kroku jest wymagana (maks. 300 znaków).'
-  if (v.purchases.some((p) => badText(p.product)))
-    errors.purchases = 'Nazwa produktu jest wymagana (maks. 300 znaków).'
-  if (v.proofs.some((p) => badText(p.what))) errors.proofs = 'Opis dowodu jest wymagany (maks. 300 znaków).'
-
-  if (Object.keys(errors).length > 0) return { errors, dto: null }
-  return {
-    errors,
-    dto: {
-      name: v.name.trim(),
-      organizer: orNull(v.organizer),
-      url: orNull(v.url),
-      rulesUrl: orNull(v.rulesUrl),
-      type: v.type,
-      prizeDescription: orNull(v.prizeDescription),
-      prizeValue,
-      prizeCount,
-      startDate: v.startDate,
-      endDate: v.endDate,
-      resultsDate: v.resultsDate || null,
-      resultsCheckNote: orNull(v.resultsCheckNote),
-      entryLimitPerDay: perDay,
-      entryLimitTotal: total,
-      status: v.status,
-      notes: orNull(v.notes),
-      icon: v.icon,
-      tasks: v.tasks.map((t) => ({ ...t, text: t.text.trim() })),
-      purchases: v.purchases.map((p) => ({
-        ...p,
-        product: p.product.trim(),
-        store: orNull(p.store ?? ''),
-        quantity: orNull(p.quantity ?? ''),
-      })),
-      proofs: v.proofs.map((p) => ({
-        ...p,
-        what: p.what.trim(),
-        keepUntil: p.keepUntil || null,
-        location: orNull(p.location ?? ''),
-      })),
-    },
-  }
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="space-y-3">
-      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-      {children}
-    </section>
-  )
-}
-
-function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
-  return (
-    <div>
-      <label className={labelClass}>
-        <span>{label}</span>
-        {children}
-      </label>
-      {error && <p className="mt-1 text-sm text-red-700">{error}</p>}
-    </div>
-  )
-}
+const isEmptyValue = (value: unknown) =>
+  value == null || value === '' || (Array.isArray(value) && value.length === 0)
 
 function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
   const navigate = useNavigate()
   const save = useSaveContest()
+  const { aiExtraction } = useFeatures()
   const [v, setV] = useState<FormValues>(initial)
   const [errors, setErrors] = useState<Errors>({})
   const [serverErrors, setServerErrors] = useState<string[]>([])
+  const [aiFields, setAiFields] = useState<Set<keyof FormValues>>(new Set())
 
-  const set = <K extends keyof FormValues>(key: K, value: FormValues[K]) =>
+  const clearAi = (key: keyof FormValues) =>
+    setAiFields((s) => {
+      if (!s.has(key)) return s
+      const next = new Set(s)
+      next.delete(key)
+      return next
+    })
+  const set = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
     setV((p) => ({ ...p, [key]: value }))
+    clearAi(key)
+  }
   const text = (key: TextKey) => ({
     value: v[key],
-    onChange: (e: { target: { value: string } }) => setV((p) => ({ ...p, [key]: e.target.value })),
+    onChange: (e: { target: { value: string } }) => set(key, e.target.value as FormValues[TextKey]),
   })
+  const badge = (key: keyof FormValues) => (aiFields.has(key) ? <AiBadge /> : undefined)
+
+  const applyExtraction = (dto: ContestExtractionDto) => {
+    const merged = mergeExtraction(v, extractionToValues(dto), id ? 'edit' : 'new', {
+      // a new form always holds the default type, so it counts as "empty"
+      isEmpty: (key, value) => (key === 'type' ? value === emptyValues.type : isEmptyValue(value)),
+    })
+    if (merged.aiFields.size === 0) return
+    setV(merged.value)
+    setAiFields((s) => new Set([...s, ...merged.aiFields]))
+  }
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
@@ -219,31 +79,40 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
   }
 
   return (
-    <form onSubmit={submit} noValidate className="space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-900">{id ? 'Edycja konkursu' : 'Nowy konkurs'}</h1>
+    <form onSubmit={submit} noValidate className="mx-auto flex w-full max-w-xl flex-col gap-space-lg">
+      <h1 className="text-headline-md text-on-surface">{id ? 'Edycja konkursu' : 'Nowy konkurs'}</h1>
       {serverErrors.length > 0 && (
-        <div role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <div role="alert" className="rounded-lg bg-error-container p-space-sm text-body-md text-on-error-container">
           {serverErrors.map((m) => (
             <p key={m}>{m}</p>
           ))}
         </div>
       )}
 
-      <Section title="Podstawowe">
-        <Field label="Nazwa" error={errors.name}>
-          <input className={inputClass} {...text('name')} />
+      {aiExtraction && <AiFillSection onExtracted={applyExtraction} />}
+
+      <Section icon="emoji_events" title="Podstawowe">
+        <Field label="Nazwa" error={errors.name} hint={badge('name')}>
+          <input className={input} {...text('name')} />
         </Field>
-        <Field label="Organizator">
-          <input className={inputClass} {...text('organizer')} />
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-label-md text-on-surface-variant">Ikona</span>
+            {badge('icon')}
+          </div>
+          <IconPicker value={v.icon} onChange={(icon) => set('icon', icon)} />
+        </div>
+        <Field label="Organizator" hint={badge('organizer')}>
+          <input className={input} {...text('organizer')} />
         </Field>
-        <Field label="Adres konkursu">
-          <input className={inputClass} type="url" inputMode="url" {...text('url')} />
+        <Field label="Adres konkursu" hint={badge('url')}>
+          <input className={input} type="url" inputMode="url" {...text('url')} />
         </Field>
-        <Field label="Adres regulaminu">
-          <input className={inputClass} type="url" inputMode="url" {...text('rulesUrl')} />
+        <Field label="Adres regulaminu" hint={badge('rulesUrl')}>
+          <input className={input} type="url" inputMode="url" {...text('rulesUrl')} />
         </Field>
-        <Field label="Typ">
-          <select className={inputClass} value={v.type} onChange={(e) => set('type', e.target.value as ContestType)}>
+        <Field label="Typ" hint={badge('type')}>
+          <select className={input} value={v.type} onChange={(e) => set('type', e.target.value as ContestType)}>
             {(Object.keys(typeLabel) as ContestType[]).map((t) => (
               <option key={t} value={t}>
                 {typeLabel[t]}
@@ -252,11 +121,7 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
           </select>
         </Field>
         <Field label="Status">
-          <select
-            className={inputClass}
-            value={v.status}
-            onChange={(e) => set('status', e.target.value as ContestStatus)}
-          >
+          <select className={input} value={v.status} onChange={(e) => set('status', e.target.value as ContestStatus)}>
             {(Object.keys(statusLabel) as ContestStatus[]).map((s) => (
               <option key={s} value={s}>
                 {statusLabel[s]}
@@ -266,131 +131,103 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         </Field>
       </Section>
 
-      <Section title="Nagroda">
-        <Field label="Opis nagrody">
-          <input className={inputClass} {...text('prizeDescription')} />
+      <Section icon="redeem" title="Nagroda">
+        <Field label="Opis nagrody" hint={badge('prizeDescription')}>
+          <input className={input} {...text('prizeDescription')} />
         </Field>
-        <Field label="Wartość nagrody" error={errors.prizeValue}>
-          <input className={inputClass} type="text" inputMode="decimal" {...text('prizeValue')} />
+        <Field label="Wartość nagrody" error={errors.prizeValue} hint={badge('prizeValue')}>
+          <input className={`${input} font-mono`} type="text" inputMode="decimal" {...text('prizeValue')} />
         </Field>
-        <Field label="Liczba nagród" error={errors.prizeCount}>
-          <input className={inputClass} type="text" inputMode="numeric" {...text('prizeCount')} />
-        </Field>
-      </Section>
-
-      <Section title="Daty">
-        <Field label="Data startu" error={errors.startDate}>
-          <input className={inputClass} type="date" {...text('startDate')} />
-        </Field>
-        <Field label="Data końca" error={errors.endDate}>
-          <input className={inputClass} type="date" {...text('endDate')} />
-        </Field>
-        <Field label="Data wyników" error={errors.resultsDate}>
-          <input className={inputClass} type="date" {...text('resultsDate')} />
-        </Field>
-        <Field label="Gdzie sprawdzić wyniki">
-          <input className={inputClass} {...text('resultsCheckNote')} />
+        <Field label="Liczba nagród" error={errors.prizeCount} hint={badge('prizeCount')}>
+          <input className={`${input} font-mono`} type="text" inputMode="numeric" {...text('prizeCount')} />
         </Field>
       </Section>
 
-      <Section title="Limity">
-        <Field label="Limit zgłoszeń na dzień" error={errors.entryLimitPerDay}>
-          <input className={inputClass} type="text" inputMode="numeric" {...text('entryLimitPerDay')} />
+      <Section icon="calendar_month" title="Daty">
+        <Field label="Data startu" error={errors.startDate} hint={badge('startDate')}>
+          <input className={`${input} font-mono`} type="date" {...text('startDate')} />
         </Field>
-        <Field label="Limit zgłoszeń łącznie" error={errors.entryLimitTotal}>
-          <input className={inputClass} type="text" inputMode="numeric" {...text('entryLimitTotal')} />
+        <Field label="Data końca" error={errors.endDate} hint={badge('endDate')}>
+          <input className={`${input} font-mono`} type="date" {...text('endDate')} />
+        </Field>
+        <Field label="Data wyników" error={errors.resultsDate} hint={badge('resultsDate')}>
+          <input className={`${input} font-mono`} type="date" {...text('resultsDate')} />
+        </Field>
+        <Field label="Gdzie sprawdzić wyniki" hint={badge('resultsCheckNote')}>
+          <input className={input} {...text('resultsCheckNote')} />
+        </Field>
+      </Section>
+
+      <Section icon="shield" title="Limity">
+        <Field label="Limit zgłoszeń na dzień" error={errors.entryLimitPerDay} hint={badge('entryLimitPerDay')}>
+          <input className={`${input} font-mono`} type="text" inputMode="numeric" {...text('entryLimitPerDay')} />
+        </Field>
+        <Field label="Limit zgłoszeń łącznie" error={errors.entryLimitTotal} hint={badge('entryLimitTotal')}>
+          <input className={`${input} font-mono`} type="text" inputMode="numeric" {...text('entryLimitTotal')} />
         </Field>
       </Section>
 
       <EditableList<TaskDto>
         title="Do zrobienia"
+        icon="checklist"
         addLabel="Dodaj krok"
         items={v.tasks}
         onChange={(items) => set('tasks', items)}
         newItem={() => ({ id: null, text: '', done: false })}
         error={errors.tasks}
+        badge={badge('tasks')}
         renderItem={(t, i, update) => (
-          <input
-            className={inputClass}
-            aria-label={`Krok ${i + 1}`}
-            value={t.text}
-            onChange={(e) => update({ text: e.target.value })}
-          />
+          <input className={input} aria-label={`Krok ${i + 1}`} value={t.text} onChange={(e) => update({ text: e.target.value })} />
         )}
       />
 
       <EditableList<PurchaseDto>
         title="Do kupienia"
+        icon="shopping_cart"
         addLabel="Dodaj produkt"
         items={v.purchases}
         onChange={(items) => set('purchases', items)}
         newItem={() => ({ id: null, product: '', store: null, quantity: null, bought: false, note: null })}
         error={errors.purchases}
+        badge={badge('purchases')}
         renderItem={(p, i, update) => (
           <>
-            <input
-              className={inputClass}
-              aria-label={`Produkt ${i + 1}`}
-              value={p.product}
-              onChange={(e) => update({ product: e.target.value })}
-            />
-            <input
-              className={inputClass}
-              aria-label={`Sklep ${i + 1}`}
-              value={p.store ?? ''}
-              onChange={(e) => update({ store: e.target.value })}
-            />
-            <input
-              className={inputClass}
-              aria-label={`Ilość ${i + 1}`}
-              value={p.quantity ?? ''}
-              onChange={(e) => update({ quantity: e.target.value })}
-            />
+            <input className={input} aria-label={`Produkt ${i + 1}`} value={p.product} onChange={(e) => update({ product: e.target.value })} />
+            <input className={input} aria-label={`Sklep ${i + 1}`} value={p.store ?? ''} onChange={(e) => update({ store: e.target.value })} />
+            <input className={input} aria-label={`Ilość ${i + 1}`} value={p.quantity ?? ''} onChange={(e) => update({ quantity: e.target.value })} />
+            <input className={input} aria-label={`Notatka pozycji ${i + 1}`} placeholder="Notatka" value={p.note ?? ''} onChange={(e) => update({ note: e.target.value })} />
           </>
         )}
       />
 
       <EditableList<ProofDto>
         title="Do zachowania"
+        icon="inventory_2"
         addLabel="Dodaj dowód"
         items={v.proofs}
         onChange={(items) => set('proofs', items)}
         newItem={() => ({ id: null, what: '', keepUntil: null, location: null, discarded: false, note: null })}
         error={errors.proofs}
+        badge={badge('proofs')}
         renderItem={(p, i, update) => (
           <>
-            <input
-              className={inputClass}
-              aria-label={`Dowód ${i + 1}`}
-              value={p.what}
-              onChange={(e) => update({ what: e.target.value })}
-            />
-            <input
-              className={inputClass}
-              type="date"
-              aria-label={`Przechowaj do ${i + 1}`}
-              value={p.keepUntil ?? ''}
-              onChange={(e) => update({ keepUntil: e.target.value })}
-            />
-            <input
-              className={inputClass}
-              aria-label={`Miejsce ${i + 1}`}
-              value={p.location ?? ''}
-              onChange={(e) => update({ location: e.target.value })}
-            />
+            <input className={input} aria-label={`Dowód ${i + 1}`} value={p.what} onChange={(e) => update({ what: e.target.value })} />
+            <input className={`${input} font-mono`} type="date" aria-label={`Przechowaj do ${i + 1}`} value={p.keepUntil ?? ''} onChange={(e) => update({ keepUntil: e.target.value })} />
+            <input className={input} aria-label={`Miejsce ${i + 1}`} value={p.location ?? ''} onChange={(e) => update({ location: e.target.value })} />
+            <input className={input} aria-label={`Notatka dowodu ${i + 1}`} placeholder="Notatka" value={p.note ?? ''} onChange={(e) => update({ note: e.target.value })} />
           </>
         )}
       />
 
-      <Section title="Notatki">
-        <Field label="Notatki">
-          <textarea className={`${inputClass} py-2`} rows={4} {...text('notes')} />
+      <Section icon="description" title="Notatki">
+        <Field label="Notatki" hint={badge('notes')}>
+          <textarea className={`${input} py-2`} rows={4} {...text('notes')} />
         </Field>
       </Section>
 
-      <button type="submit" disabled={save.isPending} className={`${primaryButtonClass} w-full`}>
+      <Button type="submit" disabled={save.isPending} className="w-full">
         Zapisz
-      </button>
+      </Button>
     </form>
   )
 }
@@ -400,7 +237,7 @@ export default function ContestFormPage() {
   const { data, isPending, isError } = useContest(id)
 
   if (!id) return <ContestForm initial={emptyValues} />
-  if (isPending) return <p className="text-slate-500">Ładowanie…</p>
-  if (isError) return <p role="alert" className="text-red-700">Nie udało się wczytać konkursu</p>
-  return <ContestForm key={data.id} id={id} initial={fromDto(data)} />
+  if (isPending) return <p className="text-on-surface-variant">Ładowanie…</p>
+  if (isError) return <p role="alert" className="text-error">Nie udało się wczytać konkursu</p>
+  return <ContestForm key={data.id} id={id} initial={fromDto(toUpsert(data))} />
 }

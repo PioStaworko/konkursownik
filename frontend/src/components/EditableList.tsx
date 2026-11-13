@@ -1,17 +1,22 @@
 import type { ReactNode } from 'react'
-import { secondaryButtonClass } from '../lib/styles'
+import { Button, IconButton } from '../ui/Button'
+import { Section } from '../ui/Section'
+import type { IconName } from '../ui/icons'
 
 interface Props<T> {
   title: string
+  icon: IconName
   addLabel: string
   items: T[]
   onChange: (items: T[]) => void
   newItem: () => T
   renderItem: (item: T, index: number, update: (patch: Partial<T>) => void) => ReactNode
   error?: string
+  /** Shown next to the section (e.g. the "AI — sprawdź" badge). */
+  badge?: ReactNode
 }
 
-export default function EditableList<T>({ title, addLabel, items, onChange, newItem, renderItem, error }: Props<T>) {
+export default function EditableList<T>({ title, icon, addLabel, items, onChange, newItem, renderItem, error, badge }: Props<T>) {
   const update = (i: number, patch: Partial<T>) =>
     onChange(items.map((item, idx) => (idx === i ? { ...item, ...patch } : item)))
   const remove = (i: number) => onChange(items.filter((_, idx) => idx !== i))
@@ -23,38 +28,27 @@ export default function EditableList<T>({ title, addLabel, items, onChange, newI
   }
 
   return (
-    <section className="space-y-3">
-      <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-      {error && <p className="text-sm text-red-700">{error}</p>}
-      <ul className="space-y-3">
+    <Section icon={icon} title={title}>
+      {badge && <div className="flex">{badge}</div>}
+      {error && (
+        <p role="alert" className="text-label-md text-error">
+          {error}
+        </p>
+      )}
+      <ul className="flex flex-col gap-space-sm">
         {items.map((item, i) => (
-          <li key={i} className="space-y-2 rounded-lg bg-slate-50 p-3 ring-1 ring-slate-200">
+          <li key={i} className="flex flex-col gap-space-sm rounded-xl bg-surface-container p-space-sm shadow-sm">
             {renderItem(item, i, (patch) => update(i, patch))}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className={secondaryButtonClass}
-                disabled={i === 0}
-                aria-label={`Przesuń w górę ${i + 1}`}
-                onClick={() => moveUp(i)}
-              >
-                W górę
-              </button>
-              <button
-                type="button"
-                className={secondaryButtonClass}
-                aria-label={`Usuń ${i + 1}`}
-                onClick={() => remove(i)}
-              >
-                Usuń
-              </button>
+            <div className="flex justify-end">
+              <IconButton icon="expand_less" label={`Przesuń w górę ${i + 1}`} disabled={i === 0} onClick={() => moveUp(i)} />
+              <IconButton icon="delete" label={`Usuń ${i + 1}`} onClick={() => remove(i)} />
             </div>
           </li>
         ))}
       </ul>
-      <button type="button" className={secondaryButtonClass} onClick={() => onChange([...items, newItem()])}>
+      <Button variant="secondary" icon="add" onClick={() => onChange([...items, newItem()])}>
         {addLabel}
-      </button>
-    </section>
+      </Button>
+    </Section>
   )
 }
