@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pl"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100%;margin:0;padding:0;min-height:100vh;}body{overscroll-behavior-y:none;-webkit-font-smoothing:antialiased;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-secondary-fixed": "#002113", "surface-tint": "#c0c1ff", "inverse-primary": "#494bd6", "on-tertiary-fixed": "#2a1700", "on-tertiary": "#472a00", "primary-fixed": "#e1e0ff", "on-background": "#e0e2ea", "on-primary-fixed": "#07006c", "tertiary-fixed-dim": "#ffb95f", "on-primary-container": "#0d0096", "outline-variant": "#464554", "on-surface-variant": "#c7c4d7", "secondary": "#4edea3", "on-secondary": "#003824", "on-tertiary-fixed-variant": "#653e00", "on-error": "#690005", "surface-container-lowest": "#0a0e13", "on-primary": "#1000a9", "inverse-on-surface": "#2d3136", "tertiary-fixed": "#ffddb8", "tertiary": "#ffb95f", "background": "#101419", "on-error-container": "#ffdad6", "primary-fixed-dim": "#c0c1ff", "tertiary-container": "#ca8100", "on-surface": "#e0e2ea", "secondary-container": "#00a572", "surface-container-highest": "#31353b", "error": "#ffb4ab", "secondary-fixed-dim": "#4edea3", "surface-container-low": "#181c21", "on-secondary-container": "#00311f", "surface-bright": "#36393f", "secondary-fixed": "#6ffbbe", "surface": "#101419", "on-primary-fixed-variant": "#2f2ebe", "inverse-surface": "#e0e2ea", "outline": "#908fa0", "surface-container": "#1c2025", "primary": "#c0c1ff", "error-container": "#93000a", "on-tertiary-container": "#3e2400", "surface-dim": "#101419", "surface-variant": "#31353b", "primary-container": "#8083ff", "on-secondary-fixed-variant": "#005236", "surface-container-high": "#262a30" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "0.875rem", "space-lg": "1.25rem", "space-xl": "2rem", "space-sm": "0.5rem", "margin": "2rem", "gutter-mobile": "0.75rem", "margin-mobile": "1rem", "gutter": "1rem", "space-xs": "0.25rem" }, "fontFamily": { "body-md": ["Geist"], "display-lg": ["Geist"], "display-lg-mobile": ["Geist"], "label-md": ["Geist"], "headline-lg": ["Geist"], "title-md": ["Geist"], "headline-sm": ["Geist"], "mono-data": ["JetBrains Mono"], "body-lg": ["Geist"], "label-xs": ["Geist"] }, "fontSize": { "body-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }], "display-lg-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "mono-data": ["12px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "body-lg": ["15px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "label-xs": ["10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "600" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="h-16 px-margin-mobile flex items-center justify-between max-w-7xl mx-auto w-full"><div class="flex items-center gap-space-sm"><img alt="Konkursownik Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/ALJJyrAEvuWpgmAk7P4qX40XGEGr5TAxIQeqtUoaRVlBt99LE45jI-ZWGKDLiLkMCzHE_6LXw0HhWNRbwtfDVT3dJZW3rskTQh-X2RjsbBrim8tX2YeHOMjNpigzrfDgCqZwes6enTGgcPCwMOEN7aNJySGKZDzsZ9UKgttMOzOJCNv5KrDPWbhUF-BveCNSQyuo5QpCbFuLomyAymKGMIaF5TZgMzlrLeihmQO1gL-NF6Ke"/><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">Konkursownik</span><span class="hidden sm:inline-block font-label-xs text-label-xs text-on-surface-variant/70 uppercase tracking-wider ml-1.5">· Zakupy</span></div><span class="font-label-xs text-label-xs text-on-surface-variant leading-none mt-1">Prywatny asystent loterii</span></div></div><div class="flex items-center gap-space-xs sm:gap-space-sm"><div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high/80 text-secondary text-label-xs font-label-xs"><span class="material-symbols-outlined text-[14px]">lock</span><span>Tylko Twoje dane</span></div><button aria-label="Zmień motyw" class="w-11 h-11 flex items-center justify-center rounded-lg text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">dark_mode</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 max-w-7xl mx-auto bg-surface"><div class="flex flex-col w-full px-margin-mobile pb-8 space-y-space-md">
+<!-- Tryb Sklepowy: Tactical Shopping Assistant Bar -->
+<div class="w-full bg-surface-container-high rounded-xl p-space-md shadow-md flex items-center justify-between gap-space-sm relative overflow-hidden">
+<div class="absolute -right-4 -bottom-4 w-28 h-28 bg-primary/5 rounded-full pointer-events-none blur-2xl"></div>
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-xs text-label-xs uppercase tracking-wider text-secondary">Tryb sklepowy aktywny</span>
+</div>
+<h2 class="font-title-md text-title-md text-on-surface truncate" id="shopping-summary-title">
+          Do kupienia: <span class="text-primary font-mono-data font-bold" id="remaining-count">6</span> pozycji w <span class="text-primary font-mono-data font-bold">4</span> sieciach
+        </h2>
+</div>
+</div>
+<!-- Quick Manual Add Action -->
+<button class="shrink-0 h-10 px-3.5 bg-primary text-on-primary font-label-md text-label-md rounded-lg flex items-center gap-1 active:scale-95 transition-transform shadow-sm" id="btn-quick-add" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="hidden xs:inline">Dodaj</span>
+</button>
+</div>
+<!-- Shopping Progress Bar -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-sm shadow-sm flex flex-col gap-1.5">
+<div class="flex justify-between items-center px-1">
+<span class="font-label-xs text-label-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">military_tech</span>
+        Twój cel: 100% poprawnych paragonów
+      </span>
+<span class="font-mono-data text-mono-data text-primary" id="progress-percent">0%</span>
+</div>
+<div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-300 w-0" id="progress-bar-fill"></div>
+</div>
+</div>
+<!-- SEKCJA 1: BIEDRONKA -->
+<section class="store-section w-full bg-surface-container-low rounded-xl overflow-hidden shadow-sm flex flex-col" data-store="biedronka">
+<!-- Store Accordion Header -->
+<button class="w-full p-space-md flex items-center justify-between text-left active:bg-surface-container transition-colors" onclick="toggleAccordion('store-biedronka', this)" type="button">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-tertiary">storefront</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Biedronka</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest font-mono-data text-label-xs text-on-surface-variant store-badge">2 poz.</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant/80">Wymóg: paragon papierowy</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined transition-transform duration-200 chevron-icon rotate-180">expand_more</span>
+</div>
+</button>
+<!-- Item List -->
+<div class="flex flex-col px-space-md pb-space-md space-y-space-sm" id="store-biedronka">
+<!-- Pozycja 1: Ptasie Mleczko (Pilne + Notatka) -->
+<article class="shopping-card w-full bg-surface-container rounded-lg p-space-md flex flex-col gap-space-sm relative transition-all" data-id="item-1">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex-1 min-w-0">
+<div class="flex flex-wrap items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded-full bg-tertiary/15 text-tertiary font-label-xs text-label-xs flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">alarm</span> Koniec za 2 dni!
+              </span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Wielka Loteria Wedla</span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold leading-snug">Ptasie Mleczko E.Wedel</h3>
+<p class="font-label-md text-label-md text-primary font-medium mt-0.5">Wymóg: min. 2 sztuki na jednym paragonie</p>
+</div>
+<!-- Wielki kciukoodporny Checkbox (44x44px touch target) -->
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer rounded-lg bg-surface-container-highest active:scale-95 transition-all">
+<input class="sr-only peer" onchange="toggleItemPurchased('item-1', this)" type="checkbox"/>
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant peer-checked:hidden">check_box_outline_blank</span>
+<span class="material-symbols-outlined text-[26px] text-secondary hidden peer-checked:inline-block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</label>
+</div>
+<!-- Notatka fiskalna: Moment of Delight / Safeguard -->
+<div class="w-full bg-surface-container-highest/70 rounded-lg p-2.5 flex items-start gap-2">
+<span class="material-symbols-outlined text-tertiary text-[18px] shrink-0 mt-0.5">receipt_long</span>
+<p class="font-body-md text-body-md text-on-surface-variant leading-tight">
+<strong class="text-on-surface font-medium">Uwaga przy kasie:</strong> Weź <span class="text-tertiary underline decoration-tertiary/40 underline-offset-2">paragon papierowy fiskalny</span>! E-paragony z aplikacji Biedronka są odrzucane przez komisję loterii.
+          </p>
+</div>
+</article>
+<!-- Pozycja 2: Kawa Tchibo Barista -->
+<article class="shopping-card w-full bg-surface-container rounded-lg p-space-md flex items-center justify-between gap-space-sm relative transition-all" data-id="item-2">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-xs text-label-xs">
+              Loteria Kawowa
+            </span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold leading-snug">Kawa ziarnista Tchibo Barista 500g</h3>
+<p class="font-label-md text-label-md text-on-surface-variant/80 mt-0.5">Dowolny wariant (Espresso lub Crema)</p>
+</div>
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer rounded-lg bg-surface-container-highest active:scale-95 transition-all">
+<input class="sr-only peer" onchange="toggleItemPurchased('item-2', this)" type="checkbox"/>
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant peer-checked:hidden">check_box_outline_blank</span>
+<span class="material-symbols-outlined text-[26px] text-secondary hidden peer-checked:inline-block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</label>
+</article>
+</div>
+</section>
+<!-- SEKCJA 2: ROSSMANN -->
+<section class="store-section w-full bg-surface-container-low rounded-xl overflow-hidden shadow-sm flex flex-col" data-store="rossmann">
+<!-- Store Accordion Header -->
+<button class="w-full p-space-md flex items-center justify-between text-left active:bg-surface-container transition-colors" onclick="toggleAccordion('store-rossmann', this)" type="button">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-error">health_and_beauty</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Rossmann</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest font-mono-data text-label-xs text-on-surface-variant store-badge">2 poz.</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant/80">Drogeria stacjonarna</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined transition-transform duration-200 chevron-icon rotate-180">expand_more</span>
+</div>
+</button>
+<!-- Item List -->
+<div class="flex flex-col px-space-md pb-space-md space-y-space-sm" id="store-rossmann">
+<!-- Pozycja 1: Pasta do zębów Colgate -->
+<article class="shopping-card w-full bg-surface-container rounded-lg p-space-md flex items-center justify-between gap-space-sm relative transition-all" data-id="item-3">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded-full bg-primary-container/20 text-primary font-label-xs text-label-xs">
+              Uśmiech na Święta
+            </span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold leading-snug">Colgate Total Whitening</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mt-0.5">Wymóg: min. 1 sztuka</p>
+</div>
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer rounded-lg bg-surface-container-highest active:scale-95 transition-all">
+<input class="sr-only peer" onchange="toggleItemPurchased('item-3', this)" type="checkbox"/>
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant peer-checked:hidden">check_box_outline_blank</span>
+<span class="material-symbols-outlined text-[26px] text-secondary hidden peer-checked:inline-block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</label>
+</article>
+<!-- Pozycja 2: Szampon Elseve -->
+<article class="shopping-card w-full bg-surface-container rounded-lg p-space-md flex items-center justify-between gap-space-sm relative transition-all" data-id="item-4">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-xs text-label-xs">
+              Piękne Włosy z L'Oreal
+            </span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold leading-snug">Szampon Elseve L'Oreal</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mt-0.5">Dowolny rodzaj szamponu z serii Elseve</p>
+</div>
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer rounded-lg bg-surface-container-highest active:scale-95 transition-all">
+<input class="sr-only peer" onchange="toggleItemPurchased('item-4', this)" type="checkbox"/>
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant peer-checked:hidden">check_box_outline_blank</span>
+<span class="material-symbols-outlined text-[26px] text-secondary hidden peer-checked:inline-block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</label>
+</article>
+</div>
+</section>
+<!-- SEKCJA 3: LIDL -->
+<section class="store-section w-full bg-surface-container-low rounded-xl overflow-hidden shadow-sm flex flex-col" data-store="lidl">
+<!-- Store Accordion Header -->
+<button class="w-full p-space-md flex items-center justify-between text-left active:bg-surface-container transition-colors" onclick="toggleAccordion('store-lidl', this)" type="button">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-secondary">eco</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Lidl</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest font-mono-data text-label-xs text-on-surface-variant store-badge">1 poz.</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant/80">Kwalifikacja kwotowa</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined transition-transform duration-200 chevron-icon rotate-180">expand_more</span>
+</div>
+</button>
+<!-- Item List -->
+<div class="flex flex-col px-space-md pb-space-md space-y-space-sm" id="store-lidl">
+<!-- Pozycja 1: Bio Lidlomix -->
+<article class="shopping-card w-full bg-surface-container rounded-lg p-space-md flex items-center justify-between gap-space-sm relative transition-all" data-id="item-5">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-secondary font-label-xs text-label-xs">
+              Wygraj Lidlomixa
+            </span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold leading-snug">Dowolne produkty BIO</h3>
+<p class="font-label-md text-label-md text-primary font-medium mt-0.5">Wartość łączna: min. 20,00 zł</p>
+</div>
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer rounded-lg bg-surface-container-highest active:scale-95 transition-all">
+<input class="sr-only peer" onchange="toggleItemPurchased('item-5', this)" type="checkbox"/>
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant peer-checked:hidden">check_box_outline_blank</span>
+<span class="material-symbols-outlined text-[26px] text-secondary hidden peer-checked:inline-block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</label>
+</article>
+</div>
+</section>
+<!-- SEKCJA 4: DOWOLNY SKLEP -->
+<section class="store-section w-full bg-surface-container-low rounded-xl overflow-hidden shadow-sm flex flex-col" data-store="any-store">
+<!-- Store Accordion Header -->
+<button class="w-full p-space-md flex items-center justify-between text-left active:bg-surface-container transition-colors" onclick="toggleAccordion('store-any', this)" type="button">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0 text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary">local_mall</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Dowolny sklep</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest font-mono-data text-label-xs text-on-surface-variant store-badge">1 poz.</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant/80">Ogólnopolska promocja</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined transition-transform duration-200 chevron-icon rotate-180">expand_more</span>
+</div>
+</button>
+<!-- Item List -->
+<div class="flex flex-col px-space-md pb-space-md space-y-space-sm" id="store-any">
+<!-- Pozycja 1: Nałęczowianka -->
+<article class="shopping-card w-full bg-surface-container rounded-lg p-space-md flex items-center justify-between gap-space-sm relative transition-all" data-id="item-6">
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-xs text-label-xs">
+              Promocja Ogólna
+            </span>
+</div>
+<h3 class="font-title-md text-title-md text-on-surface font-semibold leading-snug">Woda mineralna Nałęczowianka</h3>
+<p class="font-label-md text-label-md text-on-surface-variant mt-0.5">Zgrzewka: 1.5L x 6 butelek</p>
+</div>
+<label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer rounded-lg bg-surface-container-highest active:scale-95 transition-all">
+<input class="sr-only peer" onchange="toggleItemPurchased('item-6', this)" type="checkbox"/>
+<span class="material-symbols-outlined text-[24px] text-on-surface-variant peer-checked:hidden">check_box_outline_blank</span>
+<span class="material-symbols-outlined text-[26px] text-secondary hidden peer-checked:inline-block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</label>
+</article>
+</div>
+</section>
+<!-- Pasek Podsumowania / Call To Action - Bezpośrednio po zakupie -->
+<aside class="w-full bg-gradient-to-r from-surface-container-high via-surface-container to-surface-container-high rounded-xl p-space-md shadow-md flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-container/20 text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">photo_camera</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-xs text-label-xs text-secondary uppercase font-semibold">Złota reguła zwycięzcy</span>
+<p class="font-title-md text-title-md text-on-surface font-medium leading-tight">
+          Po zakupie zrób od razu zdjęcie paragonu i wpisz numer schowka!
+        </p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-sm mt-1">
+<button class="h-11 rounded-lg bg-surface-container-highest text-on-surface font-label-md text-label-md flex items-center justify-center gap-1.5 active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span>Przypisz schowek</span>
+</button>
+<button class="h-11 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition-transform shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">document_scanner</span>
+<span>Skanuj paragon</span>
+</button>
+</div>
+</aside>
+<!-- Delight Micro-Banner / Fun Pro-Tip -->
+<div class="w-full text-center py-2">
+<span class="font-label-xs text-label-xs text-on-surface-variant/60 flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-[14px]">format_image_left</span>
+      Paragony są bezpiecznie archiwizowane w chmurze
+    </span>
+</div>
+</div>
+<!-- Client-side Interactive Logic for Shopping Mode -->
+<script>
+  let totalItems = 6;
+  let purchasedCount = 0;
+
+  function toggleAccordion(contentId, btn) {
+    const content = document.getElementById(contentId);
+    const chevron = btn.querySelector('.chevron-icon');
+    if (!content) return;
+
+    if (content.classList.contains('hidden')) {
+      content.classList.remove('hidden');
+      chevron.classList.add('rotate-180');
+    } else {
+      content.classList.add('hidden');
+      chevron.classList.remove('rotate-180');
+    }
+  }
+
+  function toggleItemPurchased(itemId, checkbox) {
+    const card = document.querySelector(`[data-id="${itemId}"]`);
+    if (!card) return;
+
+    if (checkbox.checked) {
+      purchasedCount++;
+      card.classList.add('opacity-45', 'line-through');
+    } else {
+      purchasedCount = Math.max(0, purchasedCount - 1);
+      card.classList.remove('opacity-45', 'line-through');
+    }
+
+    const remaining = totalItems - purchasedCount;
+    const remainingEl = document.getElementById('remaining-count');
+    if (remainingEl) remainingEl.textContent = remaining;
+
+    const percent = Math.round((purchasedCount / totalItems) * 100);
+    const progressFill = document.getElementById('progress-bar-fill');
+    const progressText = document.getElementById('progress-percent');
+    
+    if (progressFill) progressFill.style.width = percent + '%';
+    if (progressText) progressText.textContent = percent + '%';
+  }
+
+  // Quick manual add action handler
+  const btnQuickAdd = document.getElementById('btn-quick-add');
+  if (btnQuickAdd) {
+    btnQuickAdd.addEventListener('click', () => {
+      const storeSection = document.querySelector('#store-any');
+      if (!storeSection) return;
+      
+      const newId = 'item-' + (Date.now());
+      totalItems++;
+
+      const newArticle = document.createElement('article');
+      newArticle.className = 'shopping-card w-full bg-surface-container rounded-lg p-space-md flex items-center justify-between gap-space-sm relative transition-all animate-pulse';
+      newArticle.setAttribute('data-id', newId);
+      newArticle.innerHTML = `
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="px-2 py-0.5 rounded-full bg-primary/20 text-primary font-label-xs text-label-xs">
+              Ręcznie dodana pozycja
+            </span>
+          </div>
+          <h3 class="font-title-md text-title-md text-on-surface font-semibold leading-snug">Nowy produkt konkursowy</h3>
+          <p class="font-label-md text-label-md text-on-surface-variant mt-0.5">Zachowaj paragon ze sklepu</p>
+        </div>
+        <label class="relative flex items-center justify-center w-11 h-11 shrink-0 cursor-pointer rounded-lg bg-surface-container-highest active:scale-95 transition-all">
+          <input type="checkbox" class="sr-only peer" onchange="toggleItemPurchased('${newId}', this)">
+          <span class="material-symbols-outlined text-[24px] text-on-surface-variant peer-checked:hidden">check_box_outline_blank</span>
+          <span class="material-symbols-outlined text-[26px] text-secondary hidden peer-checked:inline-block" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        </label>
+      `;
+
+      storeSection.prepend(newArticle);
+      setTimeout(() => newArticle.classList.remove('animate-pulse'), 800);
+
+      const remainingEl = document.getElementById('remaining-count');
+      if (remainingEl) remainingEl.textContent = totalItems - purchasedCount;
+      
+      const percent = Math.round((purchasedCount / totalItems) * 100);
+      const progressFill = document.getElementById('progress-bar-fill');
+      const progressText = document.getElementById('progress-percent');
+      if (progressFill) progressFill.style.width = percent + '%';
+      if (progressText) progressText.textContent = percent + '%';
+    });
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-4px_16px_rgba(0,0,0,0.5)]" data-active-classes="text-primary font-bold"><div class="h-16 px-margin-mobile max-w-md md:max-w-xl mx-auto flex items-center justify-between relative"><a class="flex flex-col items-center justify-center flex-1 h-full min-w-[44px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="konkursy" href="#"><span class="material-symbols-outlined text-[22px]">emoji_events</span><span class="font-label-xs text-label-xs mt-1">Konkursy</span></a><a class="flex flex-col items-center justify-center flex-1 h-full min-w-[44px] relative text-on-surface-variant hover:text-on-surface transition-colors" data-path="pilne" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">local_fire_department</span><span class="absolute -top-1 -right-2 px-1.5 py-0.2 rounded-full bg-tertiary text-on-tertiary font-mono-data text-[10px] leading-tight font-bold">3</span></div><span class="font-label-xs text-label-xs mt-1">Pilne</span></a><div class="flex items-center justify-center flex-1"><a aria-label="Dodaj konkurs lub paragon" class="w-12 h-12 rounded-full bg-gradient-to-tr from-primary-container to-surface-tint text-on-primary-container flex items-center justify-center shadow-[0_4px_12px_rgba(128,131,255,0.4)] active:scale-95 transition-transform" data-path="nowe-zgloszenie" href="#"><span class="material-symbols-outlined text-[28px] text-on-primary">add</span></a></div><a aria-current="page" class="flex flex-col items-center justify-center flex-1 h-full min-w-[44px] relative transition-colors text-primary font-bold" data-path="zakupy" href="#"><div class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">shopping_cart</span><span class="absolute -top-1 -right-2 px-1.5 py-0.2 rounded-full bg-surface-container-highest text-on-surface font-mono-data text-[10px] leading-tight font-bold">5</span></div><span class="font-label-xs text-label-xs mt-1">Zakupy</span></a><a class="flex flex-col items-center justify-center flex-1 h-full min-w-[44px] text-on-surface-variant hover:text-on-surface transition-colors" data-path="statystyki" href="#"><span class="material-symbols-outlined text-[22px]">account_balance_wallet</span><span class="font-label-xs text-label-xs mt-1">Statystyki</span></a></div></nav></body></html>
