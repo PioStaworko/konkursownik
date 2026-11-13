@@ -18,6 +18,8 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public FakeGeminiClient Gemini { get; } = new();
 
+    public FakePageFetcher PageFetcher { get; } = new();
+
     public FakeTimeProvider Clock { get; } = new(DateTimeOffset.Parse("2026-11-12T10:00:00Z"));
 
     private const string DefaultPassword = "Haslo123!";
@@ -91,6 +93,8 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             services.AddSingleton<TimeProvider>(Clock);
             services.RemoveAll<IGeminiClient>();
             services.AddSingleton<IGeminiClient>(Gemini);
+            services.RemoveAll<IPageFetcher>();
+            services.AddSingleton<IPageFetcher>(PageFetcher);
         });
     }
 }

@@ -18,6 +18,7 @@ public static class AiFeatures
     {
         services.Configure<GeminiOptions>(config.GetSection(GeminiOptions.Section));
         services.AddSingleton<GeminiQuota>();
+        services.AddSingleton<IPageFetcher>(_ => new PageFetcher());
         services.AddHttpClient<IGeminiClient, GeminiClient>((sp, http) =>
             http.Timeout = TimeSpan.FromSeconds(sp.GetRequiredService<IOptions<GeminiOptions>>().Value.TimeoutSeconds));
 

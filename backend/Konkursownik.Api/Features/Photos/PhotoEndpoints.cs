@@ -14,20 +14,20 @@ public static class PhotoEndpoints
     public const int MaxBytes = 10 * 1024 * 1024;
     public const long RequestLimit = 11 * 1024 * 1024;
 
-    /// <summary>Reads at most <see cref="MaxBytes"/> + 1 bytes so the cap holds regardless of the declared length; null when over the cap.</summary>
-    public static async Task<MemoryStream?> ReadBoundedAsync(IFormFile file, CancellationToken ct)
+    /// <summary>Reads at most <paramref name="maxBytes"/> + 1 bytes so the cap holds regardless of the declared length; null when over the cap.</summary>
+    public static async Task<MemoryStream?> ReadBoundedAsync(IFormFile file, CancellationToken ct, int maxBytes = MaxBytes)
     {
         var buffer = new MemoryStream();
         await using var input = file.OpenReadStream();
         var chunk = new byte[81920];
-        while (buffer.Length <= MaxBytes)
+        while (buffer.Length <= maxBytes)
         {
-            var toRead = (int)Math.Min(chunk.Length, MaxBytes + 1 - buffer.Length);
+            var toRead = (int)Math.Min(chunk.Length, maxBytes + 1 - buffer.Length);
             var read = await input.ReadAsync(chunk.AsMemory(0, toRead), ct);
             if (read == 0) break;
             buffer.Write(chunk, 0, read);
         }
-        return buffer.Length > MaxBytes ? null : buffer;
+        return buffer.Length > maxBytes ? null : buffer;
     }
 
     /// <summary>The image's content type from its magic bytes (client Content-Type and filename are ignored); null if unsupported.</summary>
