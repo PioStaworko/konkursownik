@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Konkursownik.Api.Features.Ai;
 using Konkursownik.Api.Features.Auth;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -14,6 +15,8 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _db = new PostgreSqlBuilder("postgres:17").Build();
     private readonly string _storagePath = Path.Combine(Path.GetTempPath(), "konkursownik-tests-" + Guid.NewGuid().ToString("N"));
+
+    public FakeGeminiClient Gemini { get; } = new();
 
     public FakeTimeProvider Clock { get; } = new(DateTimeOffset.Parse("2026-11-12T10:00:00Z"));
 
@@ -79,11 +82,15 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             ["Storage:Provider"] = "Local",
             ["Storage:LocalPath"] = _storagePath,
             ["Invites:BootstrapCode"] = "START",
+            ["Gemini:ApiKey"] = "test",
+            ["Gemini:Model"] = "test",
         }));
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<TimeProvider>();
             services.AddSingleton<TimeProvider>(Clock);
+            services.RemoveAll<IGeminiClient>();
+            services.AddSingleton<IGeminiClient>(Gemini);
         });
     }
 }

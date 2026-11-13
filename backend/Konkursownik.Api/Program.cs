@@ -1,6 +1,7 @@
 using Konkursownik.Api.Common;
 using Konkursownik.Api.Data;
 using Konkursownik.Api.Domain;
+using Konkursownik.Api.Features.Ai;
 using Konkursownik.Api.Features.Auth;
 using Konkursownik.Api.Features.Contests;
 using Konkursownik.Api.Features.Entries;
@@ -62,6 +63,7 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
         o.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; };
     });
 builder.Services.AddAuthorization();
+builder.Services.AddAiServices(builder.Configuration);
 
 var app = builder.Build();
 
@@ -79,6 +81,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapGet("/api/health", () => new { status = "ok" }).AllowAnonymous();
 app.MapPublicAuthEndpoints();
@@ -86,6 +89,7 @@ app.MapPublicAuthEndpoints();
 // Every other /api endpoint belongs on this group and therefore requires a signed-in user.
 var secured = app.MapGroup("/api").RequireAuthorization();
 secured.MapAccountEndpoints();
+secured.MapAiFeatureEndpoints();
 secured.MapContestEndpoints();
 secured.MapEntryEndpoints();
 secured.MapItemToggleEndpoints();

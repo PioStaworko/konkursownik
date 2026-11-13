@@ -166,6 +166,26 @@ Przeładuj: `sudo systemctl reload caddy`. Caddy sam pobierze certyfikat Let's E
 
 ---
 
+## Odczyt AI (Gemini)
+
+Odczyt paragonów i regulaminów przez Gemini jest **opcjonalny** i domyślnie wyłączony: działa dopiero, gdy ustawisz klucz API. Bez klucza aplikacja działa normalnie, a przyciski AI się nie pojawiają.
+
+> **Przed włączeniem sprawdź aktualne warunki Gemini API dotyczące wykorzystania danych** — plan darmowy a płatny (czy dane mogą służyć do ulepszania modeli), a także dostępność i zasady w Europejskim Obszarze Gospodarczym (EOG). Do Gemini trafiają zdjęcia paragonów i treść regulaminów.
+
+Ustawienia (zmienne środowiskowe; w Azure jako Application settings, w Dockerze w `.env`/compose):
+
+| Zmienna | Znaczenie | Domyślnie |
+|---|---|---|
+| `Gemini__ApiKey` | klucz API z Google AI Studio (sekret, nie zapisuj w repozytorium) | pusty = AI wyłączone |
+| `Gemini__Model` | identyfikator modelu | `gemini-3.5-flash-lite` (sprawdź aktualną nazwę modelu Flash w dokumentacji) |
+| `Gemini__TimeoutSeconds` | limit czasu jednego wywołania | `30` |
+| `Gemini__RequestsPerHour` | limit odczytów AI na użytkownika na godzinę | `30` |
+| `Gemini__MaxRequestsPerMinute` | wspólny limit wywołań na minutę | `15` |
+| `Gemini__MaxTokensPerMinute` | wspólny budżet tokenów na minutę | `250000` |
+| `Gemini__QuotaResetTimeZone` | strefa resetu dziennych limitów Gemini | `America/Los_Angeles` |
+
+Aplikacja pilnuje limitów klucza sama (wspólnie dla wszystkich użytkowników). Gdy mimo to Gemini odpowie błędem 429, odczyt AI wyłącza się do północy czasu pacyficznego. Limity modelu zależą od planu — sprawdź je w swoim koncie.
+
 ## Kopia zapasowa
 
 **Baza** (wdrożenie Docker):
