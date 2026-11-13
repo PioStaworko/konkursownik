@@ -11,8 +11,28 @@ public record PhotoLabelDto(PhotoLabel? Label);
 
 public static class PhotoEndpoints
 {
-    private const int MaxBytes = 10 * 1024 * 1024;
-    private const long RequestLimit = 11 * 1024 * 1024;
+    public const int MaxBytes = 10 * 1024 * 1024;
+    public const long RequestLimit = 11 * 1024 * 1024;
+
+    /// <summary>Reads at most <see cref="MaxBytes"/> + 1 bytes so the cap holds regardless of the declared length; null when over the cap.</summary>
+    public static async Task<MemoryStream?> ReadBoundedAsync(IFormFile file, CancellationToken ct)
+    {
+        var buffer = new MemoryStream();
+        await using var input = file.OpenReadStream();
+        var chunk = new byte[81920];
+        while (buffer.Length <= MaxBytes)
+        {
+            var toRead = (int)Math.Min(chunk.Length, MaxBytes + 1 - buffer.Length);
+            var read = await input.ReadAsync(chunk.AsMemory(0, toRead), ct);
+            if (read == 0) break;
+            buffer.Write(chunk, 0, read);
+        }
+        return buffer.Length > MaxBytes ? null : buffer;
+    }
+
+    /// <summary>The image's content type from its magic bytes (client Content-Type and filename are ignored); null if unsupported.</summary>
+    public static string? DetectContentType(MemoryStream buffer) =>
+        ImageSignature.Detect(buffer.GetBuffer().AsSpan(0, (int)Math.Min(buffer.Length, 16)));
 
     /// <summary>Private receipt/package photos; the passed group already carries RequireAuthorization.</summary>
     public static void MapPhotoEndpoints(this IEndpointRouteBuilder secured)
@@ -29,23 +49,10 @@ public static class PhotoEndpoints
                 if (rawLabel != "" && !(Enum.TryParse(rawLabel, ignoreCase: true, out label) && Enum.IsDefined(label)))
                     return Results.BadRequest(new { error = "invalid_label" });
 
-                // Read at most limit + 1 bytes so the cap holds regardless of the declared length.
-                var buffer = new MemoryStream();
-                await using (var input = file.OpenReadStream())
-                {
-                    var chunk = new byte[81920];
-                    while (buffer.Length <= MaxBytes)
-                    {
-                        var toRead = (int)Math.Min(chunk.Length, MaxBytes + 1 - buffer.Length);
-                        var read = await input.ReadAsync(chunk.AsMemory(0, toRead), ct);
-                        if (read == 0) break;
-                        buffer.Write(chunk, 0, read);
-                    }
-                }
-                if (buffer.Length > MaxBytes) return Results.BadRequest(new { error = "too_large" });
+                var buffer = await ReadBoundedAsync(file, ct);
+                if (buffer is null) return Results.BadRequest(new { error = "too_large" });
 
-                // The type comes from the file's magic bytes; client Content-Type and filename are ignored.
-                var contentType = ImageSignature.Detect(buffer.GetBuffer().AsSpan(0, (int)Math.Min(buffer.Length, 16)));
+                var contentType = DetectContentType(buffer);
                 if (contentType is null) return Results.BadRequest(new { error = "unsupported_type" });
 
                 var photo = new Photo

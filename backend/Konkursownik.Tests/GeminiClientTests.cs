@@ -100,7 +100,7 @@ public class GeminiClientTests
     public async Task Exhausted_quota_throws_busy()
     {
         var (client, quota, _, handler) = Create(HttpStatusCode.OK, Candidate("{}"));
-        Assert.True(quota.TryAcquire(249_000));
+        Assert.NotNull(quota.TryAcquire(249_000));
         await Assert.ThrowsAsync<GeminiBusyException>(() => client.GenerateJsonAsync(new string('a', 40_000), [], Schema, default));
         Assert.Null(handler.Request);
     }

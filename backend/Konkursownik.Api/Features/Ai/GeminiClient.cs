@@ -16,7 +16,7 @@ public class GeminiClient(HttpClient http, IOptions<GeminiOptions> options, Gemi
         if (!o.Enabled || quota.IsBlocked) throw new GeminiUnavailableException("Gemini is disabled or blocked.");
 
         var estimate = Estimate(prompt, parts);
-        if (!quota.TryAcquire(estimate)) throw new GeminiBusyException();
+        var reservation = quota.TryAcquire(estimate) ?? throw new GeminiBusyException();
 
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}{Uri.EscapeDataString(o.Model)}:generateContent")
         {
@@ -31,7 +31,7 @@ public class GeminiClient(HttpClient http, IOptions<GeminiOptions> options, Gemi
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !ct.IsCancellationRequested)
         {
-            quota.Record(0, estimate);
+            quota.Record(reservation, 0);
             throw new GeminiUnavailableException("Gemini request failed.", ex);
         }
 
@@ -39,13 +39,13 @@ public class GeminiClient(HttpClient http, IOptions<GeminiOptions> options, Gemi
         {
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                quota.Record(0, estimate);
+                quota.Record(reservation, 0);
                 quota.BlockUntilNextReset();
                 throw new GeminiUnavailableException("Gemini quota exhausted.");
             }
             if (!response.IsSuccessStatusCode)
             {
-                quota.Record(0, estimate);
+                quota.Record(reservation, 0);
                 throw new GeminiUnavailableException($"Gemini returned {(int)response.StatusCode}.");
             }
 
@@ -56,13 +56,13 @@ public class GeminiClient(HttpClient http, IOptions<GeminiOptions> options, Gemi
             }
             catch (JsonException)
             {
-                quota.Record(0, estimate);
+                quota.Record(reservation, 0);
                 return null;
             }
 
             var actual = root.TryGetProperty("usageMetadata", out var usage)
                          && usage.TryGetProperty("totalTokenCount", out var total) && total.TryGetInt32(out var t) ? t : estimate;
-            quota.Record(actual, estimate);
+            quota.Record(reservation, actual);
             return ExtractJson(root);
         }
     }

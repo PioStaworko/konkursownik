@@ -90,6 +90,7 @@ app.MapPublicAuthEndpoints();
 var secured = app.MapGroup("/api").RequireAuthorization();
 secured.MapAccountEndpoints();
 secured.MapAiFeatureEndpoints();
+secured.MapAiEndpoints();
 secured.MapContestEndpoints();
 secured.MapEntryEndpoints();
 secured.MapItemToggleEndpoints();
