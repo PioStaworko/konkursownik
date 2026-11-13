@@ -22,6 +22,15 @@ public class IpPolicyTests
     [InlineData("::ffff:127.0.0.1")]
     [InlineData("::ffff:10.0.0.1")]
     [InlineData("::ffff:192.168.0.1")]
+    [InlineData("64:ff9b::7f00:1")]
+    [InlineData("64:ff9b::808:808")]
+    [InlineData("64:ff9b:1::1")]
+    [InlineData("::7f00:1")]
+    [InlineData("::a9fe:a9fe")]
+    [InlineData("2002:7f00:1::")]
+    [InlineData("2002:808:808::")]
+    [InlineData("2001::1")]
+    [InlineData("::ffff:0:7f00:1")]
     public void Non_public_addresses_are_rejected(string ip) => Assert.False(IpPolicy.IsPublic(IPAddress.Parse(ip)));
 
     [Theory]
@@ -30,5 +39,6 @@ public class IpPolicyTests
     [InlineData("100.128.0.1")]
     [InlineData("2606:4700::1111")]
     [InlineData("::ffff:8.8.8.8")]
+    [InlineData("2a00:1450:4001::1")]
     public void Public_addresses_are_allowed(string ip) => Assert.True(IpPolicy.IsPublic(IPAddress.Parse(ip)));
 }

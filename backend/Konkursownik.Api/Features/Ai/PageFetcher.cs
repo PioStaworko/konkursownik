@@ -27,6 +27,8 @@ public sealed partial class PageFetcher : IPageFetcher, IDisposable
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(2);
 
+    static PageFetcher() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // windows-1250, iso-8859-2 for Polish pages
+
     private readonly Func<IPAddress, bool> _isAllowed;
     private readonly HttpClient _http;
 
@@ -132,6 +134,7 @@ public sealed partial class PageFetcher : IPageFetcher, IDisposable
 
     private static string DecodeBody(byte[] bytes, string? charset)
     {
+        charset = string.IsNullOrWhiteSpace(charset) ? SniffMetaCharset(bytes) : charset;
         Encoding encoding = Encoding.UTF8;
         if (!string.IsNullOrWhiteSpace(charset))
         {
@@ -140,6 +143,17 @@ public sealed partial class PageFetcher : IPageFetcher, IDisposable
         }
         return encoding.GetString(bytes);
     }
+
+    /// <summary>Finds a charset declared in a meta tag within the first 4 KB (ASCII-compatible scan).</summary>
+    private static string? SniffMetaCharset(byte[] bytes)
+    {
+        var head = Encoding.Latin1.GetString(bytes, 0, Math.Min(bytes.Length, 4096));
+        var m = MetaCharset().Match(head);
+        return m.Success ? m.Groups[1].Value : null;
+    }
+
+    [GeneratedRegex(@"<meta\b[^>]*?charset\s*=\s*[""']?\s*([\w\-:.]+)", RegexOptions.IgnoreCase, matchTimeoutMilliseconds: 2000)]
+    private static partial Regex MetaCharset();
 
     private static PageText? ToPage(string html, Uri baseUri)
     {

@@ -28,6 +28,12 @@ public class PageFetcherTests : IAsyncLifetime
             "<a href=\"https://x.test/a.PDF\">dup</a><a href=\"/about\">no</a><a href=\"mailto:a@b.pl?x=regulamin\">m</a></body></html>",
             "text/html; charset=utf-8"));
         _app.MapGet("/huge", () => Results.Content("<p>" + new string('a', 2 * 1024 * 1024 + 10) + "</p>", "text/html"));
+        _app.MapGet("/pl1250", () =>
+        {
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            var html = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1250\"></head><body><p>Łódź żółć " + Filler + "</p></body></html>";
+            return Results.Bytes(System.Text.Encoding.GetEncoding(1250).GetBytes(html), "text/html");
+        });
         _app.MapGet("/short", () => Results.Content("<p>krótko</p>", "text/html"));
         _app.MapGet("/to-page", () => Results.Redirect("/page"));
         _app.MapGet("/to-private", () => Results.Redirect("http://[::1]:1/secret"));
@@ -97,5 +103,14 @@ public class PageFetcherTests : IAsyncLifetime
         Assert.DoesNotContain("<h1>", page.Text);
         Assert.DoesNotContain("  ", page.Text);
         Assert.Equal([_baseUrl + "/files/Regulamin-konkursu.html", "https://x.test/a.PDF"], page.Links);
+    }
+
+    [Fact]
+    public async Task Fetcher_decodes_windows1250_from_meta_tag()
+    {
+        using var fetcher = new PageFetcher(OnlyV4Loopback);
+        var page = await fetcher.FetchAsync(new Uri(_baseUrl + "/pl1250"), CancellationToken.None);
+        Assert.NotNull(page);
+        Assert.Contains("Łódź żółć", page.Text);
     }
 }

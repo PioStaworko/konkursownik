@@ -25,9 +25,17 @@ public static class IpPolicy
         }
         if (ip.AddressFamily == AddressFamily.InterNetworkV6)
         {
-            return !(ip.Equals(IPAddress.IPv6None) || ip.Equals(IPAddress.IPv6Any)
-                || ip.IsIPv6LinkLocal || ip.IsIPv6SiteLocal || ip.IsIPv6Multicast
-                || (b[0] & 0xFE) == 0xFC);                       // fc00::/7 unique-local
+            // Ranges that embed an IPv4 address (or tunnel to one) are blocked outright.
+            var firstEightZero = b.Take(8).All(x => x == 0);
+            return !(ip.IsIPv6LinkLocal || ip.IsIPv6SiteLocal || ip.IsIPv6Multicast
+                || (b[0] & 0xFE) == 0xFC                                                  // fc00::/7 unique-local
+                || b.Take(12).All(x => x == 0)                                            // ::/96 unspecified, loopback, IPv4-compatible
+                || (firstEightZero && b[8] == 0xFF && b[9] == 0xFF && b[10] == 0 && b[11] == 0) // ::ffff:0:0:0/96 IPv4-translated
+                || (b[0] == 0 && b[1] == 0x64 && b[2] == 0xFF && b[3] == 0x9B
+                    && ((b[4] == 0 && b[5] == 0 && b[6] == 0 && b[7] == 0 && b[8] == 0 && b[9] == 0 && b[10] == 0 && b[11] == 0) // 64:ff9b::/96
+                        || (b[4] == 0 && b[5] == 1)))                                     // 64:ff9b:1::/48
+                || (b[0] == 0x20 && b[1] == 0x02)                                         // 2002::/16 6to4
+                || (b[0] == 0x20 && b[1] == 0x01 && b[2] == 0 && b[3] == 0));             // 2001::/32 Teredo
         }
         return false;
     }
