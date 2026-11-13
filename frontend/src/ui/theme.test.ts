@@ -38,7 +38,7 @@ describe('theme', () => {
   it.each([['light', false], ['dark', true], [null, true]] as const)(
     'inline head script and readTheme agree for %s',
     (stored, dark) => {
-      if (stored) localStorage.setItem('theme', stored)
+      if (stored) localStorage.setItem('konkursownik-theme', stored)
       document.documentElement.classList.remove('dark')
       new Function(inlineScript())()
       expect(document.documentElement.classList.contains('dark')).toBe(dark)

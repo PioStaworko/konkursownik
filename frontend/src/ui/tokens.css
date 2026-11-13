@@ -2,11 +2,12 @@
  * Design tokens. Dark values are copied from the mockups' tailwind-config and are the default.
  * Light overrides live under `:root:not(.dark)` (same palette family, Material-3 light roles).
  *
- * Light palette (contrast against its own surface #f8f9ff / #ffffff):
- *   on-surface #181c21 (~16:1)   on-surface-variant #454654 (~9:1)   outline #767587 (~4.6:1)
- *   primary #494bd6 + on-primary #ffffff (~6.6:1)     secondary #006c49 + #ffffff (~6.6:1)
- *   tertiary #8a5100 + #ffffff (~6.1:1)               error #ba1a1a + #ffffff (~6.5:1)
- *   containers (primary/secondary/tertiary/error) use their on-*-container colors (>= 9:1).
+ * Light palette (computed WCAG contrast; surface #f8f9ff, text roles also checked on containers):
+ *   on-surface #181c21 on surface 16.3:1       on-surface-variant #454654 on surface 8.9:1 (>= 6.3 on every container)
+ *   outline #5f5e70 (text/icons): 6.0 on surface, 5.7 low, 5.4 container, 5.1 high, 4.7 highest
+ *   primary #494bd6 + #ffffff 6.4:1            secondary #006c49 + #ffffff 6.5:1
+ *   tertiary #8a5100 + #ffffff 6.5:1           error #ba1a1a + #ffffff 6.5:1
+ *   containers (primary/secondary/tertiary/error) use their on-*-container colours.
  */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -129,7 +130,7 @@
   --color-on-surface-variant: #454654;
   --color-inverse-surface: #2d3136;
   --color-inverse-on-surface: #eff1f9;
-  --color-outline: #767587;
+  --color-outline: #5f5e70;
   --color-outline-variant: #c7c4d7;
   --color-primary: #494bd6;
   --color-on-primary: #ffffff;

@@ -76,7 +76,9 @@ describe('small components', () => {
 
   it('FilterPill exposes active state and count', () => {
     render(<FilterPill active count={7}>Wszystkie</FilterPill>)
-    expect(screen.getByRole('button', { name: /Wszystkie/ })).toHaveAttribute('aria-pressed', 'true')
+    const pill = screen.getByRole('button', { name: /Wszystkie/ })
+    expect(pill).toHaveAttribute('aria-pressed', 'true')
+    expect(pill).toHaveClass('min-h-11')
     expect(screen.getByText('7')).toBeInTheDocument()
   })
 

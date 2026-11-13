@@ -7,8 +7,8 @@ const styles: Record<ContestStatus, { badge: string; dot: string }> = {
   Submitted: { badge: 'bg-primary/15 text-primary', dot: 'bg-primary' },
   AwaitingResults: { badge: 'bg-primary/15 text-primary', dot: 'bg-primary' },
   Won: { badge: 'bg-secondary text-on-secondary', dot: 'bg-on-secondary' },
-  Lost: { badge: 'bg-outline-variant/40 text-outline', dot: 'bg-outline' },
-  Archived: { badge: 'bg-outline-variant/40 text-outline', dot: 'bg-outline' },
+  Lost: { badge: 'bg-outline-variant/40 text-on-surface-variant', dot: 'bg-outline' },
+  Archived: { badge: 'bg-outline-variant/40 text-on-surface-variant', dot: 'bg-outline' },
 }
 
 export function StatusBadge({ status }: { status: ContestStatus }) {

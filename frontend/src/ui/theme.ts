@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 
 export type Theme = 'dark' | 'light'
 
-export const THEME_KEY = 'theme'
+export const THEME_KEY = 'konkursownik-theme'
 
 // Keep in sync with the inline <script id="theme-init"> in index.html (a test checks both agree).
 export function readTheme(storage: Storage | null): Theme {
