@@ -136,6 +136,60 @@ public class ContestPrizesTests(ApiFactory factory)
     }
 
     [Fact]
+    public async Task Migration_normalizes_legacy_values()
+    {
+        var baseCs = factory.Services.GetRequiredService<IConfiguration>().GetConnectionString("Default")!;
+        var cs = new NpgsqlConnectionStringBuilder(baseCs) { Database = "migr_" + Guid.NewGuid().ToString("N") }.ToString();
+        await using var db = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>().UseNpgsql(cs).Options);
+        await db.GetService<IMigrator>().MigrateAsync("20261113082202_WinSteps");
+
+        await db.Database.ExecuteSqlRawAsync("""
+            INSERT INTO "AspNetUsers" ("Id","EmailConfirmed","PhoneNumberConfirmed","TwoFactorEnabled","LockoutEnabled","AccessFailedCount")
+            VALUES ('u1', false, false, false, false, 0)
+            """);
+        var blank = Guid.NewGuid();
+        var zero = Guid.NewGuid();
+        var longDesc = Guid.NewGuid();
+        var onlyBlank = Guid.NewGuid();
+        await InsertContestAsync(db, blank, "   ", 10m, null);
+        await InsertContestAsync(db, zero, "Bon", null, 0);
+        await InsertContestAsync(db, longDesc, new string('x', 250), null, null);
+        await InsertContestAsync(db, onlyBlank, "  ", null, null);
+
+        await db.Database.MigrateAsync();
+
+        var prizes = await db.Set<Konkursownik.Api.Domain.ContestPrize>().AsNoTracking().ToListAsync();
+        Assert.Equal(3, prizes.Count);
+        var b = prizes.Single(p => p.ContestId == blank);
+        Assert.Equal("Nagroda", b.Name);
+        Assert.Equal(10m, b.Value);
+        Assert.Null(prizes.Single(p => p.ContestId == zero).Count);
+        Assert.Equal(200, prizes.Single(p => p.ContestId == longDesc).Name.Length);
+        Assert.DoesNotContain(prizes, p => p.ContestId == onlyBlank);
+
+        await db.Database.EnsureDeletedAsync();
+    }
+
+    [Fact]
+    public async Task Missing_or_null_prizes_returns_400()
+    {
+        var c = await factory.CreateUserClientAsync();
+        foreach (var json in new[] { null, "null" })
+        {
+            var body = System.Text.Json.JsonSerializer.SerializeToNode(Samples.Contest(), JsonConfig.Options)!.AsObject();
+            body.Remove("prizes");
+            if (json is not null) body["prizes"] = null;
+            var res = await c.PostAsJsonAsync("/api/contests", body);
+            Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
+            Assert.Contains("\"Prizes\"", await res.Content.ReadAsStringAsync());
+
+            var id = await Samples.CreateContestAsync(c, Samples.Contest());
+            var put = await c.PutAsJsonAsync($"/api/contests/{id}", body);
+            Assert.Equal(HttpStatusCode.BadRequest, put.StatusCode);
+        }
+    }
+
+    [Fact]
     public async Task Migration_down_restores_first_prize_by_order()
     {
         var baseCs = factory.Services.GetRequiredService<IConfiguration>().GetConnectionString("Default")!;

@@ -40,9 +40,11 @@ namespace Konkursownik.Api.Data.Migrations
 
             migrationBuilder.Sql("""
                 INSERT INTO "ContestPrizes" ("Id", "ContestId", "Name", "Value", "Count", "Order")
-                SELECT gen_random_uuid(), "Id", LEFT(COALESCE("PrizeDescription", 'Nagroda'), 200), "PrizeValue", "PrizeCount", 0
+                SELECT gen_random_uuid(), "Id", LEFT(COALESCE(NULLIF(TRIM("PrizeDescription"), ''), 'Nagroda'), 200),
+                       CASE WHEN "PrizeValue" >= 0 THEN "PrizeValue" END,
+                       CASE WHEN "PrizeCount" > 0 THEN "PrizeCount" END, 0
                 FROM "Contests"
-                WHERE "PrizeDescription" IS NOT NULL OR "PrizeValue" IS NOT NULL
+                WHERE NULLIF(TRIM("PrizeDescription"),'') IS NOT NULL OR "PrizeValue" IS NOT NULL
                 """);
 
             migrationBuilder.DropColumn(

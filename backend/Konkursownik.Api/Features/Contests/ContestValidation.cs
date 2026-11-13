@@ -28,7 +28,9 @@ public static class ContestValidation
         if (d.Proofs.Any(p => Bad(p.What)))
             Add(nameof(d.Proofs), "Opis dowodu jest wymagany (maks. 300 znaków).");
 
-        if (d.Prizes.Any(p => string.IsNullOrWhiteSpace(p.Name) || p.Name.Length > 200))
+        if (d.Prizes is null || d.Prizes.Any(p => p is null))
+            Add(nameof(d.Prizes), "Lista nagród jest wymagana.");
+        else if (d.Prizes.Any(p => string.IsNullOrWhiteSpace(p.Name) || p.Name.Length > 200))
             Add(nameof(d.Prizes), "Nazwa nagrody jest wymagana (maks. 200 znaków).");
         else if (d.Prizes.Any(p => p.Value is < 0))
             Add(nameof(d.Prizes), "Wartość nagrody nie może być ujemna.");
