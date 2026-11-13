@@ -68,7 +68,8 @@ describe('WinSection', () => {
     await user.clear(first)
     await user.type(first, 'Nowy tekst')
     await user.click(screen.getByRole('button', { name: 'Usuń krok laureata 2' }))
-    await user.type(screen.getByLabelText('Nowy krok'), 'Wyślij dane')
+    const fields = screen.getAllByLabelText('Krok')
+    await user.type(fields[fields.length - 1], 'Wyślij dane')
     await user.click(screen.getByRole('button', { name: 'Dodaj krok laureata' }))
     await user.click(screen.getByRole('button', { name: 'Zapisz wygraną' }))
     await waitFor(() => expect(fetchMock).toHaveBeenCalled())
@@ -76,6 +77,16 @@ describe('WinSection', () => {
       { id: 's1', text: 'Nowy tekst', done: true },
       { id: null, text: 'Wyślij dane', done: false },
     ])
+  })
+
+  it('numbers laureate steps and lets step inputs fill the row', async () => {
+    const { user } = renderWin(win)
+    await user.click(screen.getByRole('button', { name: 'Edytuj wygraną' }))
+    expect(screen.getByText('Krok 1')).toBeInTheDocument()
+    expect(screen.getByText('Krok 2')).toBeInTheDocument()
+    const inputs = screen.getAllByLabelText('Krok')
+    expect(inputs).toHaveLength(win.steps.length + 1)
+    for (const input of inputs) expect(input.closest('div.min-w-0')).toHaveClass('min-w-0', 'flex-1')
   })
 
   it('marks data as sent', async () => {

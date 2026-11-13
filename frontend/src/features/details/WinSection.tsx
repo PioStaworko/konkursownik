@@ -124,25 +124,30 @@ function WinEditor({
         <span className="text-label-md text-on-surface-variant">Kroki laureata</span>
         {steps.map((s, i) => (
           <div key={s.id ?? `new-${i}`} className="flex items-end gap-1">
-            <Field label="Krok">
-              <input
-                className={tokenInputClass}
-                value={s.text}
-                onChange={(e) => setSteps((list) => list.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
-              />
-            </Field>
+            <div className="min-w-0 flex-1">
+              <p className="text-label-md font-semibold text-on-surface">Krok {i + 1}</p>
+              <Field label="Krok">
+                <input
+                  className={tokenInputClass}
+                  value={s.text}
+                  onChange={(e) => setSteps((list) => list.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))}
+                />
+              </Field>
+            </div>
             <IconButton icon="close" label={`Usuń krok laureata ${i + 1}`} onClick={() => setSteps((list) => list.filter((_, j) => j !== i))} />
           </div>
         ))}
         <div className="flex items-end gap-1">
-          <Field label="Nowy krok">
-            <input
-              className={tokenInputClass}
-              placeholder="np. Wyślij oświadczenie"
-              value={newStep}
-              onChange={(e) => setNewStep(e.target.value)}
-            />
-          </Field>
+          <div className="min-w-0 flex-1">
+            <Field label="Krok">
+              <input
+                className={tokenInputClass}
+                placeholder="np. Wyślij oświadczenie"
+                value={newStep}
+                onChange={(e) => setNewStep(e.target.value)}
+              />
+            </Field>
+          </div>
           <IconButton icon="add" label="Dodaj krok laureata" onClick={addStep} />
         </div>
       </div>

@@ -170,8 +170,9 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         newItem={() => ({ id: null, name: '', value: '', count: '' })}
         error={errors.prizes}
         badge={badge('prizes')}
-        renderItem={(p, _i, update) => (
+        renderItem={(p, i, update) => (
           <>
+            <p className="text-label-md font-semibold text-on-surface">Nagroda {i + 1}</p>
             <Field label="Nagroda">
               <input className={input} value={p.name} onChange={(e) => update({ name: e.target.value })} />
             </Field>
@@ -196,10 +197,13 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         newItem={() => ({ id: null, text: '', done: false })}
         error={errors.tasks}
         badge={badge('tasks')}
-        renderItem={(t, _i, update) => (
-          <Field label="Krok">
-            <input className={input} value={t.text} onChange={(e) => update({ text: e.target.value })} />
-          </Field>
+        renderItem={(t, i, update) => (
+          <>
+            <p className="text-label-md font-semibold text-on-surface">Krok {i + 1}</p>
+            <Field label="Krok">
+              <input className={input} value={t.text} onChange={(e) => update({ text: e.target.value })} />
+            </Field>
+          </>
         )}
       />
 
