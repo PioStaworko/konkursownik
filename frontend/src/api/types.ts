@@ -145,7 +145,12 @@ export interface Reminder {
   boughtPurchases: OpenPurchaseDto[]
 }
 
-export interface ShoppingItemDto { id: string; contestId: string; contestName: string; product: string; quantity: string | null }
+export interface ShoppingItemDto { id: string; contestId: string; contestName: string; product: string; quantity: string | null
+  contestEndDate: string; contestIcon: string | null; note: string | null }
+export interface ProofListItemDto {
+  id: string; contestId: string; contestName: string; contestIcon: string | null; what: string
+  keepUntil: string | null; location: string | null; note: string | null
+}
 export interface ShoppingGroupDto { store: string; items: ShoppingItemDto[] }
 
 export interface StatsDto { contests: number; entries: number; wins: number; totalSpent: number; totalWonValue: number }

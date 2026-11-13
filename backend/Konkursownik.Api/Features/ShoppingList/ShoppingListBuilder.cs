@@ -3,7 +3,8 @@ using Konkursownik.Api.Domain;
 
 namespace Konkursownik.Api.Features.ShoppingList;
 
-public record ShoppingItemDto(Guid Id, Guid ContestId, string ContestName, string Product, string? Quantity);
+public record ShoppingItemDto(Guid Id, Guid ContestId, string ContestName, string Product, string? Quantity,
+    DateOnly ContestEndDate, string? ContestIcon, string? Note);
 public record ShoppingGroupDto(string Store, List<ShoppingItemDto> Items);
 
 public static class ShoppingListBuilder
@@ -27,7 +28,8 @@ public static class ShoppingListBuilder
             var key = store.ToLowerInvariant();
             if (!groups.TryGetValue(key, out var group))
                 groups[key] = group = new ShoppingGroupDto(store.Length == 0 ? AnyStore : store, []);
-            group.Items.Add(new ShoppingItemDto(item.Id, contest.Id, contest.Name, item.Product, item.Quantity));
+            group.Items.Add(new ShoppingItemDto(item.Id, contest.Id, contest.Name, item.Product, item.Quantity,
+                contest.EndDate, contest.Icon, item.Note));
         }
 
         return groups

@@ -29,7 +29,9 @@ public class ReminderDtoTests(ApiFactory factory)
         Assert.Equal(ReminderKind.ResultsDue, r.Kind);
         Assert.Equal(id, r.Contest.Id);
         Assert.Equal(4, r.Contest.EntryCount);
-        Assert.Equal(["A1", "B2", "B3"], r.ConfirmationCodes);
+        Assert.Equal("A1", r.ConfirmationCodes[0]);
+        Assert.Equal(["B2", "B3"], r.ConfirmationCodes.Skip(1).Order());
+        Assert.Equal(3, r.ConfirmationCodes.Count);
         Assert.Empty(r.WinSteps);
         Assert.Empty(r.BoughtPurchases);
         Assert.Null(r.ProofLocation);

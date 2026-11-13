@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch, jsonBody } from './client'
 import type {
-  ContestDto, ContestStatus, ContestCardDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto,
+  ContestDto, ContestStatus, ContestCardDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto, ProofListItemDto,
   PhotoLabel, StatsDto, WinDto,
 } from './types'
 
@@ -26,7 +26,7 @@ function useInvalidateContestData() {
   const qc = useQueryClient()
   return () =>
     Promise.all(
-      (['contests', 'reminders', 'shopping', 'stats'] as const).map((k) => qc.invalidateQueries({ queryKey: [k] })),
+      (['contests', 'reminders', 'shopping', 'stats', 'proofs'] as const).map((k) => qc.invalidateQueries({ queryKey: [k] })),
     )
 }
 
@@ -174,4 +174,8 @@ export function useCreateInvite() {
     mutationFn: () => apiFetch<InviteDto>('/api/invites', { method: 'POST' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invites'] }),
   })
+}
+
+export function useProofs() {
+  return useQuery({ queryKey: ['proofs'], queryFn: () => apiFetch<ProofListItemDto[]>('/api/proofs') })
 }

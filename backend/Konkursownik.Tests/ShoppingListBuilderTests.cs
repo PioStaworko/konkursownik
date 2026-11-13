@@ -62,4 +62,18 @@ public class ShoppingListBuilderTests
 
         Assert.Equal(["Auchan", "Lidl", "Żabka", "Dowolny sklep"], result.Select(g => g.Store));
     }
+
+    [Fact]
+    public void Shopping_item_has_end_date_icon_and_note()
+    {
+        var contest = C("A", end: "2026-11-20", items: [("Mleko", "Lidl", false)]);
+        contest.Icon = "🎁";
+        contest.Purchases[0].Note = "bez laktozy";
+
+        var item = Assert.Single(Assert.Single(ShoppingListBuilder.Build([contest], Today)).Items);
+
+        Assert.Equal(new DateOnly(2026, 11, 20), item.ContestEndDate);
+        Assert.Equal("🎁", item.ContestIcon);
+        Assert.Equal("bez laktozy", item.Note);
+    }
 }

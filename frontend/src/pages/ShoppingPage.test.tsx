@@ -10,10 +10,10 @@ afterEach(() => vi.unstubAllGlobals())
 
 const groups: ShoppingGroupDto[] = [
   { store: 'Biedronka', items: [
-    { id: 'i1', contestId: 'c1', contestName: 'Loteria', product: 'Mleko', quantity: '2 szt.' },
-    { id: 'i2', contestId: 'c2', contestName: 'Konkurs B', product: 'Chleb', quantity: null },
+    { id: 'i1', contestId: 'c1', contestName: 'Loteria', product: 'Mleko', quantity: '2 szt.', contestEndDate: '2026-11-30', contestIcon: null, note: null },
+    { id: 'i2', contestId: 'c2', contestName: 'Konkurs B', product: 'Chleb', quantity: null, contestEndDate: '2026-11-30', contestIcon: null, note: null },
   ] },
-  { store: 'Lidl', items: [{ id: 'i3', contestId: 'c1', contestName: 'Loteria', product: 'Masło', quantity: null }] },
+  { store: 'Lidl', items: [{ id: 'i3', contestId: 'c1', contestName: 'Loteria', product: 'Masło', quantity: null, contestEndDate: '2026-11-30', contestIcon: null, note: null }] },
 ]
 
 function setup(patchStatus = 204) {

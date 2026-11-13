@@ -138,3 +138,6 @@ GET {{host}}/api/shopping-list
 
 ### Stats
 GET {{host}}/api/stats
+
+### Proofs (not discarded, all contests)
+GET {{host}}/api/proofs
