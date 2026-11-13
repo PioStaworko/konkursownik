@@ -280,4 +280,33 @@ describe('ContestFormPage', () => {
     expect(confirm).toHaveBeenCalledWith(expect.stringMatching(/^Nadpisać \d+ pól danymi z AI\?$/))
     expect(screen.getByLabelText('Organizator')).toHaveValue('Mój org')
   })
+
+  it('keeps values typed while the read is in flight', async () => {
+    localStorage.setItem('konkursownik-ai-notice', '1')
+    let release: (r: Response) => void = () => {}
+    const gate = new Promise<Response>((r) => (release = r))
+    const mock = vi.fn((url: string) =>
+      url === '/api/features' ? Promise.resolve(json({ aiExtraction: true })) : url === '/api/ai/contest' ? gate : Promise.resolve(json({})),
+    )
+    vi.stubGlobal('fetch', mock)
+    renderPage()
+    const user = userEvent.setup()
+    await user.type(await screen.findByLabelText('Link do konkursu lub regulaminu'), 'https://x.pl/k')
+    await user.click(screen.getByRole('button', { name: 'Odczytaj' }))
+    await user.type(screen.getByLabelText('Notatki'), 'moja notatka')
+    release(json(extraction))
+    await waitFor(() => expect(screen.getByLabelText('Nazwa')).toHaveValue('Konkurs z linku'))
+    expect(screen.getByLabelText('Notatki')).toHaveValue('moja notatka')
+  })
+
+  it('Enter in the link field reads the link and never saves the contest', async () => {
+    localStorage.setItem('konkursownik-ai-notice', '1')
+    const api = stub((url) => (url === '/api/ai/contest' ? json(extraction) : json({ id: 'z' }, 201)), true)
+    renderPage()
+    const user = userEvent.setup()
+    await user.type(await screen.findByLabelText('Link do konkursu lub regulaminu'), 'https://x.pl/k{Enter}')
+    await waitFor(() => expect(screen.getByLabelText('Nazwa')).toHaveValue('Konkurs z linku'))
+    const calls = api.calls().map(([u, i]) => `${i?.method ?? 'GET'} ${u}`)
+    expect(calls).toEqual(['POST /api/ai/contest'])
+  })
 })

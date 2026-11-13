@@ -47,6 +47,8 @@ export default function AiReceiptButton({ onExtracted, autoReceipt = false, onAu
         accept={PHOTO_ACCEPT}
         aria-label="Plik paragonu"
         className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
         onChange={(e) => {
           const file = e.target.files?.[0]
           e.target.value = ''

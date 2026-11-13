@@ -26,6 +26,11 @@ export default function AiFillSection({ onExtracted }: { onExtracted: (dto: Cont
     }
   }
 
+  const readLink = () => {
+    if (url.trim() === '' || extract.isPending) return
+    gate(() => void run({ url: url.trim() }))
+  }
+
   return (
     <Section icon="document_scanner" title="Wypełnij automatycznie" subtitle="AI wypełni formularz — nic nie zapisuje się samo.">
       <Field label="Link do konkursu lub regulaminu">
@@ -36,13 +41,18 @@ export default function AiFillSection({ onExtracted }: { onExtracted: (dto: Cont
           placeholder="https://"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter') return
+            e.preventDefault() // never let Enter submit the surrounding contest form
+            readLink()
+          }}
         />
       </Field>
       <div className="flex flex-wrap gap-space-sm">
         <Button
           icon="search"
           disabled={extract.isPending || url.trim() === ''}
-          onClick={() => gate(() => void run({ url: url.trim() }))}
+          onClick={readLink}
         >
           Odczytaj
         </Button>
@@ -52,6 +62,8 @@ export default function AiFillSection({ onExtracted }: { onExtracted: (dto: Cont
           accept={FILE_ACCEPT}
           aria-label="Plik regulaminu"
           className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
           onChange={(e) => {
             const f = e.target.files?.[0]
             e.target.value = ''

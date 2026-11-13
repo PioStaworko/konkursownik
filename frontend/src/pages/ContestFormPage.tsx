@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { ApiError } from '../api/client'
 import { useContest, useFeatures, useSaveContest } from '../api/hooks'
@@ -32,6 +32,11 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
   const [errors, setErrors] = useState<Errors>({})
   const [serverErrors, setServerErrors] = useState<string[]>([])
   const [aiFields, setAiFields] = useState<Set<keyof FormValues>>(new Set())
+  // A read takes seconds; merge against what the user has typed since, not the values at request time.
+  const latest = useRef(v)
+  useEffect(() => {
+    latest.current = v
+  })
 
   const clearAi = (key: keyof FormValues) =>
     setAiFields((s) => {
@@ -51,11 +56,12 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
   const badge = (key: keyof FormValues) => (aiFields.has(key) ? <AiBadge /> : undefined)
 
   const applyExtraction = (dto: ContestExtractionDto) => {
-    const merged = mergeExtraction(v, extractionToValues(dto), id ? 'edit' : 'new', {
+    const merged = mergeExtraction(latest.current, extractionToValues(dto), id ? 'edit' : 'new', {
       // a new form always holds the default type, so it counts as "empty"
       isEmpty: (key, value) => (key === 'type' ? value === emptyValues.type : isEmptyValue(value)),
     })
     if (merged.aiFields.size === 0) return
+    latest.current = merged.value
     setV(merged.value)
     setAiFields((s) => new Set([...s, ...merged.aiFields]))
   }
