@@ -96,6 +96,7 @@ export function LaureateCard({ r }: { r: Reminder }) {
               saveWin.mutate({
                 prizeWon: win.prizeWon,
                 prizeValue: win.prizeValue,
+                ...(win.prizeId ? { prizeId: win.prizeId } : {}),
                 laureateDeadline: win.laureateDeadline,
                 laureateDataSent: true,
               })

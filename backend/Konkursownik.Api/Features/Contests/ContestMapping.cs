@@ -15,7 +15,7 @@ public static class ContestMapping
         ContestRules.EffectiveStatus(c, today),
         c.Entries.OrderByDescending(e => e.Date).Select(ToDto).ToList(),
         c.Win is null ? null : new WinDto(c.Win.PrizeWon, c.Win.PrizeValue, c.Win.LaureateDeadline, c.Win.LaureateDataSent,
-            c.Win.Steps.OrderBy(s => s.Order).Select(s => new WinStepDto(s.Id, s.Text, s.Done)).ToList()),
+            c.Win.Steps.OrderBy(s => s.Order).Select(s => new WinStepDto(s.Id, s.Text, s.Done)).ToList(), c.Win.PrizeId),
         ContestRules.EntriesOn(c, today));
 
     private static EntryDto ToDto(Entry e) => new(

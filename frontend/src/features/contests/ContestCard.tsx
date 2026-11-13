@@ -103,7 +103,8 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
   const won = status === 'Won'
   const left = daysUntil(c.endDate, today)
   const ending = status === 'Bought' && left >= 0 && left <= 3
-  const prize = [c.prizeDescription, c.prizeValue != null && formatMoney(c.prizeValue)].filter(Boolean).join(' · ')
+  const prize = [c.topPrize?.name, c.topPrize?.value != null && formatMoney(c.topPrize.value)].filter(Boolean).join(' · ')
+  const more = c.prizesCount > 1 ? ` +${c.prizesCount - 1} innych` : ''
   const subtitle =
     status === 'AwaitingResults' && c.resultsDate ? `Wyniki: ${formatDate(c.resultsDate)}` : `do ${formatDate(c.endDate)}`
   const error = setStatus.isError || saveWin.isError || duplicate.isError
@@ -217,7 +218,7 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
         <div className="grid grid-cols-2 gap-space-xs">
           {prize && (
             <Spec icon="military_tech" label="Nagroda">
-              {prize}
+              {prize}{prize && more}
             </Spec>
           )}
           {(status === 'Bought' || status === 'Submitted') && (
@@ -273,6 +274,7 @@ export default function ContestCard({ contest: c }: { contest: ContestCardDto })
               saveWin.mutate({
                 prizeWon: c.win!.prizeWon,
                 prizeValue: c.win!.prizeValue,
+                ...(c.win!.prizeId ? { prizeId: c.win!.prizeId } : {}),
                 laureateDeadline: c.win!.laureateDeadline,
                 laureateDataSent: true,
               })

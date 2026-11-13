@@ -56,6 +56,30 @@ public class ContestCardsTests(ApiFactory factory)
     }
 
     [Fact]
+    public void Top_prize_is_highest_value_then_first()
+    {
+        var c = new Contest
+        {
+            Prizes =
+            [
+                new ContestPrize { Name = "B", Value = 100m, Order = 1 },
+                new ContestPrize { Name = "A", Value = 100m, Order = 0 },
+                new ContestPrize { Name = "C", Value = 50m, Order = 2 },
+            ],
+        };
+        var card = ContestCards.Build(c, Today);
+        Assert.Equal("A", card.TopPrize!.Name);
+        Assert.Equal(3, card.PrizesCount);
+
+        var noValues = new Contest { Prizes = [new ContestPrize { Name = "Y", Order = 1 }, new ContestPrize { Name = "X", Order = 0 }] };
+        Assert.Equal("X", ContestCards.Build(noValues, Today).TopPrize!.Name);
+
+        var none = ContestCards.Build(new Contest(), Today);
+        Assert.Null(none.TopPrize);
+        Assert.Equal(0, none.PrizesCount);
+    }
+
+    [Fact]
     public void Build_win_steps_progress()
     {
         var c = new Contest

@@ -18,12 +18,11 @@ public static class ContestCards
         var proofLocation = c.Proofs.OrderBy(p => p.Order)
             .FirstOrDefault(p => !p.Discarded && !string.IsNullOrWhiteSpace(p.Location))?.Location;
 
-        // Temporary: Task 2 replaces the single-prize card fields with the full list.
-        var firstPrize = c.Prizes.OrderBy(p => p.Order).FirstOrDefault();
+        var topPrize = c.Prizes.OrderBy(p => p.Order).MaxBy(p => p.Value ?? decimal.MinValue);
 
         return new ContestCardDto(
             c.Id, c.Name, c.Organizer, c.Icon, c.Type,
-            firstPrize?.Name, firstPrize?.Value, c.StartDate, c.EndDate, c.ResultsDate,
+            topPrize is null ? null : new TopPrizeDto(topPrize.Name, topPrize.Value, topPrize.Count), c.Prizes.Count, c.StartDate, c.EndDate, c.ResultsDate,
             c.Status, ContestRules.EffectiveStatus(c, today), c.Entries.Count, ContestRules.EntriesOn(c, today),
             c.EntryLimitTotal, c.EntryLimitPerDay, c.Url, c.RulesUrl,
             purchases.Count, purchases.Count(p => p.Bought),
@@ -31,7 +30,7 @@ public static class ContestCards
             proofLocation,
             c.Win is null ? null : new CardWinDto(
                 c.Win.PrizeWon, c.Win.PrizeValue, c.Win.LaureateDeadline, c.Win.LaureateDataSent,
-                c.Win.Steps.Count(s => s.Done), c.Win.Steps.Count),
+                c.Win.Steps.Count(s => s.Done), c.Win.Steps.Count, c.Win.PrizeId),
             c.CreatedAt);
     }
 

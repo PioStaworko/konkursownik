@@ -6,7 +6,7 @@ const base = (kind: ReminderKind, itemText: string | null = null): Reminder => (
   kind, dueDate: '2026-11-12', itemId: null, itemText,
   contest: {
     id: 'c1', name: 'Loteria', organizer: null, icon: null, type: 'Lottery',
-    prizeDescription: null, prizeValue: null, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
+    topPrize: null, prizesCount: 0, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
     status: 'Planned', effectiveStatus: 'Planned', entryCount: 0, entriesToday: 0,
     entryLimitTotal: null, entryLimitPerDay: null, url: null, rulesUrl: null,
     purchasesTotal: 0, purchasesBought: 0, firstOpenPurchase: null, stores: [], firstProofLocation: null,

@@ -51,6 +51,7 @@ function WinEditor({ contestId, win, onDone }: { contestId: string; win: WinDto 
       await save.mutateAsync({
         prizeWon: prizeWon.trim(),
         prizeValue: value,
+        ...(win?.prizeId ? { prizeId: win.prizeId } : {}),
         laureateDeadline: deadline || null,
         laureateDataSent: dataSent,
         steps: all.map((s) => ({ ...s, text: s.text.trim() })).filter((s) => s.text !== ''),

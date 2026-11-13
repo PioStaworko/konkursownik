@@ -30,7 +30,7 @@ export function sortContests(cards: ContestCardDto[], sort: ContestSort): Contes
     case 'deadline':
       return copy.sort((a, b) => a.endDate.localeCompare(b.endDate))
     case 'prize':
-      return copy.sort((a, b) => (a.prizeValue == null ? 1 : 0) - (b.prizeValue == null ? 1 : 0) || (b.prizeValue ?? 0) - (a.prizeValue ?? 0))
+      return copy.sort((a, b) => (a.topPrize?.value == null ? 1 : 0) - (b.topPrize?.value == null ? 1 : 0) || (b.topPrize?.value ?? 0) - (a.topPrize?.value ?? 0))
     case 'newest':
       return copy.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   }

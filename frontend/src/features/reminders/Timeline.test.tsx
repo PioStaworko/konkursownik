@@ -8,7 +8,7 @@ import { renderApp, stubApi } from '../../test/render'
 afterEach(() => vi.unstubAllGlobals())
 
 const contest = (id: string, name: string, extra: Partial<ContestCardDto> = {}): ContestCardDto => ({
-  id, name, organizer: null, icon: null, type: 'Purchase', prizeDescription: null, prizeValue: null,
+  id, name, organizer: null, icon: null, type: 'Purchase', topPrize: null, prizesCount: 0,
   startDate: '2026-11-01', endDate: '2026-11-14', resultsDate: null, status: 'Planned', effectiveStatus: 'Planned',
   entryCount: 0, entriesToday: 0, entryLimitTotal: null, entryLimitPerDay: null, url: null, rulesUrl: null,
   purchasesTotal: 0, purchasesBought: 0, firstOpenPurchase: null, stores: [], firstProofLocation: null, win: null,

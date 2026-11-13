@@ -64,6 +64,7 @@ export interface WinDto {
   laureateDeadline: string | null
   laureateDataSent: boolean
   steps: WinStepDto[]
+  prizeId?: string | null
 }
 
 export interface ContestDto extends ContestUpsertDto {
@@ -88,7 +89,10 @@ export interface CardWinDto {
   laureateDataSent: boolean
   stepsDone: number
   stepsTotal: number
+  prizeId?: string | null
 }
+
+export interface TopPrizeDto { name: string; value: number | null; count: number | null }
 
 export interface ContestCardDto {
   id: string
@@ -96,8 +100,8 @@ export interface ContestCardDto {
   organizer: string | null
   icon: string | null
   type: ContestType
-  prizeDescription: string | null
-  prizeValue: number | null
+  topPrize: TopPrizeDto | null
+  prizesCount: number
   startDate: string
   endDate: string
   resultsDate: string | null

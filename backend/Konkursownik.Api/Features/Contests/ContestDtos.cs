@@ -24,7 +24,7 @@ public record WinStepDto(Guid? Id, string Text, bool Done);
 
 public record WinDto(
     string PrizeWon, decimal? PrizeValue, DateOnly? LaureateDeadline, bool LaureateDataSent,
-    List<WinStepDto>? Steps = null);
+    List<WinStepDto>? Steps = null, Guid? PrizeId = null);
 
 public record ContestDto(
     Guid Id,
@@ -38,11 +38,13 @@ public record OpenPurchaseDto(string Product, string? Quantity, string? Store, s
 
 public record CardWinDto(
     string PrizeWon, decimal? PrizeValue, DateOnly? LaureateDeadline, bool LaureateDataSent,
-    int StepsDone, int StepsTotal);
+    int StepsDone, int StepsTotal, Guid? PrizeId = null);
+
+public record TopPrizeDto(string Name, decimal? Value, int? Count);
 
 public record ContestCardDto(
     Guid Id, string Name, string? Organizer, string? Icon, ContestType Type,
-    string? PrizeDescription, decimal? PrizeValue, DateOnly StartDate, DateOnly EndDate, DateOnly? ResultsDate,
+    TopPrizeDto? TopPrize, int PrizesCount, DateOnly StartDate, DateOnly EndDate, DateOnly? ResultsDate,
     ContestStatus Status, ContestStatus EffectiveStatus, int EntryCount, int EntriesToday,
     int? EntryLimitTotal, int? EntryLimitPerDay, string? Url, string? RulesUrl,
     int PurchasesTotal, int PurchasesBought, OpenPurchaseDto? FirstOpenPurchase, List<string> Stores,

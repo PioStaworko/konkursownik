@@ -383,6 +383,9 @@ namespace Konkursownik.Api.Data.Migrations
                     b.Property<DateOnly?>("LaureateDeadline")
                         .HasColumnType("date");
 
+                    b.Property<Guid?>("PrizeId")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal?>("PrizeValue")
                         .HasColumnType("decimal(10,2)");
 
@@ -394,6 +397,8 @@ namespace Konkursownik.Api.Data.Migrations
 
                     b.HasIndex("ContestId")
                         .IsUnique();
+
+                    b.HasIndex("PrizeId");
 
                     b.ToTable("Wins");
                 });
@@ -641,6 +646,11 @@ namespace Konkursownik.Api.Data.Migrations
                         .HasForeignKey("Konkursownik.Api.Domain.Win", "ContestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Konkursownik.Api.Domain.ContestPrize", null)
+                        .WithMany()
+                        .HasForeignKey("PrizeId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("Konkursownik.Api.Domain.WinStep", b =>

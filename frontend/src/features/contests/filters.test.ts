@@ -4,7 +4,7 @@ import { filterContests, sortContests } from './filters'
 
 const base: ContestCardDto = {
   id: 'x', name: 'Konkurs', organizer: null, icon: null, type: 'Lottery',
-  prizeDescription: null, prizeValue: null, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
+  topPrize: null, prizesCount: 0, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
   status: 'Planned', effectiveStatus: 'Planned', entryCount: 0, entriesToday: 0,
   entryLimitTotal: null, entryLimitPerDay: null, url: null, rulesUrl: null,
   purchasesTotal: 0, purchasesBought: 0, firstOpenPurchase: null, stores: [], firstProofLocation: null,
@@ -32,14 +32,14 @@ describe('filterContests', () => {
 
 describe('sortContests', () => {
   const cards = [
-    card({ id: 'a', endDate: '2026-12-01', prizeValue: null, createdAt: '2026-11-01T00:00:00+00:00' }),
-    card({ id: 'b', endDate: '2026-11-15', prizeValue: 100, createdAt: '2026-11-03T00:00:00+00:00' }),
-    card({ id: 'c', endDate: '2026-11-20', prizeValue: 500, createdAt: '2026-11-02T00:00:00+00:00' }),
+    card({ id: 'a', endDate: '2026-12-01', topPrize: null, createdAt: '2026-11-01T00:00:00+00:00' }),
+    card({ id: 'b', endDate: '2026-11-15', topPrize: { name: 'B', value: 100, count: null }, createdAt: '2026-11-03T00:00:00+00:00' }),
+    card({ id: 'c', endDate: '2026-11-20', topPrize: { name: 'C', value: 500, count: null }, createdAt: '2026-11-02T00:00:00+00:00' }),
   ]
   const ids = (s: Parameters<typeof sortContests>[1]) => sortContests(cards, s).map((c) => c.id)
 
   it('deadline ascending', () => expect(ids('deadline')).toEqual(['b', 'c', 'a']))
-  it('prize puts nulls last', () => expect(ids('prize')).toEqual(['c', 'b', 'a']))
+  it('sort prize uses topPrize value, nulls last', () => expect(ids('prize')).toEqual(['c', 'b', 'a']))
   it('newest first', () => expect(ids('newest')).toEqual(['b', 'c', 'a']))
   it('does not mutate input', () => {
     sortContests(cards, 'prize')

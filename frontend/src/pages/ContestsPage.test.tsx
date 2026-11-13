@@ -11,7 +11,7 @@ afterEach(() => vi.unstubAllGlobals())
 
 const base: ContestCardDto = {
   id: 'c1', name: 'Wielka loteria', organizer: null, icon: null, type: 'Lottery',
-  prizeDescription: null, prizeValue: null, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
+  topPrize: null, prizesCount: 0, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
   status: 'Submitted', effectiveStatus: 'Submitted', entryCount: 3, entriesToday: 0,
   entryLimitTotal: 10, entryLimitPerDay: null, url: null, rulesUrl: null,
   purchasesTotal: 0, purchasesBought: 0, firstOpenPurchase: null, stores: [], firstProofLocation: null,
@@ -45,6 +45,17 @@ function setup(active: ContestCardDto[], archive: ContestCardDto[] = [], reminde
 }
 
 describe('ContestsPage', () => {
+  it('card shows top prize and +N innych', async () => {
+    setup([card({ topPrize: { name: 'Samochód', value: 120000, count: 1 }, prizesCount: 3 })])
+    expect(await screen.findByText(/Samochód/)).toHaveTextContent(/120\s?000,00.*\+2 innych/)
+  })
+
+  it('card shows top prize without suffix for a single prize', async () => {
+    setup([card({ topPrize: { name: 'Rower', value: null, count: null }, prizesCount: 1 })])
+    const el = await screen.findByText(/Rower/)
+    expect(el).not.toHaveTextContent('innych')
+  })
+
   it('shows tiles, pills with counts and a card linking to details', async () => {
     setup([card({}), card({ id: 'c2', name: 'Druga', effectiveStatus: 'Bought' })], [], [{ dueDate: todayInPoland() }])
     const link = await screen.findByRole('link', { name: /Wielka loteria/ })

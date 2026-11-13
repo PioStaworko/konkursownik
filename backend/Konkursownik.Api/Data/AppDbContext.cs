@@ -70,6 +70,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             e.HasIndex(x => x.ContestId).IsUnique();
             e.Property(x => x.PrizeValue).HasColumnType("decimal(10,2)");
             e.HasMany(x => x.Steps).WithOne().HasForeignKey(s => s.WinId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne<ContestPrize>().WithMany().HasForeignKey(x => x.PrizeId).OnDelete(DeleteBehavior.SetNull);
         });
         builder.Entity<WinStep>(e =>
         {

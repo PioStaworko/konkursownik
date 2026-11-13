@@ -61,6 +61,10 @@ public static class EntryEndpoints
             var errors = EntryValidation.Validate(dto);
             if (errors.Count > 0) return Results.ValidationProblem(errors);
 
+            if (dto.PrizeId is { } prizeId
+                && !await db.Prizes.AnyAsync(p => p.Id == prizeId && p.ContestId == id))
+                return Results.BadRequest(new { error = "invalid_prize" });
+
             var win = contest.Win;
             if (win is null)
             {
@@ -69,6 +73,7 @@ public static class EntryEndpoints
             }
             win.PrizeWon = dto.PrizeWon.Trim();
             win.PrizeValue = dto.PrizeValue;
+            win.PrizeId = dto.PrizeId;
             win.LaureateDeadline = dto.LaureateDeadline;
             win.LaureateDataSent = dto.LaureateDataSent;
             if (dto.Steps is not null) ContestMapping.ApplySteps(win, dto.Steps);
