@@ -1,6 +1,6 @@
 # Konkursownik — nowy wygląd, rozszerzone dane i odczyt przez AI
 
-Data: 2026-11-13 · Status: do akceptacji
+Data: 2026-11-13 · Status: zaakceptowana (2026-11-13)
 Poprzednia specyfikacja (MVP, obowiązuje dalej tam, gdzie ta nic nie zmienia): `docs/superpowers/specs/2026-11-12-konkursownik-design.md`
 Makiety (źródło wyglądu): `docs/design/mockups/konkursy.html`, `pilne.html`, `zakupy.html`, `szczegoly.html`
 
@@ -123,7 +123,7 @@ Kształt DTO (jedno wspólne „podsumowanie karty” + pola specyficzne dla rod
 - **Nagłówek** (stały, rozmyte tło): napis „Konkursownik” (bez logo) + nazwa ekranu (na szerszych ekranach); przełącznik motywu; okrągła ikona profilu → menu: e-mail użytkownika, „Zaproszenia”, „Wyloguj”. Na podstronach (szczegóły, formularz, dowody, zaproszenia) zamiast napisu: „Wróć” + tytuł.
 - **Dolna nawigacja** (ekrany główne): Konkursy · Pilne (plakietka: liczba przypomnień) · **„+”** · Zakupy (plakietka: liczba niekupionych pozycji) · Statystyki. Ekrany szczegółów i formularzy — bez dolnej nawigacji.
 - **„+” → panel**: „Nowy konkurs” (formularz z sekcją „Wypełnij automatycznie”) oraz „Nowe zgłoszenie / paragon” → lista konkursów, do których można się zgłosić (niezakończone, niezarchiwizowane; posortowane po dacie końca; przy każdym licznik „dziś x/y”) → szczegóły wybranego konkursu z otwartym formularzem zgłoszenia.
-- Ekran startowy po zalogowaniu: **Konkursy** (pierwsza zakładka, jak w makiecie) — *decyzja do potwierdzenia, §8*.
+- Ekran startowy po zalogowaniu: **Pilne** (decyzja właściciela). Kolejność zakładek w nawigacji jak w makiecie.
 
 ### 6.3 Konkursy (`konkursy.html`)
 - Pasek: kropka + „Panel” + dzisiejsza data; plakietka z liczbą pilnych na dziś.
@@ -189,4 +189,3 @@ Kształt DTO (jedno wspólne „podsumowanie karty” + pola specyficzne dla rod
 - Paleta jasnego motywu (w ramach kontrastu AA).
 - Zestaw opcji sortowania na liście konkursów.
 - Limit odczytów AI na godzinę i limity rozmiarów poza podanymi.
-- Ekran startowy: Konkursy (propozycja) — właściciel może zmienić na Pilne.
