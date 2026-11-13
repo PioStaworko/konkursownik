@@ -3,7 +3,7 @@ import { useShoppingList, useToggleItem } from '../api/hooks'
 import type { ShoppingItemDto } from '../api/types'
 import { ANY_STORE, storeIcon } from '../features/shopping/storeIcons'
 import QuickAddSheet from '../features/shopping/QuickAddSheet'
-import { todayInPoland } from '../lib/format'
+import { pluralPl, todayInPoland } from '../lib/format'
 import NewEntryPicker from '../shell/NewEntryPicker'
 import { BottomSheet } from '../ui/BottomSheet'
 import { Button } from '../ui/Button'
@@ -91,9 +91,9 @@ export default function ShoppingPage() {
             </div>
             <h1 className="text-title-md text-on-surface">
               Do kupienia: <span className="font-mono text-mono-data font-bold text-primary">{remaining}</span>{' '}
-              pozycji w{' '}
+              {pluralPl(remaining, 'pozycja', 'pozycje', 'pozycji')} w{' '}
               <span className="font-mono text-mono-data font-bold text-primary">{storeCount}</span>{' '}
-              sklepach
+              {storeCount === 1 ? 'sklepie' : 'sklepach'}
             </h1>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatDate, formatEntryCounter, formatMoney, parseAmount, safeHttpUrl, todayInPoland } from './format'
+import { formatDate, formatEntryCounter, formatMoney, parseAmount, pluralPl, safeHttpUrl, todayInPoland } from './format'
 
 describe('format', () => {
   it.each([
@@ -27,4 +27,11 @@ describe('format', () => {
     [null, null],
   ])('safeHttpUrl(%s)', (i, o) => expect(safeHttpUrl(i)).toBe(o))
   it('todayInPoland is YYYY-MM-DD', () => expect(todayInPoland()).toMatch(/^\d{4}-\d{2}-\d{2}$/))
+})
+
+describe('pluralPl', () => {
+  it.each([[1, 'a'], [2, 'b'], [4, 'b'], [5, 'c'], [12, 'c'], [14, 'c'], [22, 'b'], [112, 'c'], [0, 'c']])(
+    '%i -> %s',
+    (n, form) => expect(pluralPl(n, 'a', 'b', 'c')).toBe(form),
+  )
 })

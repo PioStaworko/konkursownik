@@ -55,3 +55,11 @@ export function nowInPolandLabel(now: Date = new Date()): string {
 
 export const keepUntilDetail = (keepUntil: string | null, location: string | null) =>
   [keepUntil && `do ${formatDate(keepUntil)}`, location].filter(Boolean).join(' · ') || null
+
+/** Polish plural form: 1 → one, 2-4 (except 12-14) → few, otherwise many. */
+export function pluralPl(n: number, one: string, few: string, many: string): string {
+  if (n === 1) return one
+  const last = n % 10
+  const lastTwo = n % 100
+  return last >= 2 && last <= 4 && !(lastTwo >= 12 && lastTwo <= 14) ? few : many
+}

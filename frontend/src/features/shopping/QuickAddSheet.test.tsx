@@ -8,13 +8,17 @@ import QuickAddSheet from './QuickAddSheet'
 afterEach(() => vi.unstubAllGlobals())
 
 const card = { id: 'c1', name: 'Loteria' } as ContestCardDto
+const upsert = {
+  name: 'Loteria', organizer: 'Org', url: 'https://x.pl', rulesUrl: 'https://x.pl/regulamin', type: 'Lottery',
+  prizeDescription: 'Auto', prizeValue: 50000, prizeCount: 2, startDate: '2026-11-01', endDate: '2026-11-30',
+  resultsDate: '2026-12-10', resultsCheckNote: 'sprawdź na stronie', entryLimitPerDay: 3, entryLimitTotal: 20,
+  status: 'Planned', notes: 'moje notatki', icon: 'local_pizza',
+  tasks: [{ id: 't1', text: 'Krok', done: true }],
+  purchases: [{ id: 'p1', product: 'Mleko', store: 'Lidl', quantity: '2 szt.', bought: true, note: 'paragon' }],
+  proofs: [{ id: 'f1', what: 'Paragon', keepUntil: '2027-01-01', location: 'szuflada', discarded: true, note: 'wyrzucony' }],
+}
 const contest = {
-  id: 'c1', name: 'Loteria', organizer: null, url: null, rulesUrl: null, type: 'Lottery', prizeDescription: null,
-  prizeValue: null, prizeCount: null, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
-  resultsCheckNote: null, entryLimitPerDay: null, entryLimitTotal: null, status: 'Planned', notes: null, icon: null,
-  tasks: [{ id: 't1', text: 'Krok', done: false }],
-  purchases: [{ id: 'p1', product: 'Mleko', store: 'Lidl', quantity: null, bought: true, note: null }],
-  proofs: [], effectiveStatus: 'Planned', entries: [], win: null, entriesToday: 0,
+  ...upsert, id: 'c1', effectiveStatus: 'Planned', entries: [{ id: 'e1' }], win: { prizeWon: 'x' }, entriesToday: 1,
 } as unknown as ContestDto
 
 describe('QuickAddSheet', () => {
@@ -42,12 +46,13 @@ describe('QuickAddSheet', () => {
     const put = fetchMock.mock.calls.find(([, i]) => i?.method === 'PUT')!
     expect(String(put[0])).toBe('/api/contests/c1')
     const body = JSON.parse(put[1]!.body as string)
-    expect(body.tasks).toEqual([{ id: 't1', text: 'Krok', done: false }])
-    expect(body.purchases).toEqual([
-      { id: 'p1', product: 'Mleko', store: 'Lidl', quantity: null, bought: true, note: null },
-      { id: null, product: 'Masło', store: 'Biedronka', quantity: '2 szt.', bought: false, note: 'min. 2 na paragonie' },
-    ])
-    expect(body).not.toHaveProperty('entries')
+    expect(body).toEqual({
+      ...upsert,
+      purchases: [
+        ...upsert.purchases,
+        { id: null, product: 'Masło', store: 'Biedronka', quantity: '2 szt.', bought: false, note: 'min. 2 na paragonie' },
+      ],
+    })
   })
 
   it('requires product', async () => {

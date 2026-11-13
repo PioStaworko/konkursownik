@@ -58,7 +58,7 @@ describe('ShoppingPage', () => {
     expect(screen.getByRole('heading', { name: /Lidl/ })).toBeInTheDocument()
     expect(screen.getByText('2 szt.')).toBeInTheDocument()
     expect(screen.getByText('paragon papierowy')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Do kupienia: 3 pozycji w 2 sklepach')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Do kupienia: 3 pozycje w 2 sklepach')
   })
 
   it('check keeps item crossed out and uncheck restores', async () => {
@@ -72,7 +72,7 @@ describe('ShoppingPage', () => {
     await waitFor(() => expect(fetchMock.mock.calls.filter(([u]) => String(u).includes('/api/shopping')).length).toBeGreaterThan(1))
     expect(screen.getByText('Mleko')).toHaveClass('line-through')
     expect(screen.getByRole('button', { name: /Mleko/ })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Do kupienia: 2 pozycji w 2 sklepach')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Do kupienia: 2 pozycje w 2 sklepach')
 
     await user.click(screen.getByRole('button', { name: /Mleko/ }))
     expect(fetchMock).toHaveBeenCalledWith('/api/purchase-items/i1', expect.objectContaining({
@@ -128,6 +128,15 @@ describe('ShoppingPage', () => {
     expect(screen.queryByText('Masło')).not.toBeInTheDocument()
     expect(within(screen.getByRole('heading', { name: /Lidl/ })).getByText('1 poz.')).toBeInTheDocument()
   })
+
+  it.each([[1, 'pozycja'], [2, 'pozycje'], [5, 'pozycji'], [12, 'pozycji'], [22, 'pozycje']])(
+    'header pluralises %i items',
+    async (n, word) => {
+      setup([{ store: 'Lidl', items: Array.from({ length: n }, (_, k) => item({ id: `p${k}`, product: `P${k}` })) }])
+      await screen.findByText('P0')
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(`Do kupienia: ${n} ${word} w 1 sklepie`)
+    },
+  )
 
   it('shows empty state', async () => {
     setup([])
