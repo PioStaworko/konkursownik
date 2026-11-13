@@ -95,7 +95,8 @@ az webapp config appsettings set --name $APP --resource-group $RG --settings \
   "Storage__Provider=AzureBlob" \
   "Storage__BlobConnectionString=$STORAGE_CONN" \
   "Storage__BlobContainer=photos" \
-  "Invites__BootstrapCode=<wymyśl-jednorazowy-kod>" \
+  "Admin__UserName=<twój-nick>" \
+  "Admin__Password=<hasło-min-8-znaków>" \
   "Database__MigrateOnStartup=true"
 ```
 
@@ -126,15 +127,11 @@ az webapp deploy --name $APP --resource-group $RG --src-path publish.zip --type 
 
 Aplikacja będzie pod `https://<APP>.azurewebsites.net`. Sprawdź: `https://<APP>.azurewebsites.net/api/health` powinno zwrócić `{"status":"ok"}`.
 
-### Krok 6. Pierwsze konto i usunięcie kodu bootstrap
+### Krok 6. Konto administratora
 
-1. Otwórz stronę, wybierz rejestrację i podaj e-mail, hasło (min. 8 znaków) oraz kod z `Invites__BootstrapCode`. Kod bootstrap działa **tylko dopóki w bazie nie ma żadnego użytkownika**.
-2. Po zalogowaniu generuj w aplikacji kody zaproszeń dla kolejnych osób.
-3. Usuń kod bootstrap:
-
-```bash
-az webapp config appsettings delete --name $APP --resource-group $RG --setting-names Invites__BootstrapCode
-```
+1. Pierwsze konto to administrator z ustawień `Admin__UserName` / `Admin__Password`; aplikacja tworzy je przy starcie (jeśli nie istnieje). Hasło istniejącego konta nie jest zmieniane. Zaloguj się tym nickiem i hasłem.
+2. Tylko administrator generuje w aplikacji kody zaproszeń dla kolejnych osób; zaproszeni rejestrują się nickiem (3–32 znaki: litery, cyfry, `.`, `_`, `-`), hasłem i kodem.
+3. Bez `Admin__UserName` aplikacja startuje, ale nikt nie może tworzyć zaproszeń (w logu jest ostrzeżenie).
 
 ---
 
@@ -146,11 +143,11 @@ az webapp config appsettings delete --name $APP --resource-group $RG --setting-n
 git clone <adres-repozytorium> konkursownik && cd konkursownik
 cp .env.example .env
 # edytuj .env: wpisz POSTGRES_PASSWORD (tylko litery i cyfry, np. `openssl rand -hex 24`)
-# oraz BOOTSTRAP_CODE (losowy, np. `openssl rand -hex 8`)
+# oraz ADMIN_USERNAME i ADMIN_PASSWORD (konto administratora, hasło min. 8 znaków)
 docker compose up -d --build
 ```
 
-Aplikacja nasłuchuje na porcie 8080 (HTTP), ale `docker-compose.yml` publikuje go tylko na `127.0.0.1` — z zewnątrz jest niedostępny, dopóki nie skonfigurujesz proxy (krok 2). Dane żyją w wolumenach Dockera: `pgdata` (baza), `photos` (zdjęcia), `keys` (klucze Data Protection — dzięki nim restart kontenera nie wylogowuje użytkowników). Pierwsze konto zakładasz jak w części A, krok 6; potem wyczyść `BOOTSTRAP_CODE` w `.env` (zostaw `BOOTSTRAP_CODE=` puste) i wykonaj `docker compose up -d` — puste znaczy: rejestracja bootstrap wyłączona.
+Aplikacja nasłuchuje na porcie 8080 (HTTP), ale `docker-compose.yml` publikuje go tylko na `127.0.0.1` — z zewnątrz jest niedostępny, dopóki nie skonfigurujesz proxy (krok 2). Dane żyją w wolumenach Dockera: `pgdata` (baza), `photos` (zdjęcia), `keys` (klucze Data Protection — dzięki nim restart kontenera nie wylogowuje użytkowników). Pierwsze konto to administrator z `ADMIN_USERNAME`/`ADMIN_PASSWORD` (jak w części A, krok 6). Lokalnie (`dotnet run`) ustaw go w user-secrets: `dotnet user-secrets set "Admin:UserName" "piotrek"` oraz `dotnet user-secrets set "Admin:Password" "…"`.
 
 ### Krok 2. HTTPS przez Caddy
 
@@ -186,6 +183,19 @@ Ustawienia (zmienne środowiskowe; w Azure jako Application settings, w Dockerze
 
 Aplikacja pilnuje limitów klucza sama (wspólnie dla wszystkich użytkowników). Gdy mimo to Gemini odpowie błędem 429, odczyt AI wyłącza się do północy czasu pacyficznego. Limity modelu zależą od planu — sprawdź je w swoim koncie.
 
+**Gdzie wpisać klucz:**
+
+- **Docker / selfhost:** w pliku `.env` obok `docker-compose.yml` ustaw `GEMINI_API_KEY=…` (compose przekazuje go jako `Gemini__ApiKey`), potem `docker compose up -d`. Pusta wartość = AI wyłączone.
+- **Lokalnie (`dotnet run`):** zapisz klucz raz w user-secrets — trzymany jest w Twoim profilu, poza repozytorium, i wczytywany automatycznie w środowisku Development:
+
+  ```bash
+  cd backend/Konkursownik.Api
+  dotnet user-secrets set "Gemini:ApiKey" "TWÓJ_KLUCZ"
+  ```
+
+  Usunięcie: `dotnet user-secrets remove "Gemini:ApiKey"`.
+- **Azure App Service:** Application setting `Gemini__ApiKey`.
+
 ## Kopia zapasowa
 
 **Baza** (wdrożenie Docker):
@@ -209,7 +219,8 @@ Dla Neon / Azure PostgreSQL użyj `pg_dump` z własnego komputera: `pg_dump "hos
 
 - **Strona zwraca 500 / aplikacja nie startuje:** Azure: `az webapp log tail --name $APP --resource-group $RG`. Docker: `docker compose logs app`.
 - **Błąd połączenia z bazą:** sprawdź `ConnectionStrings__Default` (hasło, `SSL Mode=Require` dla Neon/Azure) oraz regułę firewalla serwera PostgreSQL.
-- **Rejestracja zwraca `invalid_invite`:** kod bootstrap działa tylko gdy nie ma jeszcze użytkowników i musi zgadzać się z ustawieniem (wielkość liter nie ma znaczenia). Kolejne konta wymagają kodu zaproszenia z aplikacji.
+- **Rejestracja zwraca `invalid_invite`:** każda rejestracja wymaga kodu zaproszenia wygenerowanego przez administratora (wielkość liter nie ma znaczenia).
+- **Aplikacja nie startuje, w logu błąd o `Admin:Password`:** hasło administratora ma mniej niż 8 znaków.
 - **Zdjęcia nie działają na Azure:** sprawdź `Storage__Provider=AzureBlob`, poprawność `Storage__BlobConnectionString` i istnienie kontenera `photos`.
 - **Wylogowuje po każdym restarcie (Docker):** upewnij się, że wolumen `keys` jest podpięty i ustawione `DataProtection__KeysPath=/data/keys`.
 - **Port 8080 zajęty:** ustaw `APP_PORT=8081` w `.env` (mapowanie pozostaje na `127.0.0.1`) i zaktualizuj `reverse_proxy` w Caddyfile.

@@ -35,7 +35,7 @@ public class AiFeaturesTests(ApiFactory factory)
             c.AddInMemoryCollection(new Dictionary<string, string?> { ["Gemini:ApiKey"] = "" })));
         var client = noKey.CreateClient();
         (await client.PostAsJsonAsync("/api/auth/register",
-            new RegisterRequest($"{Guid.NewGuid():N}@test.local", "Haslo123!", code))).EnsureSuccessStatusCode();
+            new RegisterRequest(ApiFactory.NewUserName(), "Haslo123!", code))).EnsureSuccessStatusCode();
 
         Assert.False(await AiExtractionAsync(client));
     }

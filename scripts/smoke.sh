@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Smoke test: build + run the compose stack, check health, register, SPA root; always tears down.
+# Smoke test: build + run the compose stack, check health, admin login, SPA root; always tears down.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 CREATED_ENV=0
 if [ ! -f .env ]; then
   rand() { head -c "$1" /dev/urandom | od -An -tx1 | tr -d ' \n'; }
-  printf 'POSTGRES_PASSWORD=%s\nBOOTSTRAP_CODE=%s\n' "$(rand 24)" "$(rand 8)" > .env
+  printf 'POSTGRES_PASSWORD=%s\nADMIN_USERNAME=smokeadmin\nADMIN_PASSWORD=%s\n' "$(rand 24)" "$(rand 12)" > .env
   CREATED_ENV=1
 fi
 
@@ -26,10 +26,11 @@ cleanup() {
 trap cleanup EXIT
 
 set -a; . ./.env; set +a
-# A user-provided .env may have the bootstrap code cleared (bootstrap disabled); the test needs one.
-if [ -z "${BOOTSTRAP_CODE:-}" ]; then
-  BOOTSTRAP_CODE="smoke$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n')"
-  export BOOTSTRAP_CODE
+# A user-provided .env may lack the admin account; the test needs one (random, never printed).
+if [ -z "${ADMIN_USERNAME:-}" ] || [ "${#ADMIN_PASSWORD}" -lt 8 ]; then
+  ADMIN_USERNAME="smokeadmin"
+  ADMIN_PASSWORD="smoke$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+  export ADMIN_USERNAME ADMIN_PASSWORD
 fi
 BASE="http://localhost:$APP_PORT"
 
@@ -44,11 +45,11 @@ done
 [ "$ok" = 1 ] || { echo "FAIL: health"; docker compose -p konkursownik-smoke logs app; exit 1; }
 echo "OK health"
 
-code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/register" \
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/api/auth/login" \
   -H 'Content-Type: application/json' \
-  -d "{\"email\":\"smoke@example.com\",\"password\":\"smoke-password-1\",\"inviteCode\":\"$BOOTSTRAP_CODE\"}")
-[ "$code" = "200" ] || { echo "FAIL: register returned $code"; docker compose -p konkursownik-smoke logs app; exit 1; }
-echo "OK register"
+  -d "{\"userName\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}")
+[ "$code" = "200" ] || { echo "FAIL: admin login returned $code"; docker compose -p konkursownik-smoke logs app; exit 1; }
+echo "OK admin login"
 
 curl -s "$BASE/" | grep -q '<div id="root">' || { echo "FAIL: SPA root"; exit 1; }
 echo "OK spa"

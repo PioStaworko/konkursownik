@@ -3,17 +3,17 @@
 ### Health
 GET {{host}}/api/health
 
-### Register (first user: bootstrap code from Invites:BootstrapCode; later: invite code)
+### Register (invite code from the admin)
 POST {{host}}/api/auth/register
 Content-Type: application/json
 
-{ "email": "ja@example.com", "password": "Haslo123!", "inviteCode": "START" }
+{ "userName": "ja", "password": "Haslo123!", "inviteCode": "ABCD2345" }
 
 ### Login
 POST {{host}}/api/auth/login
 Content-Type: application/json
 
-{ "email": "ja@example.com", "password": "Haslo123!" }
+{ "userName": "ja", "password": "Haslo123!" }
 
 ### Me
 GET {{host}}/api/auth/me
@@ -21,10 +21,10 @@ GET {{host}}/api/auth/me
 ### Logout
 POST {{host}}/api/auth/logout
 
-### Create invite
+### Create invite (admin only)
 POST {{host}}/api/invites
 
-### List my invites
+### List my invites (admin only)
 GET {{host}}/api/invites
 
 ### List contests (view=archive for the archive)

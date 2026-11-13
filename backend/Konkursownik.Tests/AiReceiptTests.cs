@@ -36,7 +36,7 @@ public class AiReceiptTests(ApiFactory factory)
         var code = await factory.CreateInviteCodeAsync();
         var client = f.CreateClient();
         (await client.PostAsJsonAsync("/api/auth/register",
-            new RegisterRequest($"{Guid.NewGuid():N}@test.local", "Haslo123!", code))).EnsureSuccessStatusCode();
+            new RegisterRequest(ApiFactory.NewUserName(), "Haslo123!", code))).EnsureSuccessStatusCode();
         return client;
     }
 

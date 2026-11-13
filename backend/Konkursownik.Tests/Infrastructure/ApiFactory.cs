@@ -22,11 +22,19 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     public FakeTimeProvider Clock { get; } = new(DateTimeOffset.Parse("2026-11-12T10:00:00Z"));
 
-    private const string DefaultPassword = "Haslo123!";
+    public const string AdminUserName = "admin";
+    public const string AdminPassword = "AdminHaslo123!";
+    public const string DefaultPassword = "Haslo123!";
+
+    /// <summary>Whether the app is configured with the admin account (a subclass can turn it off).</summary>
+    protected virtual bool ConfigureAdmin => true;
+
+    public static string NewUserName() => $"u{Guid.NewGuid():N}"[..20];
+
     private readonly SemaphoreSlim _seedLock = new(1, 1);
     private HttpClient? _seedClient;
 
-    /// <summary>Registers (once) the seed user with the bootstrap code and returns its logged-in client.</summary>
+    /// <summary>Logs in (once) as the configured admin and returns that client.</summary>
     private async Task<HttpClient> GetSeedClientAsync()
     {
         await _seedLock.WaitAsync();
@@ -35,8 +43,8 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             if (_seedClient is null)
             {
                 var client = CreateClient();
-                var res = await client.PostAsJsonAsync("/api/auth/register",
-                    new RegisterRequest("seed@test.local", DefaultPassword, "START"));
+                var res = await client.PostAsJsonAsync("/api/auth/login",
+                    new LoginRequest(AdminUserName, AdminPassword));
                 res.EnsureSuccessStatusCode();
                 _seedClient = client;
             }
@@ -45,7 +53,10 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         finally { _seedLock.Release(); }
     }
 
-    /// <summary>Creates a fresh invite code issued by the seed user.</summary>
+    /// <summary>Returns the shared client logged in as the configured admin.</summary>
+    public Task<HttpClient> CreateAdminClientAsync() => GetSeedClientAsync();
+
+    /// <summary>Creates a fresh invite code issued by the admin.</summary>
     public async Task<string> CreateInviteCodeAsync()
     {
         var seed = await GetSeedClientAsync();
@@ -54,13 +65,13 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         return (await res.Content.ReadFromJsonAsync<InviteDto>())!.Code;
     }
 
-    /// <summary>Registers a new user (invited by the seed user) and returns a client logged in as them.</summary>
-    public async Task<HttpClient> CreateUserClientAsync(string? email = null)
+    /// <summary>Registers a new user (invited by the admin) and returns a client logged in as them.</summary>
+    public async Task<HttpClient> CreateUserClientAsync(string? userName = null)
     {
         var code = await CreateInviteCodeAsync();
         var client = CreateClient();
         var res = await client.PostAsJsonAsync("/api/auth/register",
-            new RegisterRequest(email ?? $"{Guid.NewGuid():N}@test.local", DefaultPassword, code));
+            new RegisterRequest(userName ?? NewUserName(), DefaultPassword, code));
         res.EnsureSuccessStatusCode();
         return client;
     }
@@ -77,16 +88,24 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
-        builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
+        builder.ConfigureAppConfiguration((_, config) =>
         {
-            ["ConnectionStrings:Default"] = _db.GetConnectionString(),
-            ["Database:MigrateOnStartup"] = "true",
-            ["Storage:Provider"] = "Local",
-            ["Storage:LocalPath"] = _storagePath,
-            ["Invites:BootstrapCode"] = "START",
-            ["Gemini:ApiKey"] = "test",
-            ["Gemini:Model"] = "test",
-        }));
+            var settings = new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:Default"] = _db.GetConnectionString(),
+                ["Database:MigrateOnStartup"] = "true",
+                ["Storage:Provider"] = "Local",
+                ["Storage:LocalPath"] = _storagePath,
+                ["Gemini:ApiKey"] = "test",
+                ["Gemini:Model"] = "test",
+            };
+            if (ConfigureAdmin)
+            {
+                settings["Admin:UserName"] = AdminUserName;
+                settings["Admin:Password"] = AdminPassword;
+            }
+            config.AddInMemoryCollection(settings);
+        });
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<TimeProvider>();

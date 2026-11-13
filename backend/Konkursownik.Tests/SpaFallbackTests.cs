@@ -25,7 +25,7 @@ public class SpaFallbackTests(ApiFactory factory) : IDisposable
         var client = CreateClientWithWebRoot();
         var code = await factory.CreateInviteCodeAsync();
         var register = await client.PostAsJsonAsync("/api/auth/register",
-            new RegisterRequest($"{Guid.NewGuid():N}@test.local", "Haslo123!", code));
+            new RegisterRequest(ApiFactory.NewUserName(), "Haslo123!", code));
         register.EnsureSuccessStatusCode();
 
         var res = await client.GetAsync("/api/does-not-exist");

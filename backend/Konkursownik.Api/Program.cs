@@ -41,13 +41,15 @@ builder.Services.AddSingleton<IPhotoStorage>(sp => PhotoStorageFactory.Create(sp
 
 builder.Services.AddIdentityCore<AppUser>(o =>
     {
-        o.User.RequireUniqueEmail = true;
+        o.User.RequireUniqueEmail = false;
+        o.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
         o.Password.RequiredLength = 8;
         o.Password.RequireDigit = false;
         o.Password.RequireLowercase = false;
         o.Password.RequireUppercase = false;
         o.Password.RequireNonAlphanumeric = false;
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddSignInManager();
 
@@ -62,7 +64,8 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
         o.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = StatusCodes.Status401Unauthorized; return Task.CompletedTask; };
         o.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(o =>
+    o.AddPolicy(AdminSeeder.RoleName, p => p.RequireRole(AdminSeeder.RoleName)));
 builder.Services.AddAiServices(builder.Configuration);
 
 var app = builder.Build();
@@ -74,6 +77,13 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 {
     using var scope = app.Services.CreateScope();
     await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync();
+}
+
+// Runs after migrations, also when MigrateOnStartup is false (schema then managed externally).
+using (var scope = app.Services.CreateScope())
+{
+    await AdminSeeder.EnsureAdminAsync(
+        scope.ServiceProvider, app.Configuration, app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("AdminSeeder"));
 }
 
 app.UseForwardedHeaders();
