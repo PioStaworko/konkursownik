@@ -3,14 +3,18 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { ContestSummaryDto } from '../api/types'
+import type { ContestCardDto } from '../api/types'
 import ContestsPage from './ContestsPage'
 
 afterEach(() => vi.unstubAllGlobals())
 
-const card: ContestSummaryDto = {
-  id: 'c1', name: 'Wielka loteria', endDate: '2026-11-30', resultsDate: null,
-  status: 'Planned', effectiveStatus: 'Submitted', entryCount: 3, entryLimitTotal: 10,
+const card: ContestCardDto = {
+  id: 'c1', name: 'Wielka loteria', organizer: null, icon: null, type: 'Lottery',
+  prizeDescription: null, prizeValue: null, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
+  status: 'Planned', effectiveStatus: 'Submitted', entryCount: 3, entriesToday: 0,
+  entryLimitTotal: 10, entryLimitPerDay: null, url: null, rulesUrl: null,
+  purchasesTotal: 0, purchasesBought: 0, firstOpenPurchase: null, stores: [], firstProofLocation: null,
+  win: null, createdAt: '2026-11-01T00:00:00+00:00',
 }
 
 describe('ContestsPage', () => {

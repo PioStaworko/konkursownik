@@ -13,8 +13,8 @@ public class ContestEndpointTests(ApiFactory factory)
     private static Task<ContestDto?> GetAsync(HttpClient c, Guid id) =>
         c.GetFromJsonAsync<ContestDto>($"/api/contests/{id}", JsonConfig.Options);
 
-    private static Task<List<ContestSummaryDto>?> ListAsync(HttpClient c, string? view = null) =>
-        c.GetFromJsonAsync<List<ContestSummaryDto>>("/api/contests" + (view is null ? "" : $"?view={view}"), JsonConfig.Options);
+    private static Task<List<ContestCardDto>?> ListAsync(HttpClient c, string? view = null) =>
+        c.GetFromJsonAsync<List<ContestCardDto>>("/api/contests" + (view is null ? "" : $"?view={view}"), JsonConfig.Options);
 
     [Fact]
     public async Task Create_then_get_roundtrips_children_in_order()

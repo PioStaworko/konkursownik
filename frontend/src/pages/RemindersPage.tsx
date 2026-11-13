@@ -20,11 +20,11 @@ export default function RemindersPage() {
         <ul className="space-y-3">
           {data.map((r) => (
             <li
-              key={`${r.kind}-${r.contestId}-${r.itemId ?? ''}`}
+              key={`${r.kind}-${r.contest.id}-${r.itemId ?? ''}`}
               className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
             >
-              <Link to={`/konkursy/${r.contestId}`} className="block min-h-11">
-                <span className="block font-medium text-slate-900">{r.contestName}</span>
+              <Link to={`/konkursy/${r.contest.id}`} className="block min-h-11">
+                <span className="block font-medium text-slate-900">{r.contest.name}</span>
                 <span className="block text-sm text-slate-600">{reminderText(r)}</span>
               </Link>
               {r.kind === 'ProofDisposable' && r.itemId && (

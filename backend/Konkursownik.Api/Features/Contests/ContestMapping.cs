@@ -22,10 +22,6 @@ public static class ContestMapping
         e.Id, e.Date, e.ConfirmationCode, e.ReceiptNumber, e.PurchaseAmount, e.ContactUsed, e.AnswerText, e.Store,
         e.Photos.OrderBy(p => p.UploadedAt).Select(p => new PhotoDto(p.Id, p.Label, p.SizeBytes)).ToList());
 
-    public static ContestSummaryDto ToSummary(Contest c, DateOnly today) => new(
-        c.Id, c.Name, c.EndDate, c.ResultsDate, c.Status, ContestRules.EffectiveStatus(c, today),
-        c.Entries.Count, c.EntryLimitTotal);
-
     /// <summary>
     /// Replaces the win's steps. An Id is honoured only when it is already a step of this win;
     /// any other Id is treated as a new step with a fresh Id.

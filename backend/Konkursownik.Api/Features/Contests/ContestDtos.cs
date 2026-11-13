@@ -34,9 +34,19 @@ public record ContestDto(
     List<TaskDto> Tasks, List<PurchaseDto> Purchases, List<ProofDto> Proofs,
     ContestStatus EffectiveStatus, List<EntryDto> Entries, WinDto? Win, int EntriesToday);
 
-public record ContestSummaryDto(
-    Guid Id, string Name, DateOnly EndDate, DateOnly? ResultsDate,
-    ContestStatus Status, ContestStatus EffectiveStatus, int EntryCount, int? EntryLimitTotal);
+public record OpenPurchaseDto(string Product, string? Quantity, string? Store, string? Note);
+
+public record CardWinDto(
+    string PrizeWon, decimal? PrizeValue, DateOnly? LaureateDeadline, bool LaureateDataSent,
+    int StepsDone, int StepsTotal);
+
+public record ContestCardDto(
+    Guid Id, string Name, string? Organizer, string? Icon, ContestType Type,
+    string? PrizeDescription, decimal? PrizeValue, DateOnly StartDate, DateOnly EndDate, DateOnly? ResultsDate,
+    ContestStatus Status, ContestStatus EffectiveStatus, int EntryCount, int EntriesToday,
+    int? EntryLimitTotal, int? EntryLimitPerDay, string? Url, string? RulesUrl,
+    int PurchasesTotal, int PurchasesBought, OpenPurchaseDto? FirstOpenPurchase, List<string> Stores,
+    string? FirstProofLocation, CardWinDto? Win, DateTimeOffset CreatedAt);
 
 public record StatusDto(ContestStatus Status);
 

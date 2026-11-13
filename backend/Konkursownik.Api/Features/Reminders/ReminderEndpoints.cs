@@ -12,12 +12,17 @@ public static class ReminderEndpoints
         secured.MapGet("/reminders", async (HttpContext http, AppDbContext db, TimeProvider time) =>
         {
             var userId = http.User.UserId();
+            var today = time.TodayInPoland();
             var contests = await db.Contests.AsNoTracking()
+                .AsSplitQuery()
+                .Include(c => c.Entries)
+                .Include(c => c.Purchases)
                 .Include(c => c.Proofs)
-                .Include(c => c.Win)
+                .Include(c => c.Win).ThenInclude(w => w!.Steps)
                 .Where(c => c.OwnerId == userId)
                 .ToListAsync();
-            return ReminderRules.For(contests, time.TodayInPoland());
+            var byId = contests.ToDictionary(c => c.Id);
+            return ReminderRules.For(contests, today).Select(r => ReminderMapping.ToDto(r, byId[r.ContestId], today)).ToList();
         });
     }
 }

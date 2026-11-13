@@ -3,7 +3,16 @@ import type { Reminder, ReminderKind } from '../api/types'
 import { reminderText } from './reminders'
 
 const base = (kind: ReminderKind, itemText: string | null = null): Reminder => ({
-  kind, contestId: 'c1', contestName: 'Loteria', dueDate: '2026-11-12', itemId: null, itemText,
+  kind, dueDate: '2026-11-12', itemId: null, itemText,
+  contest: {
+    id: 'c1', name: 'Loteria', organizer: null, icon: null, type: 'Lottery',
+    prizeDescription: null, prizeValue: null, startDate: '2026-11-01', endDate: '2026-11-30', resultsDate: null,
+    status: 'Planned', effectiveStatus: 'Planned', entryCount: 0, entriesToday: 0,
+    entryLimitTotal: null, entryLimitPerDay: null, url: null, rulesUrl: null,
+    purchasesTotal: 0, purchasesBought: 0, firstOpenPurchase: null, stores: [], firstProofLocation: null,
+    win: null, createdAt: '2026-11-01T00:00:00+00:00',
+  },
+  confirmationCodes: [], winSteps: [], proofLocation: null, proofNote: null, boughtPurchases: [],
 })
 
 describe('reminderText', () => {

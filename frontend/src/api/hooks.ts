@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch, jsonBody } from './client'
 import type {
-  ContestDto, ContestStatus, ContestSummaryDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto,
+  ContestDto, ContestStatus, ContestCardDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto,
   PhotoLabel, StatsDto, WinDto,
 } from './types'
 
@@ -10,7 +10,7 @@ export type ContestView = 'active' | 'archive'
 export function useContests(view: ContestView) {
   return useQuery({
     queryKey: ['contests', 'list', view],
-    queryFn: () => apiFetch<ContestSummaryDto[]>(`/api/contests?view=${view}`),
+    queryFn: () => apiFetch<ContestCardDto[]>(`/api/contests?view=${view}`),
   })
 }
 

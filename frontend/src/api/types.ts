@@ -74,15 +74,48 @@ export interface ContestDto extends ContestUpsertDto {
   entriesToday: number
 }
 
-export interface ContestSummaryDto {
+export interface OpenPurchaseDto {
+  product: string
+  quantity: string | null
+  store: string | null
+  note: string | null
+}
+
+export interface CardWinDto {
+  prizeWon: string
+  prizeValue: number | null
+  laureateDeadline: string | null
+  laureateDataSent: boolean
+  stepsDone: number
+  stepsTotal: number
+}
+
+export interface ContestCardDto {
   id: string
   name: string
+  organizer: string | null
+  icon: string | null
+  type: ContestType
+  prizeDescription: string | null
+  prizeValue: number | null
+  startDate: string
   endDate: string
   resultsDate: string | null
   status: ContestStatus
   effectiveStatus: ContestStatus
   entryCount: number
+  entriesToday: number
   entryLimitTotal: number | null
+  entryLimitPerDay: number | null
+  url: string | null
+  rulesUrl: string | null
+  purchasesTotal: number
+  purchasesBought: number
+  firstOpenPurchase: OpenPurchaseDto | null
+  stores: string[]
+  firstProofLocation: string | null
+  win: CardWinDto | null
+  createdAt: string
 }
 
 export interface IdDto { id: string }
@@ -101,11 +134,15 @@ export interface ToggleDto { value: boolean }
 
 export interface Reminder {
   kind: ReminderKind
-  contestId: string
-  contestName: string
   dueDate: string
   itemId: string | null
   itemText: string | null
+  contest: ContestCardDto
+  confirmationCodes: string[]
+  winSteps: WinStepDto[]
+  proofLocation: string | null
+  proofNote: string | null
+  boughtPurchases: OpenPurchaseDto[]
 }
 
 export interface ShoppingItemDto { id: string; contestId: string; contestName: string; product: string; quantity: string | null }

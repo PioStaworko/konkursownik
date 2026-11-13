@@ -15,13 +15,13 @@ public class ReminderEndpointTests(ApiFactory factory)
         var b = await factory.CreateUserClientAsync();
         var id = await Samples.CreateContestAsync(a, Samples.Contest(name: "Mój", end: "2026-11-13"));
 
-        var mine = await a.GetFromJsonAsync<List<Reminder>>("/api/reminders", JsonConfig.Options);
-        var theirs = await b.GetFromJsonAsync<List<Reminder>>("/api/reminders", JsonConfig.Options);
+        var mine = await a.GetFromJsonAsync<List<ReminderDto>>("/api/reminders", JsonConfig.Options);
+        var theirs = await b.GetFromJsonAsync<List<ReminderDto>>("/api/reminders", JsonConfig.Options);
 
         var r = Assert.Single(mine!);
         Assert.Equal(ReminderKind.EndingSoon, r.Kind);
-        Assert.Equal(id, r.ContestId);
-        Assert.Equal("Mój", r.ContestName);
+        Assert.Equal(id, r.Contest.Id);
+        Assert.Equal("Mój", r.Contest.Name);
         Assert.Empty(theirs!);
     }
 }

@@ -18,15 +18,18 @@ public static class ContestEndpoints
             var userId = http.User.UserId();
             var today = time.TodayInPoland();
             var contests = await db.Contests.AsNoTracking()
+                .AsSplitQuery()
                 .Include(c => c.Entries)
-                .Include(c => c.Win)
+                .Include(c => c.Purchases)
+                .Include(c => c.Proofs)
+                .Include(c => c.Win).ThenInclude(w => w!.Steps)
                 .Where(c => c.OwnerId == userId)
                 .ToListAsync();
 
             var archive = string.Equals(view, "archive", StringComparison.OrdinalIgnoreCase);
             var selected = contests.Where(c => ContestRules.IsArchived(c) == archive);
             var ordered = archive ? selected.OrderByDescending(c => c.EndDate) : selected.OrderBy(c => c.EndDate);
-            return ordered.Select(c => ContestMapping.ToSummary(c, today)).ToList();
+            return ordered.Select(c => ContestCards.Build(c, today)).ToList();
         });
 
         group.MapGet("/{id:guid}", async (Guid id, HttpContext http, AppDbContext db, TimeProvider time) =>
