@@ -1,5 +1,6 @@
+/// <reference types="node" />
 import { describe, expect, it } from 'vitest'
-import tokens from './tokens.css?raw'
+import { readFileSync } from 'node:fs'
 
 const lum = (hex: string) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) =>
@@ -12,6 +13,7 @@ export function contrastRatio(a: string, b: string) {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
 }
 
+const tokens = readFileSync('src/ui/tokens.css', 'utf8')
 const light = tokens.slice(tokens.lastIndexOf(':root:not(.dark)'))
 const color = (name: string) => light.match(new RegExp(`--color-${name}: (#[0-9a-f]{6})`))![1]
 
