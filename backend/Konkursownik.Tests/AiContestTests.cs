@@ -47,7 +47,7 @@ public class AiContestTests(ApiFactory factory)
     public void Map_dates_and_lists()
     {
         var dto = ContestExtraction.Map(Json("""
-            {"startDate":"2026-11-01","endDate":"30.11.2026","resultsDate":"2026-12-05","prizeValue":1500,"prizeCount":3,
+            {"startDate":"2026-11-01","endDate":"30.11.2026","resultsDate":"2026-12-05",
              "url":"javascript:alert(1)","rulesUrl":"https://x.pl/r.pdf",
              "tasks":["Zrób zdjęcie"," ",5,"Opisz produkt"],
              "purchases":[{"product":"Mleko","store":"Biedronka","quantity":"2 szt."},{"store":"bez produktu"}],
@@ -56,8 +56,6 @@ public class AiContestTests(ApiFactory factory)
         Assert.Equal(new DateOnly(2026, 11, 1), dto.StartDate);
         Assert.Null(dto.EndDate);
         Assert.Equal(new DateOnly(2026, 12, 5), dto.ResultsDate);
-        Assert.Equal(1500m, dto.PrizeValue);
-        Assert.Equal(3, dto.PrizeCount);
         Assert.Null(dto.Url);
         Assert.Equal("https://x.pl/r.pdf", dto.RulesUrl);
         Assert.Equal(["Zrób zdjęcie", "Opisz produkt"], dto.Tasks);
@@ -68,6 +66,27 @@ public class AiContestTests(ApiFactory factory)
         var proof = Assert.Single(dto.Proofs);
         Assert.Equal("Paragon", proof.What);
         Assert.Equal(new DateOnly(2027, 1, 31), proof.KeepUntil);
+    }
+
+    [Fact]
+    public void Map_prizes_list()
+    {
+        var dto = ContestExtraction.Map(Json("""{"prizes":[{"name":"Samochód","value":120000,"count":1},{"name":"Rower","value":"2 500,00","count":10}]}"""));
+        Assert.Equal(2, dto.Prizes.Count);
+        Assert.Equal(new ExtractedPrizeDto("Samochód", 120000m, 1), dto.Prizes[0]);
+        Assert.Equal("Rower", dto.Prizes[1].Name);
+        Assert.Equal(2500m, dto.Prizes[1].Value);
+        Assert.Equal(10, dto.Prizes[1].Count);
+    }
+
+    [Fact]
+    public void Map_prizes_drops_nameless_and_fixes_bad_numbers()
+    {
+        var dto = ContestExtraction.Map(Json("""{"prizes":[{"value":5},{"name":"Bon","value":-1,"count":0}]}"""));
+        var prize = Assert.Single(dto.Prizes);
+        Assert.Equal("Bon", prize.Name);
+        Assert.Null(prize.Value);
+        Assert.Null(prize.Count);
     }
 
     [Fact]

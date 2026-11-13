@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { emptyValues, validate } from './contestForm'
+import { emptyValues, extractionToValues, validate } from './contestForm'
+import type { ContestExtractionDto } from '../../api/types'
 
 const base = { ...emptyValues, name: 'K', startDate: '2026-11-01', endDate: '2026-12-01' }
 const purchase = (note: string | null) => ({ id: null, product: 'Mleko', store: null, quantity: null, bought: false, note })
@@ -21,5 +22,15 @@ describe('contest form notes', () => {
     expect(validate({ ...base, purchases: [purchase(long)] }).errors.purchases).toBe('Notatka do zakupu może mieć maks. 300 znaków.')
     expect(validate({ ...base, proofs: [proof(long)] }).errors.proofs).toBe('Notatka do dowodu może mieć maks. 300 znaków.')
     expect(validate({ ...base, purchases: [purchase('a'.repeat(300))] }).dto).not.toBeNull()
+  })
+})
+
+describe('extractionToValues prizes', () => {
+  it('maps the prize list with null ids and drops nameless entries', () => {
+    const x = { prizes: [{ name: ' Rower ', value: 2500, count: 10 }, { name: null, value: 5, count: 1 }, { name: 'Bon', value: null, count: null }] } as ContestExtractionDto
+    expect(extractionToValues(x).prizes).toEqual([
+      { id: null, name: 'Rower', value: 2500, count: 10 },
+      { id: null, name: 'Bon', value: null, count: null },
+    ])
   })
 })

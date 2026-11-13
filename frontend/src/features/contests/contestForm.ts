@@ -164,10 +164,9 @@ export function extractionToValues(x: ContestExtractionDto): Partial<FormValues>
     rulesUrl: str(x.rulesUrl),
     type: x.type && x.type in typeLabel ? (x.type as ContestType) : undefined,
     icon: x.icon && (CONTEST_ICONS as readonly string[]).includes(x.icon) ? x.icon : undefined,
-    prizes:
-      str(x.prizeDescription) || x.prizeValue != null
-        ? [{ id: null, name: str(x.prizeDescription) ?? 'Nagroda', value: x.prizeValue ?? null, count: x.prizeCount ?? null }]
-        : undefined,
+    prizes: (x.prizes ?? [])
+      .filter((p) => str(p.name))
+      .map((p) => ({ id: null, name: p.name!.trim(), value: p.value ?? null, count: p.count ?? null })),
     startDate: str(x.startDate),
     endDate: str(x.endDate),
     resultsDate: str(x.resultsDate),

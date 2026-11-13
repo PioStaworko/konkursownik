@@ -168,7 +168,7 @@ describe('ContestFormPage', () => {
 
   const extraction = {
     name: 'Konkurs z linku', organizer: 'Org AI', url: null, rulesUrl: null, type: 'Creative', icon: 'coffee',
-    prizeDescription: null, prizeValue: 1500.5, prizeCount: 2, startDate: '2026-11-02', endDate: '2026-11-20',
+    prizes: [{ name: 'Rower', value: 1500.5, count: 2 }], startDate: '2026-11-02', endDate: '2026-11-20',
     resultsDate: null, resultsCheckNote: null, entryLimitPerDay: 1, entryLimitTotal: null,
     tasks: ['Dodaj opis'], purchases: [{ product: 'Kawa', store: 'Lidl', quantity: '2 szt.', note: 'promocja' }],
     proofs: [{ what: 'Paragon', keepUntil: '2026-12-31', note: 'folia' }], notes: null,

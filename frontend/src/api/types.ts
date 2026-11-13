@@ -177,9 +177,7 @@ export interface ContestExtractionDto {
   rulesUrl: string | null
   type: string | null
   icon: string | null
-  prizeDescription: string | null
-  prizeValue: number | null
-  prizeCount: number | null
+  prizes: { name: string | null; value: number | null; count: number | null }[] | null
   startDate: string | null
   endDate: string | null
   resultsDate: string | null
