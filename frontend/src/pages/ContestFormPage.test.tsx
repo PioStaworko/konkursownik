@@ -73,8 +73,9 @@ describe('ContestFormPage', () => {
     const body = JSON.parse(init.body as string)
     expect(body.prizeValue).toBe(99.99)
     expect(body.purchases).toEqual([
-      { id: null, product: 'Mleko', store: 'Biedronka', quantity: null, bought: false },
+      { id: null, product: 'Mleko', store: 'Biedronka', quantity: null, bought: false, note: null },
     ])
+    expect(body.icon).toBeNull()
   })
 
   it('shows server validation errors at top', async () => {
@@ -94,10 +95,10 @@ describe('ContestFormPage', () => {
       id: 'c1', name: 'Stary', organizer: null, url: null, rulesUrl: null, type: 'Lottery',
       prizeDescription: null, prizeValue: 10, prizeCount: null, startDate: '2026-11-01', endDate: '2026-11-30',
       resultsDate: null, resultsCheckNote: null, entryLimitPerDay: null, entryLimitTotal: null,
-      status: 'Planned', notes: null,
+      status: 'Planned', notes: null, icon: null,
       tasks: [{ id: 't1', text: 'Krok', done: true }],
-      purchases: [{ id: 'p1', product: 'Mleko', store: null, quantity: null, bought: true }],
-      proofs: [{ id: 'r1', what: 'Paragon', keepUntil: null, location: null, discarded: true }],
+      purchases: [{ id: 'p1', product: 'Mleko', store: null, quantity: null, bought: true, note: null }],
+      proofs: [{ id: 'r1', what: 'Paragon', keepUntil: null, location: null, discarded: true, note: null }],
       effectiveStatus: 'Planned', entries: [], win: null, entriesToday: 0,
     }
     const fetchMock = vi.fn((_: string, init?: RequestInit) =>
@@ -121,5 +122,35 @@ describe('ContestFormPage', () => {
     expect(body.purchases[0]).toMatchObject({ id: 'p1', bought: true })
     expect(body.proofs[0]).toMatchObject({ id: 'r1', discarded: true })
     expect(body).not.toHaveProperty('entries')
+  })
+
+  it('edit_preserves_icon_and_notes', async () => {
+    const contest: ContestDto = {
+      id: 'c1', name: 'Stary', organizer: null, url: null, rulesUrl: null, type: 'Lottery',
+      prizeDescription: null, prizeValue: null, prizeCount: null, startDate: '2026-11-01', endDate: '2026-11-30',
+      resultsDate: null, resultsCheckNote: null, entryLimitPerDay: null, entryLimitTotal: null,
+      status: 'Planned', notes: null, icon: 'coffee',
+      tasks: [],
+      purchases: [{ id: 'p1', product: 'Mleko', store: null, quantity: null, bought: false, note: 'Weź paragon papierowy' }],
+      proofs: [{ id: 'r1', what: 'Paragon', keepUntil: null, location: null, discarded: false, note: 'Nie wyrzucać folii' }],
+      effectiveStatus: 'Planned', entries: [], win: null, entriesToday: 0,
+    }
+    const fetchMock = vi.fn((_: string, init?: RequestInit) =>
+      Promise.resolve(init?.method === 'PUT' ? new Response(null, { status: 204 }) : json(contest)),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    renderPage('/konkursy/c1/edycja')
+    const user = userEvent.setup()
+    const name = await screen.findByLabelText('Nazwa')
+    await waitFor(() => expect(name).toHaveValue('Stary'))
+    await user.clear(name)
+    await user.type(name, 'Nowy')
+    await user.click(screen.getByRole('button', { name: 'Zapisz' }))
+    expect(await screen.findByText('Szczegóły konkursu')).toBeInTheDocument()
+    const put = fetchMock.mock.calls.find(([, i]) => i?.method === 'PUT')!
+    const body = JSON.parse(put[1]!.body as string)
+    expect(body.icon).toBe('coffee')
+    expect(body.purchases[0].note).toBe('Weź paragon papierowy')
+    expect(body.proofs[0].note).toBe('Nie wyrzucać folii')
   })
 })

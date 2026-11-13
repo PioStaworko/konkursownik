@@ -3,14 +3,14 @@ using Konkursownik.Api.Domain;
 namespace Konkursownik.Api.Features.Contests;
 
 public record TaskDto(Guid? Id, string Text, bool Done);
-public record PurchaseDto(Guid? Id, string Product, string? Store, string? Quantity, bool Bought);
-public record ProofDto(Guid? Id, string What, DateOnly? KeepUntil, string? Location, bool Discarded);
+public record PurchaseDto(Guid? Id, string Product, string? Store, string? Quantity, bool Bought, string? Note);
+public record ProofDto(Guid? Id, string What, DateOnly? KeepUntil, string? Location, bool Discarded, string? Note);
 
 public record ContestUpsertDto(
     string Name, string? Organizer, string? Url, string? RulesUrl, ContestType Type,
     string? PrizeDescription, decimal? PrizeValue, int? PrizeCount,
     DateOnly StartDate, DateOnly EndDate, DateOnly? ResultsDate, string? ResultsCheckNote,
-    int? EntryLimitPerDay, int? EntryLimitTotal, ContestStatus Status, string? Notes,
+    int? EntryLimitPerDay, int? EntryLimitTotal, ContestStatus Status, string? Notes, string? Icon,
     List<TaskDto> Tasks, List<PurchaseDto> Purchases, List<ProofDto> Proofs);
 
 public record EntryDto(
@@ -24,12 +24,14 @@ public record ContestDto(
     string Name, string? Organizer, string? Url, string? RulesUrl, ContestType Type,
     string? PrizeDescription, decimal? PrizeValue, int? PrizeCount,
     DateOnly StartDate, DateOnly EndDate, DateOnly? ResultsDate, string? ResultsCheckNote,
-    int? EntryLimitPerDay, int? EntryLimitTotal, ContestStatus Status, string? Notes,
+    int? EntryLimitPerDay, int? EntryLimitTotal, ContestStatus Status, string? Notes, string? Icon,
     List<TaskDto> Tasks, List<PurchaseDto> Purchases, List<ProofDto> Proofs,
     ContestStatus EffectiveStatus, List<EntryDto> Entries, WinDto? Win, int EntriesToday);
 
 public record ContestSummaryDto(
     Guid Id, string Name, DateOnly EndDate, DateOnly? ResultsDate,
     ContestStatus Status, ContestStatus EffectiveStatus, int EntryCount, int? EntryLimitTotal);
+
+public record StatusDto(ContestStatus Status);
 
 public record IdDto(Guid Id);

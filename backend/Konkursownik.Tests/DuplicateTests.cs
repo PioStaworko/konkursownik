@@ -21,7 +21,7 @@ public class DuplicateTests(ApiFactory factory)
         var id = await Samples.CreateContestAsync(c, Samples.Contest(
             name: "Oryginał", status: ContestStatus.Submitted, tasks: ["Krok 1", "Krok 2"],
             purchases: [("Mleko", "Biedronka"), ("Chleb", null)],
-            proofs: [new ProofDto(null, "Paragon", DateOnly.Parse("2027-01-01"), "Szuflada", false)]));
+            proofs: [new ProofDto(null, "Paragon", DateOnly.Parse("2027-01-01"), "Szuflada", false, null)]));
         var src = (await GetAsync(c, id))!;
         await c.PatchAsJsonAsync($"/api/contest-tasks/{src.Tasks[0].Id}", new ToggleDto(true), JsonConfig.Options);
         await c.PatchAsJsonAsync($"/api/purchase-items/{src.Purchases[0].Id}", new ToggleDto(true), JsonConfig.Options);

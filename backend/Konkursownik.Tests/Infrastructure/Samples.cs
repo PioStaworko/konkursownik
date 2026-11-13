@@ -32,8 +32,9 @@ public static class Samples
             EntryLimitTotal: null,
             Status: status,
             Notes: null,
+            Icon: null,
             Tasks: (tasks ?? []).Select(t => new TaskDto(null, t, false)).ToList(),
-            Purchases: (purchases ?? []).Select(p => new PurchaseDto(null, p.Product, p.Store, null, false)).ToList(),
+            Purchases: (purchases ?? []).Select(p => new PurchaseDto(null, p.Product, p.Store, null, false, null)).ToList(),
             Proofs: (proofs ?? []).ToList());
 
     public static async Task<Guid> CreateContestAsync(HttpClient c, ContestUpsertDto d)

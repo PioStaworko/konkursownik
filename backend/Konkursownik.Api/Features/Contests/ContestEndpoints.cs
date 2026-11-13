@@ -97,19 +97,28 @@ public static class ContestEndpoints
                 StartDate = src.StartDate, EndDate = src.EndDate, ResultsDate = src.ResultsDate,
                 ResultsCheckNote = src.ResultsCheckNote,
                 EntryLimitPerDay = src.EntryLimitPerDay, EntryLimitTotal = src.EntryLimitTotal,
-                Status = ContestStatus.Planned, Notes = src.Notes,
+                Status = ContestStatus.Planned, Notes = src.Notes, Icon = src.Icon,
                 CreatedAt = time.GetUtcNow(),
             };
             copy.Tasks = src.Tasks.OrderBy(t => t.Order)
                 .Select(t => new ContestTask { ContestId = copy.Id, Text = t.Text, Order = t.Order }).ToList();
             copy.Purchases = src.Purchases.OrderBy(p => p.Order)
-                .Select(p => new PurchaseItem { ContestId = copy.Id, Product = p.Product, Store = p.Store, Quantity = p.Quantity, Order = p.Order }).ToList();
+                .Select(p => new PurchaseItem { ContestId = copy.Id, Product = p.Product, Store = p.Store, Quantity = p.Quantity, Note = p.Note, Order = p.Order }).ToList();
             copy.Proofs = src.Proofs.OrderBy(p => p.Order)
-                .Select(p => new ProofItem { ContestId = copy.Id, What = p.What, KeepUntil = p.KeepUntil, Location = p.Location, Order = p.Order }).ToList();
+                .Select(p => new ProofItem { ContestId = copy.Id, What = p.What, KeepUntil = p.KeepUntil, Location = p.Location, Note = p.Note, Order = p.Order }).ToList();
 
             db.Contests.Add(copy);
             await db.SaveChangesAsync();
             return Results.Created($"/api/contests/{copy.Id}", new IdDto(copy.Id));
+        });
+
+        group.MapPatch("/{id:guid}/status", async (Guid id, StatusDto dto, HttpContext http, AppDbContext db) =>
+        {
+            if (!Enum.IsDefined(dto.Status)) return Results.BadRequest();
+            var userId = http.User.UserId();
+            var updated = await db.Contests.Where(c => c.Id == id && c.OwnerId == userId)
+                .ExecuteUpdateAsync(s => s.SetProperty(c => c.Status, dto.Status));
+            return updated == 0 ? Results.NotFound() : Results.NoContent();
         });
 
         group.MapDelete("/{id:guid}", async (Guid id, HttpContext http, AppDbContext db, IPhotoStorage storage, ILogger<IPhotoStorage> log) =>

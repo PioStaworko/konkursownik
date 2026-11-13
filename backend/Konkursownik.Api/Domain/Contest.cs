@@ -24,6 +24,7 @@ public class Contest
     public int? EntryLimitTotal { get; set; }
     public ContestStatus Status { get; set; }
     public string? Notes { get; set; }
+    public string? Icon { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
 
     public List<ContestTask> Tasks { get; set; } = new();

@@ -32,12 +32,13 @@ interface FormValues {
   entryLimitPerDay: string
   entryLimitTotal: string
   notes: string
+  icon: string | null
   tasks: TaskDto[]
   purchases: PurchaseDto[]
   proofs: ProofDto[]
 }
 
-type TextKey = Exclude<keyof FormValues, 'tasks' | 'purchases' | 'proofs'>
+type TextKey = Exclude<keyof FormValues, 'icon' | 'tasks' | 'purchases' | 'proofs'>
 type Errors = Partial<Record<keyof FormValues, string>>
 
 const emptyValues: FormValues = {
@@ -57,6 +58,7 @@ const emptyValues: FormValues = {
   entryLimitPerDay: '',
   entryLimitTotal: '',
   notes: '',
+  icon: null,
   tasks: [],
   purchases: [],
   proofs: [],
@@ -79,6 +81,7 @@ const fromDto = (d: ContestUpsertDto): FormValues => ({
   entryLimitPerDay: d.entryLimitPerDay == null ? '' : String(d.entryLimitPerDay),
   entryLimitTotal: d.entryLimitTotal == null ? '' : String(d.entryLimitTotal),
   notes: d.notes ?? '',
+  icon: d.icon ?? null,
   tasks: d.tasks,
   purchases: d.purchases,
   proofs: d.proofs,
@@ -144,6 +147,7 @@ function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto | null
       entryLimitTotal: total,
       status: v.status,
       notes: orNull(v.notes),
+      icon: v.icon,
       tasks: v.tasks.map((t) => ({ ...t, text: t.text.trim() })),
       purchases: v.purchases.map((p) => ({
         ...p,
@@ -320,7 +324,7 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         addLabel="Dodaj produkt"
         items={v.purchases}
         onChange={(items) => set('purchases', items)}
-        newItem={() => ({ id: null, product: '', store: null, quantity: null, bought: false })}
+        newItem={() => ({ id: null, product: '', store: null, quantity: null, bought: false, note: null })}
         error={errors.purchases}
         renderItem={(p, i, update) => (
           <>
@@ -351,7 +355,7 @@ function ContestForm({ id, initial }: { id?: string; initial: FormValues }) {
         addLabel="Dodaj dowód"
         items={v.proofs}
         onChange={(items) => set('proofs', items)}
-        newItem={() => ({ id: null, what: '', keepUntil: null, location: null, discarded: false })}
+        newItem={() => ({ id: null, what: '', keepUntil: null, location: null, discarded: false, note: null })}
         error={errors.proofs}
         renderItem={(p, i, update) => (
           <>

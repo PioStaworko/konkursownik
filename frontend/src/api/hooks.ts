@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch, jsonBody } from './client'
 import type {
-  ContestDto, ContestSummaryDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto,
+  ContestDto, ContestStatus, ContestSummaryDto, ContestUpsertDto, EntryUpsertDto, IdDto, InviteDto, Reminder, ShoppingGroupDto,
   StatsDto, WinDto,
 } from './types'
 
@@ -56,6 +56,15 @@ export function useDeleteContest() {
       qc.removeQueries({ queryKey: ['contests', 'detail', id] })
       await invalidate()
     },
+  })
+}
+
+export function useSetStatus() {
+  const invalidate = useInvalidateContestData()
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ContestStatus }) =>
+      apiFetch<void>(`/api/contests/${id}/status`, { method: 'PATCH', body: jsonBody({ status }) }),
+    onSuccess: invalidate,
   })
 }
 

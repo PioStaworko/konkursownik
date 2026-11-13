@@ -27,6 +27,7 @@ const contest: ContestDto = {
   status: 'Planned',
   effectiveStatus: 'Planned',
   notes: null,
+  icon: null,
   tasks: [{ id: 't1', text: 'Krok', done: false }],
   purchases: [],
   proofs: [],

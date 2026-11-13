@@ -1,3 +1,5 @@
+using Konkursownik.Api.Domain;
+
 namespace Konkursownik.Api.Features.Contests;
 
 public static class ContestValidation
@@ -27,6 +29,11 @@ public static class ContestValidation
             Add(nameof(d.Purchases), "Nazwa produktu jest wymagana (maks. 300 znaków).");
         if (d.Proofs.Any(p => Bad(p.What)))
             Add(nameof(d.Proofs), "Opis dowodu jest wymagany (maks. 300 znaków).");
+
+        if (d.Icon is not null && !ContestIcons.All.Contains(d.Icon))
+            Add(nameof(d.Icon), "Nieznana ikona konkursu.");
+        if (d.Purchases.Any(p => p.Note is { Length: > 300 }) || d.Proofs.Any(p => p.Note is { Length: > 300 }))
+            Add("Note", "Notatka może mieć maks. 300 znaków.");
 
         return errors;
     }

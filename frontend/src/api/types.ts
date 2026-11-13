@@ -10,8 +10,8 @@ export interface MeDto { email: string }
 export interface InviteDto { code: string; createdAt: string; used: boolean }
 
 export interface TaskDto { id: string | null; text: string; done: boolean }
-export interface PurchaseDto { id: string | null; product: string; store: string | null; quantity: string | null; bought: boolean }
-export interface ProofDto { id: string | null; what: string; keepUntil: string | null; location: string | null; discarded: boolean }
+export interface PurchaseDto { id: string | null; product: string; store: string | null; quantity: string | null; bought: boolean; note: string | null }
+export interface ProofDto { id: string | null; what: string; keepUntil: string | null; location: string | null; discarded: boolean; note: string | null }
 
 export interface ContestUpsertDto {
   name: string
@@ -30,6 +30,7 @@ export interface ContestUpsertDto {
   entryLimitTotal: number | null
   status: ContestStatus
   notes: string | null
+  icon: string | null
   tasks: TaskDto[]
   purchases: PurchaseDto[]
   proofs: ProofDto[]
@@ -82,6 +83,7 @@ export interface EntryUpsertDto {
   contactUsed: string | null
   answerText: string | null
 }
+export interface StatusDto { status: ContestStatus }
 export interface ToggleDto { value: boolean }
 
 export interface Reminder {

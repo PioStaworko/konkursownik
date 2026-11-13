@@ -17,7 +17,7 @@ public class ItemToggleTests(ApiFactory factory)
         c.PatchAsJsonAsync(url, new ToggleDto(value), JsonConfig.Options);
 
     private static ContestUpsertDto WithItems() => Samples.Contest(
-        tasks: ["Krok"], purchases: [("Produkt", null)], proofs: [new ProofDto(null, "Paragon", null, null, false)]);
+        tasks: ["Krok"], purchases: [("Produkt", null)], proofs: [new ProofDto(null, "Paragon", null, null, false, null)]);
 
     [Fact]
     public async Task Toggle_task_purchase_proof()

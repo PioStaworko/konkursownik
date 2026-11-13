@@ -103,6 +103,9 @@ namespace Konkursownik.Api.Data.Migrations
                     b.Property<int?>("EntryLimitTotal")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Icon")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -286,6 +289,9 @@ namespace Konkursownik.Api.Data.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("text");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 
@@ -310,6 +316,9 @@ namespace Konkursownik.Api.Data.Migrations
 
                     b.Property<Guid>("ContestId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
 
                     b.Property<int>("Order")
                         .HasColumnType("integer");
