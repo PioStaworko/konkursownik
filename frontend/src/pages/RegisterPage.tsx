@@ -3,7 +3,8 @@ import { Link, Navigate, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
 import AuthForm from '../components/AuthForm'
-import { inputClass } from '../lib/styles'
+import { tokenInputClass } from '../lib/styles'
+import { Field } from '../ui/Field'
 
 function registerErrorMessage(e: unknown): string {
   if (e instanceof ApiError && e.code === 'invalid_invite') return 'Nieprawidłowy lub zużyty kod zaproszenia'
@@ -46,24 +47,21 @@ export default function RegisterPage() {
       footer={
         <>
           Masz już konto?{' '}
-          <Link to="/login" className="font-medium text-indigo-600">
+          <Link to="/login" className="font-medium text-primary">
             Zaloguj się
           </Link>
         </>
       }
     >
-      <label className="block text-sm font-medium text-slate-700">
-        E-mail
-        <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
-      </label>
-      <label className="block text-sm font-medium text-slate-700">
-        Hasło
-        <input type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
-      </label>
-      <label className="block text-sm font-medium text-slate-700">
-        Kod zaproszenia
-        <input type="text" required autoComplete="off" autoCapitalize="characters" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} className={inputClass} />
-      </label>
+      <Field label="E-mail">
+        <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={tokenInputClass} />
+      </Field>
+      <Field label="Hasło">
+        <input type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className={tokenInputClass} />
+      </Field>
+      <Field label="Kod zaproszenia">
+        <input type="text" required autoComplete="off" autoCapitalize="characters" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} className={tokenInputClass} />
+      </Field>
     </AuthForm>
   )
 }

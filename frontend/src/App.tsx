@@ -1,14 +1,16 @@
-import { Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 import RequireAuth from './auth/RequireAuth'
-import Layout from './components/Layout'
 import ContestDetailsPage from './pages/ContestDetailsPage'
 import ContestFormPage from './pages/ContestFormPage'
 import ContestsPage from './pages/ContestsPage'
+import InvitesPage from './pages/InvitesPage'
 import LoginPage from './pages/LoginPage'
-import MorePage from './pages/MorePage'
 import RegisterPage from './pages/RegisterPage'
 import RemindersPage from './pages/RemindersPage'
 import ShoppingPage from './pages/ShoppingPage'
+import StatsPage from './pages/StatsPage'
+import DetailLayout from './shell/DetailLayout'
+import Layout from './shell/Layout'
 
 export default function App() {
   return (
@@ -19,12 +21,16 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<RemindersPage />} />
           <Route path="konkursy" element={<ContestsPage />} />
+          <Route path="zakupy" element={<ShoppingPage />} />
+          <Route path="statystyki" element={<StatsPage />} />
+        </Route>
+        <Route element={<DetailLayout />}>
           <Route path="konkursy/nowy" element={<ContestFormPage />} />
           <Route path="konkursy/:id" element={<ContestDetailsPage />} />
           <Route path="konkursy/:id/edycja" element={<ContestFormPage />} />
-          <Route path="zakupy" element={<ShoppingPage />} />
-          <Route path="wiecej" element={<MorePage />} />
+          <Route path="zaproszenia" element={<InvitesPage />} />
         </Route>
+        <Route path="wiecej" element={<Navigate to="/statystyki" replace />} />
       </Route>
     </Routes>
   )

@@ -1,4 +1,5 @@
 import type { FormEvent, ReactNode } from 'react'
+import { Button } from '../ui/Button'
 
 interface Props {
   title: string
@@ -16,26 +17,22 @@ export default function AuthForm({ title, error, submitLabel, busy, onSubmit, ch
     onSubmit()
   }
   return (
-    <div className="min-h-dvh bg-slate-50 p-4">
-      <div className="mx-auto mt-10 max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <h1 className="mb-1 text-2xl font-semibold text-slate-900">Konkursownik</h1>
-        <h2 className="mb-5 text-slate-500">{title}</h2>
-        <form onSubmit={handle} className="space-y-4">
+    <div className="flex min-h-dvh items-center justify-center bg-surface p-margin-mobile text-on-surface">
+      <div className="w-full max-w-sm rounded-xl bg-surface-container-low p-space-lg shadow-lg">
+        <h1 className="mb-1 text-headline-lg">Konkursownik</h1>
+        <h2 className="mb-space-lg text-body-lg text-on-surface-variant">{title}</h2>
+        <form onSubmit={handle} className="flex flex-col gap-space-md">
           {children}
           {error && (
-            <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+            <p role="alert" className="rounded-lg bg-error-container p-space-sm text-body-md text-on-error-container">
               {error}
             </p>
           )}
-          <button
-            type="submit"
-            disabled={busy}
-            className="min-h-11 w-full rounded-lg bg-indigo-600 font-medium text-white disabled:opacity-60"
-          >
+          <Button type="submit" disabled={busy} className="w-full">
             {submitLabel}
-          </button>
+          </Button>
         </form>
-        <p className="mt-5 text-center text-sm text-slate-500">{footer}</p>
+        <p className="mt-space-lg text-center text-body-md text-on-surface-variant">{footer}</p>
       </div>
     </div>
   )

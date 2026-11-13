@@ -3,7 +3,8 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
 import AuthForm from '../components/AuthForm'
-import { inputClass } from '../lib/styles'
+import { tokenInputClass } from '../lib/styles'
+import { Field } from '../ui/Field'
 
 export default function LoginPage() {
   const { user, login } = useAuth()
@@ -44,20 +45,18 @@ export default function LoginPage() {
       footer={
         <>
           Nie masz konta?{' '}
-          <Link to="/register" className="font-medium text-indigo-600">
+          <Link to="/register" className="font-medium text-primary">
             Załóż konto
           </Link>
         </>
       }
     >
-      <label className="block text-sm font-medium text-slate-700">
-        E-mail
-        <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
-      </label>
-      <label className="block text-sm font-medium text-slate-700">
-        Hasło
-        <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
-      </label>
+      <Field label="E-mail">
+        <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={tokenInputClass} />
+      </Field>
+      <Field label="Hasło">
+        <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} className={tokenInputClass} />
+      </Field>
     </AuthForm>
   )
 }
