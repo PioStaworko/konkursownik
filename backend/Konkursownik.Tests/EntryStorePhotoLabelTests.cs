@@ -102,4 +102,22 @@ public class EntryStorePhotoLabelTests(ApiFactory factory)
         Assert.Contains("invalid_label", await res.Content.ReadAsStringAsync());
         Assert.Empty((await OnlyEntryAsync(c, contestId)).Photos);
     }
+
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("{\"label\":99}")]
+    [InlineData("{\"label\":\"Bogus\"}")]
+    public async Task Patch_photo_label_missing_or_undefined_400(string body)
+    {
+        var c = await factory.CreateUserClientAsync();
+        var contestId = await Samples.CreateContestAsync(c, Samples.Contest());
+        var entryId = await AddEntryAsync(c, contestId);
+        await UploadAsync(c, entryId, "packaging");
+        var photo = (await OnlyEntryAsync(c, contestId)).Photos.Single();
+
+        var res = await c.PatchAsync($"/api/photos/{photo.Id}",
+            new StringContent(body, System.Text.Encoding.UTF8, "application/json"));
+        Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
+        Assert.Equal(PhotoLabel.Packaging, (await OnlyEntryAsync(c, contestId)).Photos.Single().Label);
+    }
 }

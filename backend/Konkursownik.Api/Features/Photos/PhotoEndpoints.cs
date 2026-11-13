@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Konkursownik.Api.Features.Photos;
 
-public record PhotoLabelDto(PhotoLabel Label);
+public record PhotoLabelDto(PhotoLabel? Label);
 
 public static class PhotoEndpoints
 {
@@ -78,10 +78,10 @@ public static class PhotoEndpoints
 
         secured.MapPatch("/photos/{id:guid}", async (Guid id, PhotoLabelDto dto, HttpContext http, AppDbContext db, CancellationToken ct) =>
         {
-            if (!Enum.IsDefined(dto.Label)) return Results.BadRequest(new { error = "invalid_label" });
+            if (dto.Label is not { } newLabel || !Enum.IsDefined(newLabel)) return Results.BadRequest(new { error = "invalid_label" });
             var photo = await OwnedPhotos(db, http.User.UserId()).FirstOrDefaultAsync(p => p.Id == id, ct);
             if (photo is null) return Results.NotFound();
-            photo.Label = dto.Label;
+            photo.Label = newLabel;
             await db.SaveChangesAsync(ct);
             return Results.NoContent();
         });
