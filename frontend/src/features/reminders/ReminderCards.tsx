@@ -56,12 +56,12 @@ export function LaureateCard({ r }: { r: Reminder }) {
     <Card tone="high" className="flex flex-col gap-space-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <span className="rounded-full bg-secondary-container/40 px-2 py-0.5 text-label-xs font-semibold text-secondary-fixed">WYGRANA</span>
+          <span className="rounded-full bg-secondary-container/40 px-2 py-0.5 text-label-xs font-semibold text-secondary">WYGRANA</span>
           <div className="mt-1"><ContestTitle r={r} /></div>
         </div>
         {win && (
           <div className="shrink-0 text-right">
-            {win.prizeValue != null && <span className="block text-headline-sm font-bold text-tertiary-fixed">{formatMoney(win.prizeValue)}</span>}
+            {win.prizeValue != null && <span className="block text-headline-sm font-bold text-tertiary">{formatMoney(win.prizeValue)}</span>}
             <span className="text-label-xs text-on-surface-variant">{win.prizeWon}</span>
           </div>
         )}

@@ -42,7 +42,7 @@ export default function RemindersPage() {
         <div className="flex items-baseline justify-between gap-2">
           <h1 className="text-headline-sm font-semibold text-on-surface">Wymaga Twojej uwagi</h1>
           {data && (
-            <span className="rounded-full bg-tertiary-container/30 px-2.5 py-0.5 font-mono text-label-md font-semibold text-tertiary-fixed">
+            <span className="rounded-full bg-tertiary-container/30 px-2.5 py-0.5 font-mono text-label-md font-semibold text-tertiary">
               {pluralAlerts(total)}
             </span>
           )}

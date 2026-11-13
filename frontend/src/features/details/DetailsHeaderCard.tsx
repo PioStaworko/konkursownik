@@ -81,7 +81,7 @@ export default function DetailsHeaderCard({ c }: { c: ContestDto }) {
                 Ogłoszenie wyników: <span className="font-mono text-mono-data text-on-surface">{formatDate(c.resultsDate)}</span>
               </span>
             )}
-            {prize && <span className="text-tertiary-fixed-dim">Nagroda: {prize}</span>}
+            {prize && <span className="text-tertiary">Nagroda: {prize}</span>}
           </div>
         )}
         <div className="mt-1 grid grid-cols-2 gap-2">

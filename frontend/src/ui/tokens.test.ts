@@ -25,4 +25,8 @@ describe('light theme contrast', () => {
   it.each(['primary', 'secondary', 'tertiary', 'error'])('on-%s over its colour is >= 4.5:1', (n) => {
     expect(contrastRatio(color(`on-${n}`), color(n))).toBeGreaterThanOrEqual(4.5)
   })
+  it.each(['secondary', 'tertiary'])('text-%s (prize/alert/WYGRANA text) is >= 4.5:1 on card surfaces and tinted containers', (fg) => {
+    for (const s of [...surfaces, 'surface-container-highest', 'surface-container-lowest'])
+      expect(contrastRatio(color(fg), color(s))).toBeGreaterThanOrEqual(4.5)
+  })
 })
