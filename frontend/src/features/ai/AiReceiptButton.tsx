@@ -60,7 +60,7 @@ export default function AiReceiptButton({ onExtracted, autoReceipt = false, onAu
       </Button>
       {extract.isError && (
         <p role="alert" className="text-label-md text-error">
-          {aiErrorMessage(extract.error)}
+          {aiErrorMessage(extract.error, 'receipt')}
         </p>
       )}
       {notice}

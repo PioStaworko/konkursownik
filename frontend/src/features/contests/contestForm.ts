@@ -122,6 +122,10 @@ export function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto
   if (v.purchases.some((p) => badText(p.product)))
     errors.purchases = 'Nazwa produktu jest wymagana (maks. 300 znaków).'
   if (v.proofs.some((p) => badText(p.what))) errors.proofs = 'Opis dowodu jest wymagany (maks. 300 znaków).'
+  if (v.purchases.some((p) => (p.note ?? '').length > 300))
+    errors.purchases ??= 'Notatka do zakupu może mieć maks. 300 znaków.'
+  if (v.proofs.some((p) => (p.note ?? '').length > 300))
+    errors.proofs ??= 'Notatka do dowodu może mieć maks. 300 znaków.'
 
   if (Object.keys(errors).length > 0) return { errors, dto: null }
   return {
@@ -150,12 +154,14 @@ export function validate(v: FormValues): { errors: Errors; dto: ContestUpsertDto
         product: p.product.trim(),
         store: orNull(p.store ?? ''),
         quantity: orNull(p.quantity ?? ''),
+        note: orNull(p.note ?? ''),
       })),
       proofs: v.proofs.map((p) => ({
         ...p,
         what: p.what.trim(),
         keepUntil: p.keepUntil || null,
         location: orNull(p.location ?? ''),
+        note: orNull(p.note ?? ''),
       })),
     },
   }

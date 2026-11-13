@@ -34,9 +34,11 @@ export default function PhotoTile({ photo }: { photo: PhotoDto }) {
             aria-label="Usuń zdjęcie"
             disabled={remove.isPending}
             onClick={onDelete}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-highest/80 text-on-surface hover:text-error"
+            className="group -m-1.5 flex h-11 w-11 items-center justify-center text-on-surface hover:text-error"
           >
-            <Icon name="delete" size={16} />
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-container-highest/80">
+              <Icon name="delete" size={16} />
+            </span>
           </button>
         </div>
         <span className="absolute bottom-2 left-2 font-mono text-[10px] text-on-surface">{formatBytes(photo.sizeBytes)}</span>

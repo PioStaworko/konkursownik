@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router'
+import { pluralPl } from '../lib/format'
 import { useReminders, useShoppingList } from '../api/hooks'
 import { Icon } from '../ui/Icon'
 import type { IconName } from '../ui/icons'
@@ -62,7 +63,7 @@ export default function BottomNav() {
             icon="local_fire_department"
             label="Pilne"
             badge={reminderCount}
-            badgeLabel={`${reminderCount} pilnych`}
+            badgeLabel={`${reminderCount} ${pluralPl(reminderCount, 'pilna sprawa', 'pilne sprawy', 'pilnych spraw')}`}
             badgeClass="bg-tertiary text-on-tertiary"
           />
           <div className="flex flex-1 items-center justify-center">
@@ -80,7 +81,7 @@ export default function BottomNav() {
             icon="shopping_cart"
             label="Zakupy"
             badge={toBuy}
-            badgeLabel={`${toBuy} do kupienia`}
+            badgeLabel={`${toBuy} ${pluralPl(toBuy, 'pozycja', 'pozycje', 'pozycji')} do kupienia`}
             badgeClass="bg-surface-container-highest text-on-surface"
           />
           <NavItem to="/statystyki" icon="account_balance_wallet" label="Statystyki" />

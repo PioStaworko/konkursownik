@@ -2,7 +2,7 @@ import { ApiError } from '../../api/client'
 
 export const PAGE_UNREADABLE = 'Nie mogę odczytać tej strony. Wgraj regulamin (PDF) albo zrzut ekranu.'
 
-export function aiErrorMessage(err: unknown): string {
+export function aiErrorMessage(err: unknown, subject: 'receipt' | 'contest' = 'contest'): string {
   if (err instanceof ApiError) {
     if (err.code === 'page_unreadable') return PAGE_UNREADABLE
     if (err.code === 'ai_unavailable' || err.status === 503) return 'Odczyt AI jest teraz niedostępny'
@@ -12,5 +12,7 @@ export function aiErrorMessage(err: unknown): string {
     if (err.code === 'unsupported_type') return 'Nieobsługiwany format pliku'
     if (err.code === 'invalid_url') return 'Nieprawidłowy adres strony'
   }
-  return 'Nie udało się odczytać — uzupełnij ręcznie'
+  return subject === 'receipt'
+    ? 'Nie udało się odczytać paragonu — uzupełnij ręcznie'
+    : 'Nie udało się odczytać — uzupełnij ręcznie'
 }

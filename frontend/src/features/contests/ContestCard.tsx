@@ -18,7 +18,7 @@ const daysLabel = (n: number) => (n === 1 ? '1 dzień' : `${n} dni`)
 const shortDate = (d: string) => formatDate(d).slice(0, 5)
 
 const actionClass =
-  'flex h-10 w-full items-center justify-center gap-1.5 rounded-lg px-3 text-label-md font-semibold transition-colors disabled:opacity-60'
+  'flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg px-3 text-label-md font-semibold transition-colors disabled:opacity-60'
 
 function Menu({ id, onDuplicate, pending }: { id: string; onDuplicate: () => void; pending: boolean }) {
   const [open, setOpen] = useState(false)
