@@ -192,6 +192,8 @@ import i93 from '@material-symbols/svg-400/outlined/verified.svg?raw'
 import f93 from '@material-symbols/svg-400/outlined/verified-fill.svg?raw'
 import i94 from '@material-symbols/svg-400/outlined/verified_user.svg?raw'
 import f94 from '@material-symbols/svg-400/outlined/verified_user-fill.svg?raw'
+import i96 from '@material-symbols/svg-400/outlined/keyboard_arrow_up.svg?raw'
+import f96 from '@material-symbols/svg-400/outlined/keyboard_arrow_up-fill.svg?raw'
 import i95 from '@material-symbols/svg-400/outlined/warning.svg?raw'
 import f95 from '@material-symbols/svg-400/outlined/warning-fill.svg?raw'
 
@@ -235,6 +237,7 @@ export const icons = {
   eco: [i36, f36],
   edit_document: [i37, f37],
   emoji_events: [i38, f38],
+  expand_less: [i96, f96],
   expand_more: [i39, f39],
   filter_list_off: [i40, f40],
   flight: [i41, f41],
