@@ -27,7 +27,8 @@ trap cleanup EXIT
 
 set -a; . ./.env; set +a
 # A user-provided .env may lack the admin account; the test needs one (random, never printed).
-if [ -z "${ADMIN_USERNAME:-}" ] || [ "${#ADMIN_PASSWORD}" -lt 8 ]; then
+admin_pw="${ADMIN_PASSWORD:-}"
+if [ -z "${ADMIN_USERNAME:-}" ] || [ "${#admin_pw}" -lt 8 ]; then
   ADMIN_USERNAME="smokeadmin"
   ADMIN_PASSWORD="smoke$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n')"
   export ADMIN_USERNAME ADMIN_PASSWORD

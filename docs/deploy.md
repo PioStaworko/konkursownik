@@ -135,6 +135,10 @@ Aplikacja będzie pod `https://<APP>.azurewebsites.net`. Sprawdź: `https://<APP
 
 ---
 
+### Aktualizacja istniejącej instalacji
+
+Jeśli aktualizujesz działającą instalację, loginem użytkowników jest nadal ich dawny e-mail. Ustaw `Admin__UserName` (Docker: `ADMIN_USERNAME`) na swój **dotychczasowy login** (może to być Twój stary e-mail), inaczej powstanie drugie, puste konto administratora. Zrestartuj aplikację, a potem **wyloguj się i zaloguj ponownie** — role są w ciasteczku logowania, więc menu „Zaproszenia” pojawi się dopiero po ponownym zalogowaniu. `Admin__Password` / `ADMIN_PASSWORD` służy tylko do utworzenia brakującego konta; gdy konto już istnieje, możesz je usunąć z ustawień. Rola administratora nie jest odbierana: po zmianie `ADMIN_USERNAME` poprzednie konto zachowuje uprawnienia. Wybierz nieoczywisty nick administratora: blokada konta chroni przed zgadywaniem hasła, ale każdy, kto zna nick, może wywołać jej tymczasowe włączenie.
+
 ## Część B: Własny serwer (Docker + Caddy)
 
 ### Krok 1. Uruchomienie
